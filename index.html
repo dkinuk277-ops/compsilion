@@ -1214,87 +1214,59 @@
         <div class="section-divider"></div>
         <p class="section-desc" style="margin-top:0.8rem;">Published every Monday — AI GRC intelligence for practitioners navigating the future of regulated AI.</p>
       </div>
-      <!-- Two-column: left = current + past, right = upcoming panel -->
-      <div style="display:grid; grid-template-columns:1fr 300px; gap:2rem; margin-top:2.5rem; align-items:start;">
 
-        <!-- Left: current & recent newsletters -->
-        <div style="display:flex; flex-direction:column; gap:1rem;">
-          <!-- Latest -->
+      <div style="display:flex; flex-direction:column; gap:1rem; margin-top:2.5rem;">
+        <!-- Latest -->
+        <div style="border:1px solid var(--teal-border); border-radius:12px; padding:1.6rem 1.8rem; background:var(--bg-card);">
+          <div class="nl-issue-label">◆ Latest · 28 July 2026</div>
+          <span class="nl-card-tag">AI Agents</span>
+          <h3>Autonomous AI Agents — Governance Failing at Scale</h3>
+          <p>No approval gates, no audit trails, no liability framework — what boards must act on now.</p>
+          <div class="nl-card-footer">
+            <span class="nl-date">28 July 2026</span>
+          </div>
+        </div>
+
+        <!-- Past issues -->
+        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:1rem;">
+          <div class="nl-card" style="cursor:default;">
+            <div class="nl-issue-label">21 Jul 2026</div>
+            <span class="nl-card-tag">UK FCA</span>
+            <h3 style="font-size:0.9rem;">FCA AI Strategy: What Financial Firms Need to Know</h3>
+            <p style="font-size:0.85rem;">AI model explainability, consumer duty, and third-party vendor scrutiny.</p>
+            <div class="nl-card-footer" style="margin-top:0.8rem;">
+              <span class="nl-date">21 July 2026</span>
+            </div>
+          </div>
+          <div class="nl-card" style="cursor:default;">
+            <div class="nl-issue-label">14 Jul 2026</div>
+            <span class="nl-card-tag">ISO 42001</span>
+            <h3 style="font-size:0.9rem;">ISO/IEC 42001 Certification: Is It Worth Pursuing?</h3>
+            <p style="font-size:0.85rem;">Cost vs regulatory credit, and what auditors expect to see in 2026.</p>
+            <div class="nl-card-footer" style="margin-top:0.8rem;">
+              <span class="nl-date">14 July 2026</span>
+            </div>
+          </div>
+          <div class="nl-card" style="cursor:default;">
+            <div class="nl-issue-label">7 Jul 2026</div>
+            <span class="nl-card-tag">NIST AI RMF</span>
+            <h3 style="font-size:0.9rem;">NIST AI RMF 2.0: What Organisations Must Do Now</h3>
+            <p style="font-size:0.85rem;">Updated Govern function, new implementation guidance, and how it maps to EU AI Act compliance.</p>
+            <div class="nl-card-footer" style="margin-top:0.8rem;">
+              <span class="nl-date">7 July 2026</span>
+            </div>
+          </div>
           <div class="nl-card featured" onclick="openSP('sp-issue1')" style="cursor:pointer;">
-            <div class="nl-issue-label">◆ Latest · 28 June 2026</div>
+            <div class="nl-issue-label">28 Jun 2026</div>
             <span class="nl-card-tag">EU AI Act</span>
-            <h3>The EU AI Act Clock is Ticking: August 2026 Deadline Explained</h3>
-            <p>Article 50 transparency obligations go live August 2026. Digital Omnibus pushes high-risk deadlines to December 2027 — but chatbot disclosure is non-negotiable right now.</p>
-            <div class="nl-card-footer">
+            <h3 style="font-size:0.9rem;">The EU AI Act Clock is Ticking: August 2026 Deadline Explained</h3>
+            <p style="font-size:0.85rem;">Article 50 transparency obligations went live 2 August 2026. Digital Omnibus pushed high-risk deadlines to December 2027 — but chatbot disclosure was non-negotiable from day one.</p>
+            <div class="nl-card-footer" style="margin-top:0.8rem;">
               <span class="nl-date">28 June 2026</span>
               <span class="nl-read-btn">Read full article →</span>
             </div>
           </div>
-          <!-- Teaser row for more coming -->
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-            <div class="nl-card" style="opacity:0.6; cursor:default;">
-              <div class="nl-issue-label" style="color:var(--ink-muted);">Coming · 7 Jul 2026</div>
-              <span class="nl-card-tag">NIST AI RMF</span>
-              <h3 style="font-size:0.9rem;">NIST AI RMF 2.0: What Organisations Must Do Now</h3>
-              <div class="nl-card-footer" style="margin-top:0.8rem;">
-                <span class="nl-date">7 July 2026</span>
-                <span style="font-size:0.75rem; color:var(--ink-muted);">Not published yet</span>
-              </div>
-            </div>
-            <div class="nl-card" style="opacity:0.6; cursor:default;">
-              <div class="nl-issue-label" style="color:var(--ink-muted);">Coming · 14 Jul 2026</div>
-              <span class="nl-card-tag">ISO 42001</span>
-              <h3 style="font-size:0.9rem;">ISO/IEC 42001 Certification: Is It Worth Pursuing?</h3>
-              <div class="nl-card-footer" style="margin-top:0.8rem;">
-                <span class="nl-date">14 July 2026</span>
-                <span style="font-size:0.75rem; color:var(--ink-muted);">Not published yet</span>
-              </div>
-            </div>
-          </div>
         </div>
-
-        <!-- Right: upcoming panel -->
-        <div style="background:var(--bg-card); border:1px solid var(--teal-border); border-radius:12px; padding:1.4rem; position:sticky; top:110px;">
-          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem; padding-bottom:0.8rem; border-bottom:1px solid var(--teal-border-l);">
-            <div style="width:7px; height:7px; background:var(--teal); border-radius:50%; flex-shrink:0;"></div>
-            <span style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--teal); letter-spacing:0.12em; text-transform:uppercase; font-weight:500;">Coming up next</span>
-          </div>
-
-          <div style="display:flex; flex-direction:column; gap:0;">
-            <div style="padding:0.9rem 0; border-bottom:1px solid rgba(240,244,255,0.06);">
-              <div style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--teal); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.35rem;">Mon · 7 Jul 2026</div>
-              <span style="display:inline-block; font-family:'JetBrains Mono',monospace; font-size:0.6rem; background:var(--teal-dim); color:var(--teal); border:1px solid var(--teal-border); padding:0.12rem 0.45rem; border-radius:3px; margin-bottom:0.4rem; letter-spacing:0.05em; text-transform:uppercase;">NIST AI RMF</span>
-              <div style="font-family:'Playfair Display',serif; font-size:0.88rem; font-weight:600; color:var(--ink); line-height:1.35; margin-bottom:0.35rem;">NIST AI RMF 2.0: What organisations must do now</div>
-              <div style="font-size:0.78rem; color:var(--ink-muted); line-height:1.55;">Updated Govern function, new implementation guidance, and how it maps to EU AI Act compliance.</div>
-            </div>
-
-            <div style="padding:0.9rem 0; border-bottom:1px solid rgba(240,244,255,0.06);">
-              <div style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--teal); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.35rem;">Mon · 14 Jul 2026</div>
-              <span style="display:inline-block; font-family:'JetBrains Mono',monospace; font-size:0.6rem; background:var(--teal-dim); color:var(--teal); border:1px solid var(--teal-border); padding:0.12rem 0.45rem; border-radius:3px; margin-bottom:0.4rem; letter-spacing:0.05em; text-transform:uppercase;">ISO 42001</span>
-              <div style="font-family:'Playfair Display',serif; font-size:0.88rem; font-weight:600; color:var(--ink); line-height:1.35; margin-bottom:0.35rem;">ISO/IEC 42001 certification — is it worth pursuing?</div>
-              <div style="font-size:0.78rem; color:var(--ink-muted); line-height:1.55;">Cost vs regulatory credit, and what auditors expect to see in 2026.</div>
-            </div>
-
-            <div style="padding:0.9rem 0; border-bottom:1px solid rgba(240,244,255,0.06);">
-              <div style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--teal); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.35rem;">Mon · 21 Jul 2026</div>
-              <span style="display:inline-block; font-family:'JetBrains Mono',monospace; font-size:0.6rem; background:var(--teal-dim); color:var(--teal); border:1px solid var(--teal-border); padding:0.12rem 0.45rem; border-radius:3px; margin-bottom:0.4rem; letter-spacing:0.05em; text-transform:uppercase;">UK FCA</span>
-              <div style="font-family:'Playfair Display',serif; font-size:0.88rem; font-weight:600; color:var(--ink); line-height:1.35; margin-bottom:0.35rem;">FCA AI strategy: what financial firms need to know</div>
-              <div style="font-size:0.78rem; color:var(--ink-muted); line-height:1.55;">AI model explainability, consumer duty, and third-party vendor scrutiny.</div>
-            </div>
-
-            <div style="padding:0.9rem 0 0;">
-              <div style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--teal); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.35rem;">Mon · 28 Jul 2026</div>
-              <span style="display:inline-block; font-family:'JetBrains Mono',monospace; font-size:0.6rem; background:var(--teal-dim); color:var(--teal); border:1px solid var(--teal-border); padding:0.12rem 0.45rem; border-radius:3px; margin-bottom:0.4rem; letter-spacing:0.05em; text-transform:uppercase;">AI Agents</span>
-              <div style="font-family:'Playfair Display',serif; font-size:0.88rem; font-weight:600; color:var(--ink); line-height:1.35; margin-bottom:0.35rem;">Autonomous AI agents — governance failing at scale</div>
-              <div style="font-size:0.78rem; color:var(--ink-muted); line-height:1.55;">No approval gates, no audit trails, no liability framework — what boards must act on now.</div>
-            </div>
-          </div>
-
-          <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--teal-border-l);">
-            <a href="#subscribe" style="display:block; background:var(--teal); color:var(--bg-base); text-align:center; padding:0.65rem; border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; text-decoration:none; transition:opacity 0.2s;">Subscribe to get these →</a>
-          </div>
-        </div>
-
       </div>
     </div>
   </section>
@@ -1620,10 +1592,7 @@
     </div>
   </div>
 
-  <!-- Remaining placeholder modals for sp-issue2, sp-issue3, sp-issue4, sp-attack3-6, sp-risk2-6, sp-agent2-6 -->
-  <div class="sp-modal" id="sp-issue2" onclick="closeSPBackdrop(event,'sp-issue2')"><div class="sp-box"><div class="sp-header"><div><div class="sp-issue">◆ Issue #2 · Coming 7 July 2026</div><div class="sp-title">NIST AI RMF 2.0: What Organisations Must Do Now</div></div><button class="sp-close" onclick="closeSP('sp-issue2')">&times;</button></div><div class="sp-body"><p style="color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:0.85rem;">Publishing 7 July 2026. Subscribe to receive it in your inbox.</p></div></div></div>
-  <div class="sp-modal" id="sp-issue3" onclick="closeSPBackdrop(event,'sp-issue3')"><div class="sp-box"><div class="sp-header"><div><div class="sp-issue">◆ Issue #3 · Coming 14 July 2026</div><div class="sp-title">ISO/IEC 42001 Certification: Is It Worth Pursuing?</div></div><button class="sp-close" onclick="closeSP('sp-issue3')">&times;</button></div><div class="sp-body"><p style="color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:0.85rem;">Publishing 14 July 2026. Subscribe to receive it in your inbox.</p></div></div></div>
-  <div class="sp-modal" id="sp-issue4" onclick="closeSPBackdrop(event,'sp-issue4')"><div class="sp-box"><div class="sp-header"><div><div class="sp-issue">◆ Issue #4 · Coming 21 July 2026</div><div class="sp-title">FCA AI Strategy: What Financial Firms Need to Know</div></div><button class="sp-close" onclick="closeSP('sp-issue4')">&times;</button></div><div class="sp-body"><p style="color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:0.85rem;">Publishing 21 July 2026. Subscribe to receive it in your inbox.</p></div></div></div>
+  <!-- Remaining placeholder modals for sp-attack3-6, sp-risk2-6, sp-agent2-6 -->
   <div class="sp-modal" id="sp-attack3" onclick="closeSPBackdrop(event,'sp-attack3')"><div class="sp-box"><div class="sp-header"><div><div class="sp-issue">◆ Incident · September 2024 · Healthcare AI</div><div class="sp-title">NHS AI Diagnostic Tool — Bias-Driven Misdiagnosis</div></div><button class="sp-close" onclick="closeSP('sp-attack3')">&times;</button></div><div class="sp-body"><h3>What Happened</h3><p>An AI diagnostic tool deployed across NHS trusts produced systematically less accurate results for ethnic minority patients due to biased training data. No pre-deployment bias audit had been conducted, and no demographic performance monitoring was in place post-deployment.</p><div class="callout">Bias in healthcare AI is now explicitly within scope of the EU AI Act (Annex III high-risk AI systems) and NHS AI Ethics framework. Pre-deployment equity testing and ongoing monitoring are mandatory.</div><h3>Root Cause</h3><p>Training data was not representative of the patient population. Procurement process did not include bias testing as a requirement. No ongoing monitoring for demographic performance disparities was implemented.</p><p style="font-size:0.8rem;color:var(--ink-muted);">Source: British Medical Journal, 2024.</p></div></div></div>
   <div class="sp-modal" id="sp-attack4" onclick="closeSPBackdrop(event,'sp-attack4')"><div class="sp-box"><div class="sp-header"><div><div class="sp-issue">◆ Incident · 2023 · Legal AI Hallucination</div><div class="sp-title">Lawyer Sanctioned — AI Hallucinated Case Citations</div></div><button class="sp-close" onclick="closeSP('sp-attack4')">&times;</button></div><div class="sp-body"><h3>What Happened</h3><p>Attorneys at Levidow, Levidow &amp; Oberman submitted a legal brief to a New York federal court containing six AI-generated citations to cases that did not exist. When the court asked for copies of the cases, the firm submitted fake summaries. The court imposed sanctions.</p><div class="callout">AI hallucination in professional services is a governance failure, not a technology failure. The absence of a human review requirement for AI-generated professional outputs is an organisational control gap.</div><h3>Governance Lesson</h3><p>Every AI-generated professional output — legal, medical, financial, or advisory — must be subject to mandatory expert human review before use. This is not optional under professional standards frameworks or emerging AI regulation.</p><p style="font-size:0.8rem;color:var(--ink-muted);">Source: The Guardian, June 2023. US Federal Court docket SDNY.</p></div></div></div>
   <div class="sp-modal" id="sp-attack5" onclick="closeSPBackdrop(event,'sp-attack5')"><div class="sp-box"><div class="sp-header"><div><div class="sp-issue">◆ Incident · January 2025 · Voice Cloning Fraud</div><div class="sp-title">Voice Cloning Bank Fraud — £1.2M Stolen</div></div><button class="sp-close" onclick="closeSP('sp-attack5')">&times;</button></div><div class="sp-body"><h3>What Happened</h3><p>Criminals synthesised a UK CEO's voice using publicly available audio samples and called the company's finance director, posing as the CEO and requesting an emergency wire transfer citing a confidential acquisition. £1.2M was transferred before the fraud was detected.</p><div class="callout">Voice cloning attacks require no technical sophistication — publicly available AI tools can clone a voice from 3 seconds of audio. Any organisation with a public-facing CEO has executives whose voices can be cloned.</div><h3>Safeguards</h3><p>Implement callback verification to known numbers for all financial transfers over threshold. Require dual authorisation for transfers above defined limits. Include AI voice fraud in annual staff awareness training.</p></div></div></div>
