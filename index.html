@@ -114,6 +114,7 @@ section{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:100px
 .sub-form input:focus{border-color:var(--purple)}
 .sub-form input::placeholder{color:var(--muted)}
 .sub-form button{font:700 14px var(--sans);background:linear-gradient(135deg,var(--purple),var(--cyan));color:var(--bg);padding:14px 28px;border-radius:100px;border:none;cursor:pointer}
+.sub-success{font:600 15px var(--sans);color:var(--cyan);margin-top:4px;position:relative}
 
 /* About */
 .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
@@ -254,7 +255,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
 <div class="sub-box">
   <h2>Stay Ahead of AI Regulation</h2>
   <p>Weekly intelligence delivered every Monday. Free.</p>
-  <form class="sub-form" action="https://decompliance.us16.list-manage.com/subscribe/post?u=2a4b60e1a7d31aac8844c6c0d&amp;id=1b5f4532bc&amp;f_id=009cc2e1f0" method="post" name="mc-embedded-subscribe-form" target="_blank" novalidate>
+  <form class="sub-form" id="compsilonSubForm" action="https://decompliance.us16.list-manage.com/subscribe/post?u=2a4b60e1a7d31aac8844c6c0d&amp;id=1b5f4532bc&amp;f_id=0084c2e1f0" method="post" name="mc-embedded-subscribe-form" target="compsilon_hidden_iframe" novalidate onsubmit="return compsilonHandleSubscribe(this)">
     <input type="text" name="FNAME" placeholder="Your name">
     <input type="email" name="EMAIL" placeholder="your@email.com" required>
     <div aria-hidden="true" style="position:absolute;left:-5000px">
@@ -262,7 +263,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
     </div>
     <button type="submit">Subscribe</button>
   </form>
+  <div class="sub-success" id="compsilonSubSuccess" style="display:none;">&#10003; Thanks — check your inbox to confirm your subscription.</div>
 </div>
+<iframe name="compsilon_hidden_iframe" style="display:none" title="subscribe"></iframe>
 </div>
 
 <section id="about">
@@ -288,5 +291,17 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
 </div>
 <div class="ft-end">© 2026 Compsilon · compsilon.com · Darshan Krishnappa</div>
 </footer>
+<script>
+function compsilonHandleSubscribe(form){
+  var email = form.querySelector('input[name="EMAIL"]');
+  if(!email || !email.value || email.validity.typeMismatch){ return true; } // let native validation show its message
+  setTimeout(function(){
+    form.style.display = 'none';
+    var success = document.getElementById('compsilonSubSuccess');
+    if(success) success.style.display = 'block';
+  }, 300);
+  return true; // still submit the form into the hidden iframe
+}
+</script>
 </body>
 </html>
