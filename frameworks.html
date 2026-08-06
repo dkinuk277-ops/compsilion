@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI GRC Frameworks & Standards — Compsilon</title>
+<meta name="description" content="The key frameworks, standards, and regulations shaping AI governance worldwide.">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06060e;--surface:#0d0d1a;--card:#12122a;--card2:#181833;
+  --border:#1f1f42;--muted:#6366a0;--body:#9396c7;--light:#c4c6e8;--white:#eeeef6;
+  --purple:#8b5cf6;--purple-glow:#8b5cf640;--purple-soft:#8b5cf612;
+  --cyan:#06d6a0;--cyan-glow:#06d6a040;
+  --pink:#ec4899;--amber:#f59e0b;--red:#ef4444;
+  --sans:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--body);line-height:1.7}
+a{color:inherit;text-decoration:none}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:80px 80px;opacity:.15;pointer-events:none;z-index:0}
+
+nav{position:sticky;top:0;z-index:100;background:var(--bg)dd;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px}
+.logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px}
+.logo span{background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav ul{display:flex;gap:28px;list-style:none}
+nav a.lnk{font:500 13px var(--sans);color:var(--muted);transition:color .2s}
+nav a.lnk:hover{color:var(--white)}
+nav a.lnk.active{color:var(--purple)}
+.nav-sub{font:600 13px var(--sans);background:linear-gradient(135deg,var(--purple),var(--cyan));color:var(--bg);padding:9px 22px;border-radius:100px}
+
+.page-hero{position:relative;z-index:1;text-align:center;padding:72px 32px;border-bottom:1px solid var(--border)}
+.page-hero-glow{position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:500px;height:300px;background:radial-gradient(ellipse,var(--purple-glow),transparent 70%);pointer-events:none}
+.breadcrumb{font:400 13px var(--sans);color:var(--muted);margin-bottom:16px;position:relative}
+.breadcrumb a{color:var(--purple)}
+.page-hero h1{font:800 44px var(--sans);color:var(--white);letter-spacing:-2px;margin-bottom:12px;position:relative}
+.page-hero p{font:400 16px/1.7 var(--sans);color:var(--muted);max-width:540px;margin:0 auto;position:relative}
+
+.content{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:64px 32px}
+.sl{font:600 12px var(--mono);color:var(--purple);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px}
+.st{font:700 32px var(--sans);color:var(--white);letter-spacing:-1px;margin-bottom:14px}
+.sd{font:400 15px var(--sans);color:var(--muted);max-width:500px;margin-bottom:40px}
+
+/* Framework detail blocks */
+.fw-block{display:grid;grid-template-columns:1.1fr 1fr;gap:36px;padding:48px 0;border-bottom:1px solid var(--border)}
+.fw-block:last-of-type{border:none}
+.fw-origin{font:600 12px var(--mono);color:var(--cyan);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+.fw-block h2{font:700 26px var(--sans);color:var(--white);letter-spacing:-.5px;margin-bottom:12px}
+.fw-block>div>p{font:400 14.5px/1.75 var(--sans);color:var(--body);margin-bottom:14px}
+.fw-ext{font:500 13px var(--sans);color:var(--purple);display:inline-flex;align-items:center;gap:4px}
+.fw-ext:hover{color:var(--cyan)}
+
+.fw-sidebar{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px}
+.fw-sidebar h4{font:600 12px var(--sans);text-transform:uppercase;letter-spacing:1px;color:var(--white);margin-bottom:14px}
+.fw-sidebar ul{list-style:none}
+.fw-sidebar li{font:400 13.5px/1.6 var(--sans);color:var(--body);padding:10px 0;border-bottom:1px solid var(--border);display:flex;gap:10px}
+.fw-sidebar li:last-child{border:none}
+.fw-sidebar li::before{content:'→';color:var(--cyan);font-weight:600;flex-shrink:0}
+
+/* Comparison table */
+.compare{margin-top:48px}
+.compare h2{font:700 28px var(--sans);color:var(--white);letter-spacing:-.8px;margin-bottom:24px}
+.ctable{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.ctable th{background:var(--card2);color:var(--light);font:600 11px var(--sans);text-transform:uppercase;letter-spacing:1px;padding:14px 18px;text-align:left}
+.ctable td{padding:16px 18px;border-bottom:1px solid var(--border);font:400 13.5px var(--sans);color:var(--body);vertical-align:top}
+.ctable tr:last-child td{border:none}
+.ctable td:first-child{font-weight:600;color:var(--white)}
+.ctable a{color:var(--purple)}
+.badge{display:inline-block;font:600 10px var(--sans);text-transform:uppercase;letter-spacing:.5px;padding:3px 8px;border-radius:4px}
+.badge.mandatory{background:#ef444420;color:var(--red)}
+.badge.voluntary{background:#06d6a020;color:var(--cyan)}
+.badge.certifiable{background:#8b5cf620;color:var(--purple)}
+
+/* Timeline */
+.timeline{margin-top:56px}
+.timeline h2{font:700 28px var(--sans);color:var(--white);letter-spacing:-.8px;text-align:center;margin-bottom:36px}
+.tl{max-width:700px;margin:0 auto}
+.tl-item{display:flex;gap:24px;margin-bottom:24px}
+.tl-date{flex:0 0 100px;font:600 13px var(--mono);color:var(--cyan);padding-top:4px;text-align:right}
+.tl-body{border-left:2px solid var(--border);padding-left:24px}
+.tl-body h3{font:600 15px var(--sans);color:var(--white);margin-bottom:4px}
+.tl-body p{font:400 13px/1.6 var(--sans);color:var(--muted)}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px;text-align:center;font:400 12px var(--sans);color:var(--muted);max-width:1200px;margin:0 auto}
+footer a{color:var(--purple)}
+
+@media(max-width:900px){
+  nav ul{display:none}
+  .content{padding:40px 20px}
+  .fw-block{grid-template-columns:1fr}
+  .ctable{display:block;overflow-x:auto}
+  .tl-item{flex-direction:column;gap:4px}
+  .tl-date{text-align:left}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<nav><div class="nav-inner"><a href="index.html" class="logo">COMP<span>SILON</span></a><ul><li><a href="index.html#grc" class="lnk">AI GRC</a></li><li><a href="frameworks.html" class="lnk active">Frameworks</a></li><li><a href="threats.html" class="lnk">Threat Intel</a></li><li><a href="newsletter.html" class="lnk">Newsletter</a></li><li><a href="index.html#about" class="lnk">About</a></li></ul><a href="index.html#subscribe" class="nav-sub">Subscribe</a></div></nav>
+
+<div class="page-hero">
+<div class="page-hero-glow"></div>
+<div class="breadcrumb"><a href="index.html">Home</a> / Frameworks</div>
+<h1>AI GRC Frameworks & Standards</h1>
+<p>The regulations, standards, and reference documents forming the backbone of a mature AI governance programme.</p>
+</div>
+
+<div class="content">
+
+<div class="fw-block">
+<div>
+  <div class="fw-origin">European Union · 2024–26</div>
+  <h2>EU Artificial Intelligence Act</h2>
+  <p>The world's first comprehensive AI law. Risk-tiered approach — prohibited, high-risk, limited-risk, and minimal-risk AI. High-risk systems face conformity assessments, technical documentation, and post-market monitoring.</p>
+  <p>General-purpose AI models above 10²⁵ FLOPs face additional systemic risk obligations. Fines reach €35M or 7% of global turnover.</p>
+  <a href="https://artificialintelligenceact.eu/" class="fw-ext" target="_blank">Read the EU AI Act →</a>
+</div>
+<div class="fw-sidebar"><h4>Key Obligations</h4><ul>
+  <li>Risk classification for all AI systems</li>
+  <li>Conformity assessments for high-risk AI</li>
+  <li>Technical documentation and audit trails</li>
+  <li>Post-market monitoring obligations</li>
+  <li>GPAI model transparency requirements</li>
+  <li>Article 50 chatbot/AI content disclosure</li>
+</ul></div>
+</div>
+
+<div class="fw-block">
+<div>
+  <div class="fw-origin">United States · 2023+</div>
+  <h2>NIST AI Risk Management Framework</h2>
+  <p>Voluntary but widely adopted GRC structure with four core functions: Govern, Map, Measure, and Manage. Structured approach to identifying and mitigating AI risks across the entire lifecycle.</p>
+  <p>Version 2.0 includes updated governance guidance and expanded implementation resources.</p>
+  <a href="https://www.nist.gov/artificial-intelligence/ai-risk-management-framework" class="fw-ext" target="_blank">NIST AI RMF →</a>
+</div>
+<div class="fw-sidebar"><h4>Core Functions</h4><ul>
+  <li>Govern — policies, roles, accountability</li>
+  <li>Map — context, stakeholders, risk identification</li>
+  <li>Measure — assess and track AI risks</li>
+  <li>Manage — prioritise and respond to risks</li>
+  <li>Voluntary but globally referenced</li>
+</ul></div>
+</div>
+
+<div class="fw-block">
+<div>
+  <div class="fw-origin">International · 2023</div>
+  <h2>ISO/IEC 42001:2023</h2>
+  <p>International standard for AI Management Systems (AIMS). Certifiable, modelled on ISO 27001. Provides structural backbone for AI GRC programmes.</p>
+  <p>Demand for certification is rising as the EU AI Act references ISO standards. Particularly adopted in Europe and Asia-Pacific.</p>
+  <a href="https://www.iso.org/standard/81230.html" class="fw-ext" target="_blank">ISO/IEC 42001 →</a>
+</div>
+<div class="fw-sidebar"><h4>Key Elements</h4><ul>
+  <li>AI policy and objectives</li>
+  <li>AI risk assessment methodology</li>
+  <li>Controls for responsible AI development</li>
+  <li>Continuous improvement cycle (PDCA)</li>
+  <li>Certifiable — audit-ready structure</li>
+  <li>Aligned with ISO 27001 annex structure</li>
+</ul></div>
+</div>
+
+<div class="fw-block">
+<div>
+  <div class="fw-origin">United Kingdom · 2023+</div>
+  <h2>UK Pro-Innovation AI Approach</h2>
+  <p>Principles-based, sector-led model. ICO, FCA, CMA, and Ofcom each apply existing powers to AI in their domains. The AI Safety Institute runs frontier model evaluations.</p>
+  <a href="https://www.gov.uk/government/publications/ai-regulation-a-pro-innovation-approach" class="fw-ext" target="_blank">UK AI Policy →</a>
+</div>
+<div class="fw-sidebar"><h4>Core Principles</h4><ul>
+  <li>Safety, security, and robustness</li>
+  <li>Appropriate transparency and explainability</li>
+  <li>Fairness</li>
+  <li>Accountability and governance</li>
+  <li>Contestability and redress</li>
+</ul></div>
+</div>
+
+<div class="fw-block">
+<div>
+  <div class="fw-origin">Singapore · 2023+</div>
+  <h2>Singapore Model AI Governance Framework</h2>
+  <p>MAS and IMDA co-developed one of the world's most detailed voluntary AI governance frameworks for financial services and general use. Widely respected as a balanced, innovation-friendly model.</p>
+  <a href="https://www.pdpc.gov.sg/help-and-resources/2020/01/model-ai-governance-framework" class="fw-ext" target="_blank">Singapore AI Framework →</a>
+</div>
+<div class="fw-sidebar"><h4>Key Features</h4><ul>
+  <li>Voluntary, principles-based approach</li>
+  <li>Internal governance structures</li>
+  <li>Decision-making model documentation</li>
+  <li>Operations management requirements</li>
+  <li>Stakeholder interaction guidance</li>
+</ul></div>
+</div>
+
+<div class="compare">
+<h2>Framework Comparison</h2>
+<table class="ctable">
+<thead><tr><th>Framework</th><th>Origin</th><th>Type</th><th>Scope</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>EU AI Act</td><td>EU</td><td><span class="badge mandatory">Mandatory</span></td><td>Comprehensive risk-tiered AI regulation</td><td>Phased enforcement 2024–27</td></tr>
+<tr><td>NIST AI RMF</td><td>US</td><td><span class="badge voluntary">Voluntary</span></td><td>Risk management (Govern, Map, Measure, Manage)</td><td>v2.0 published</td></tr>
+<tr><td>ISO/IEC 42001</td><td>Intl</td><td><span class="badge certifiable">Certifiable</span></td><td>AI Management Systems</td><td>Active, demand rising</td></tr>
+<tr><td>UK AI Approach</td><td>UK</td><td><span class="badge voluntary">Principles</span></td><td>Sector-led, regulator-applied</td><td>Evolving</td></tr>
+<tr><td>Singapore MAIGF</td><td>SG</td><td><span class="badge voluntary">Voluntary</span></td><td>AI governance for financial services</td><td>v2 published</td></tr>
+<tr><td>OECD AI Principles</td><td>OECD</td><td><span class="badge voluntary">Principles</span></td><td>High-level policy alignment</td><td>Global reference</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="timeline">
+<h2>Regulatory Timeline</h2>
+<div class="tl">
+<div class="tl-item"><div class="tl-date">Feb 2024</div><div class="tl-body"><h3>Prohibited Systems Banned</h3><p>Social scoring, manipulative AI practices prohibited under EU AI Act.</p></div></div>
+<div class="tl-item"><div class="tl-date">Aug 2025</div><div class="tl-body"><h3>GPAI Model Obligations</h3><p>General-purpose AI providers face transparency and documentation duties.</p></div></div>
+<div class="tl-item"><div class="tl-date">Aug 2026</div><div class="tl-body"><h3>Article 50 — Transparency Live</h3><p>Chatbot disclosure and AI-generated content labelling now mandatory.</p></div></div>
+<div class="tl-item"><div class="tl-date">Dec 2026</div><div class="tl-body"><h3>AI-Generated NCII Prohibitions</h3><p>New prohibitions on AI-generated non-consensual intimate imagery.</p></div></div>
+<div class="tl-item"><div class="tl-date">Dec 2027</div><div class="tl-body"><h3>High-Risk AI Full Obligations</h3><p>Full conformity requirements enforced (extended by Digital Omnibus).</p></div></div>
+</div>
+</div>
+
+</div>
+<footer>© 2026 Compsilon · <a href="index.html">compsilon.com</a> · Darshan Krishnappa</footer>
+</body>
+</html>

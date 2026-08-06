@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newsletter Archive — Compsilon</title>
+<meta name="description" content="Weekly AI GRC intelligence — every issue of the Compsilon newsletter.">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06060e;--surface:#0d0d1a;--card:#12122a;--card2:#181833;
+  --border:#1f1f42;--muted:#6366a0;--body:#9396c7;--light:#c4c6e8;--white:#eeeef6;
+  --purple:#8b5cf6;--purple-glow:#8b5cf640;--purple-soft:#8b5cf612;
+  --cyan:#06d6a0;--cyan-glow:#06d6a040;
+  --pink:#ec4899;--amber:#f59e0b;--red:#ef4444;
+  --sans:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--body);line-height:1.7}
+a{color:inherit;text-decoration:none}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:80px 80px;opacity:.15;pointer-events:none;z-index:0}
+
+nav{position:sticky;top:0;z-index:100;background:var(--bg)dd;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px}
+.logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px}
+.logo span{background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav ul{display:flex;gap:28px;list-style:none}
+nav a.lnk{font:500 13px var(--sans);color:var(--muted);transition:color .2s}
+nav a.lnk:hover{color:var(--white)}
+nav a.lnk.active{color:var(--purple)}
+.nav-sub{font:600 13px var(--sans);background:linear-gradient(135deg,var(--purple),var(--cyan));color:var(--bg);padding:9px 22px;border-radius:100px}
+
+.page-hero{position:relative;z-index:1;text-align:center;padding:72px 32px;border-bottom:1px solid var(--border)}
+.page-hero-glow{position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:500px;height:300px;background:radial-gradient(ellipse,var(--purple-glow),transparent 70%);pointer-events:none}
+.breadcrumb{font:400 13px var(--sans);color:var(--muted);margin-bottom:16px;position:relative}
+.breadcrumb a{color:var(--purple)}
+.page-hero h1{font:800 44px var(--sans);color:var(--white);letter-spacing:-2px;margin-bottom:12px;position:relative}
+.page-hero p{font:400 16px/1.7 var(--sans);color:var(--muted);max-width:540px;margin:0 auto;position:relative}
+
+.content{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:64px 32px}
+
+/* Latest issue */
+.latest{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px;margin-bottom:48px;position:relative;overflow:hidden}
+.latest::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,var(--purple-glow),transparent 70%);pointer-events:none}
+.latest-badge{display:inline-block;font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1.5px;background:linear-gradient(135deg,var(--purple),var(--cyan));color:var(--bg);padding:5px 14px;border-radius:100px;margin-bottom:16px;position:relative}
+.latest h2{font:700 24px var(--sans);color:var(--white);letter-spacing:-.5px;margin-bottom:10px;position:relative}
+.latest p{font:400 14.5px/1.7 var(--sans);color:var(--body);margin-bottom:14px;position:relative}
+.latest-meta{font:500 12px var(--mono);color:var(--muted);position:relative}
+.latest-meta em{font-style:normal;color:var(--cyan)}
+.read-link{font:500 13px var(--sans);color:var(--purple);display:inline-block;margin-top:12px;position:relative}
+.read-link:hover{color:var(--cyan)}
+
+/* Archive heading */
+.archive-head{font:700 24px var(--sans);color:var(--white);letter-spacing:-.5px;margin-bottom:24px}
+
+/* Issue list */
+.issue-list{list-style:none}
+.issue{display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--border);transition:background .2s;align-items:start}
+.issue:last-child{border:none}
+.issue-date{flex:0 0 72px;font:600 13px var(--mono);color:var(--muted);padding-top:4px;text-align:right}
+.issue-body h3{font:600 17px var(--sans);color:var(--white);letter-spacing:-.2px;margin-bottom:4px;transition:color .2s}
+.issue:hover .issue-body h3{color:var(--purple)}
+.issue-body p{font:400 13px/1.6 var(--sans);color:var(--muted)}
+.issue-tags{display:flex;gap:6px;margin-top:8px}
+.tag{font:600 9px var(--mono);text-transform:uppercase;letter-spacing:1px;padding:3px 8px;border-radius:4px}
+.tag.act{background:#ef444420;color:var(--red)}
+.tag.nist{background:#06d6a020;color:var(--cyan)}
+.tag.iso{background:#8b5cf620;color:var(--purple)}
+.tag.fca{background:#3b82f620;color:#60a5fa}
+.tag.agents{background:#ec489920;color:var(--pink)}
+.tag.safety{background:#06b6d420;color:#22d3ee}
+
+/* Subscribe */
+.sub-box{background:linear-gradient(135deg,#1a1040,#0d2030);border:1px solid var(--border);border-radius:20px;padding:48px;text-align:center;margin-top:48px;position:relative;overflow:hidden}
+.sub-box::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:300px;height:200px;background:radial-gradient(circle,var(--cyan-glow),transparent 70%);pointer-events:none}
+.sub-box h2{font:700 24px var(--sans);color:var(--white);letter-spacing:-.5px;margin-bottom:8px;position:relative}
+.sub-box>p{font:400 14px var(--sans);color:var(--muted);margin-bottom:24px;position:relative}
+.sub-form{display:flex;gap:8px;max-width:380px;margin:0 auto;position:relative}
+.sub-form input{flex:1;font:400 14px var(--sans);padding:12px 16px;border-radius:100px;border:1px solid var(--border);background:var(--bg);color:var(--white);outline:none}
+.sub-form input:focus{border-color:var(--purple)}
+.sub-form input::placeholder{color:var(--muted)}
+.sub-form button{font:700 13px var(--sans);background:linear-gradient(135deg,var(--purple),var(--cyan));color:var(--bg);padding:12px 22px;border-radius:100px;border:none;cursor:pointer}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px;text-align:center;font:400 12px var(--sans);color:var(--muted);max-width:1200px;margin:0 auto}
+footer a{color:var(--purple)}
+
+@media(max-width:900px){
+  nav ul{display:none}
+  .content{padding:40px 20px}
+  .issue{flex-direction:column;gap:4px}
+  .issue-date{text-align:left}
+  .sub-form{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<nav><div class="nav-inner"><a href="index.html" class="logo">COMP<span>SILON</span></a><ul><li><a href="index.html#grc" class="lnk">AI GRC</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="threats.html" class="lnk">Threat Intel</a></li><li><a href="newsletter.html" class="lnk active">Newsletter</a></li><li><a href="index.html#about" class="lnk">About</a></li></ul><a href="index.html#subscribe" class="nav-sub">Subscribe</a></div></nav>
+
+<div class="page-hero">
+<div class="page-hero-glow"></div>
+<div class="breadcrumb"><a href="index.html">Home</a> / Newsletter</div>
+<h1>Weekly Newsletter</h1>
+<p>AI GRC intelligence for practitioners navigating the future of regulated AI. Published every Monday.</p>
+</div>
+
+<div class="content">
+
+<div class="latest">
+<span class="latest-badge">Latest Issue</span>
+<h2>Autonomous AI Agents — Governance Failing at Scale</h2>
+<p>No approval gates, no audit trails, no liability framework — what boards must act on now. This week we examine the governance gaps emerging as companies deploy autonomous AI agents faster than control frameworks can keep up.</p>
+<div class="latest-meta"><em>Issue #5</em> · 28 July 2026</div>
+<a href="#" class="read-link">Read full issue →</a>
+</div>
+
+<h2 class="archive-head">Archive</h2>
+
+<ul class="issue-list">
+
+<li class="issue">
+<div class="issue-date">21 Jul</div>
+<div class="issue-body">
+  <h3>FCA AI Strategy: What Financial Firms Need to Know</h3>
+  <p>AI model explainability, consumer duty obligations, and third-party vendor scrutiny in regulated financial services.</p>
+  <div class="issue-tags"><span class="tag fca">FCA</span></div>
+</div>
+</li>
+
+<li class="issue">
+<div class="issue-date">14 Jul</div>
+<div class="issue-body">
+  <h3>ISO/IEC 42001 Certification: Is It Worth Pursuing?</h3>
+  <p>Cost vs regulatory credit, market differentiation, and what auditors expect to see in 2026.</p>
+  <div class="issue-tags"><span class="tag iso">ISO 42001</span></div>
+</div>
+</li>
+
+<li class="issue">
+<div class="issue-date">7 Jul</div>
+<div class="issue-body">
+  <h3>NIST AI RMF 2.0: What Organisations Must Do Now</h3>
+  <p>Updated Govern function, new implementation guidance, and mapping to EU AI Act compliance.</p>
+  <div class="issue-tags"><span class="tag nist">NIST</span></div>
+</div>
+</li>
+
+<li class="issue">
+<div class="issue-date">28 Jun</div>
+<div class="issue-body">
+  <h3>The EU AI Act Clock is Ticking: August 2026 Deadline</h3>
+  <p>Article 50 transparency live 2 August 2026. Digital Omnibus pushed high-risk to December 2027 — chatbot disclosure non-negotiable from day one.</p>
+  <div class="issue-tags"><span class="tag act">EU AI Act</span></div>
+</div>
+</li>
+
+<li class="issue">
+<div class="issue-date">21 Jun</div>
+<div class="issue-body">
+  <h3>GPAI Model Obligations: What Providers Must Prepare For</h3>
+  <p>Technical documentation, copyright transparency, and systemic risk evaluation duties for general-purpose AI providers.</p>
+  <div class="issue-tags"><span class="tag act">EU AI Act</span></div>
+</div>
+</li>
+
+<li class="issue">
+<div class="issue-date">14 Jun</div>
+<div class="issue-body">
+  <h3>Bias Testing: Moving from Aspiration to Audit-Ready Practice</h3>
+  <p>What a credible bias testing programme looks like — from dataset audits to disparate impact analysis.</p>
+  <div class="issue-tags"><span class="tag safety">Ethics</span></div>
+</div>
+</li>
+
+<li class="issue">
+<div class="issue-date">7 Jun</div>
+<div class="issue-body">
+  <h3>Frontier AI Safety: From Bletchley to Brussels</h3>
+  <p>International AI safety dialogue shaping binding obligations. What safety evaluations mean for enterprise GRC.</p>
+  <div class="issue-tags"><span class="tag safety">AI Safety</span><span class="tag agents">Frontier</span></div>
+</div>
+</li>
+
+</ul>
+
+<div class="sub-box">
+<h2>Never Miss an Issue</h2>
+<p>Join GRC practitioners worldwide. Free, every Monday.</p>
+<div class="sub-form">
+  <input type="email" placeholder="your@email.com">
+  <button>Subscribe</button>
+</div>
+</div>
+
+</div>
+<footer>© 2026 Compsilon · <a href="index.html">compsilon.com</a> · Darshan Krishnappa</footer>
+</body>
+</html>
