@@ -109,7 +109,7 @@ section{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:100px
 .sub-box::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,var(--cyan-glow),transparent 70%);pointer-events:none}
 .sub-box h2{font:700 32px var(--sans);color:var(--white);letter-spacing:-.8px;margin-bottom:10px;position:relative}
 .sub-box>p{font:400 15px var(--sans);color:var(--muted);margin-bottom:28px;position:relative}
-.sub-form{display:flex;gap:10px;max-width:420px;margin:0 auto;position:relative}
+.sub-form{display:flex;gap:10px;max-width:560px;margin:0 auto;position:relative}
 .sub-form input{flex:1;font:400 15px var(--sans);padding:14px 18px;border-radius:100px;border:1px solid var(--border);background:var(--bg);color:var(--white);outline:none}
 .sub-form input:focus{border-color:var(--purple)}
 .sub-form input::placeholder{color:var(--muted)}
@@ -254,10 +254,14 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
 <div class="sub-box">
   <h2>Stay Ahead of AI Regulation</h2>
   <p>Weekly intelligence delivered every Monday. Free.</p>
-  <div class="sub-form">
-    <input type="email" placeholder="your@email.com">
-    <button>Subscribe</button>
-  </div>
+  <form class="sub-form" action="https://decompliance.us16.list-manage.com/subscribe/post?u=2a4b60e1a7d31aac8844c6c0d&amp;id=1b5f4532bc&amp;f_id=009cc2e1f0" method="post" name="mc-embedded-subscribe-form" target="_blank" novalidate>
+    <input type="text" name="FNAME" placeholder="Your name">
+    <input type="email" name="EMAIL" placeholder="your@email.com" required>
+    <div aria-hidden="true" style="position:absolute;left:-5000px">
+      <input type="text" name="b_2a4b60e1a7d31aac8844c6c0d_1b5f4532bc" tabindex="-1" value="">
+    </div>
+    <button type="submit">Subscribe</button>
+  </form>
 </div>
 </div>
 
