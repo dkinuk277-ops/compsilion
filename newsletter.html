@@ -60,6 +60,10 @@ nav a.lnk.active{color:var(--purple)}
 .issue:last-child{border:none}
 .issue-date{flex:0 0 72px;font:600 13px var(--mono);color:var(--muted);padding-top:4px;text-align:right}
 .issue-body h3{font:600 17px var(--sans);color:var(--white);letter-spacing:-.2px;margin-bottom:4px;transition:color .2s}
+.upcoming .issue{opacity:.72}
+.upcoming .issue-date{color:var(--amber)}
+.upcoming .issue-body h3{color:var(--light)}
+.issue-body .read-link{font:500 12.5px var(--sans);color:var(--purple);display:inline-block}
 .issue:hover .issue-body h3{color:var(--purple)}
 .issue-body p{font:400 13px/1.6 var(--sans);color:var(--muted)}
 .issue-tags{display:flex;gap:6px;margin-top:8px}
@@ -109,79 +113,70 @@ footer a{color:var(--purple)}
 
 <div class="latest">
 <span class="latest-badge">Latest Issue</span>
-<h2>Autonomous AI Agents — Governance Failing at Scale</h2>
-<p>No approval gates, no audit trails, no liability framework — what boards must act on now. This week we examine the governance gaps emerging as companies deploy autonomous AI agents faster than control frameworks can keep up.</p>
-<div class="latest-meta"><em>Issue #5</em> · 28 July 2026</div>
-<a href="issue-05.html" class="read-link">Read full issue →</a>
+<h2>AI Governance Is Quietly Fixing Compliance Functions That Were Already Broken</h2>
+<p>The most valuable outcome of an AI governance programme is often not the AI governance. It is that building one forces an organisation to fix foundations it had been working around for years — inventory, ownership, evidence, third-party rigour.</p>
+<div class="latest-meta"><em>Issue #2</em> · 10 August 2026 · 7 min read</div>
+<a href="issue-02.html" class="read-link">Read full issue →</a>
 </div>
 
-<h2 class="archive-head">Archive</h2>
+<h2 class="archive-head">Previous Issues</h2>
 
 <ul class="issue-list">
-
 <li class="issue">
-<div class="issue-date">21 Jul</div>
+<div class="issue-date">3 Aug</div>
 <div class="issue-body">
-  <h3>FCA AI Strategy: What Financial Firms Need to Know</h3>
-  <p>AI model explainability, consumer duty obligations, and third-party vendor scrutiny in regulated financial services.</p>
-  <div class="issue-tags"><span class="tag fca">FCA</span></div>
+  <h3><a href="issue-01.html">The AI Act Just Became Enforceable. Most Organisations Misread Which Part.</a></h3>
+  <p>Article 50 transparency obligations became applicable and enforceable on 2 August. The Digital Omnibus moved the high-risk deadlines and left transparency untouched — reading the second as cancelling the first is an expensive mistake.</p>
+  <div class="issue-tags"><span class="tag act">EU AI Act</span><span class="tag fca">Issue #1</span></div>
+  <a href="issue-01.html" class="read-link" style="margin-top:8px">Read full issue →</a>
 </div>
 </li>
+</ul>
 
+<h2 class="archive-head" style="margin-top:44px">Coming Up</h2>
+<p style="font:400 14px/1.7 var(--sans);color:var(--muted);margin-bottom:22px;max-width:560px">Planned topics for the next few weeks. Subscribers get each issue on the Monday it publishes.</p>
+
+<ul class="issue-list upcoming">
 <li class="issue">
-<div class="issue-date">14 Jul</div>
+<div class="issue-date">17 Aug</div>
 <div class="issue-body">
-  <h3>ISO/IEC 42001 Certification: Is It Worth Pursuing?</h3>
-  <p>Cost vs regulatory credit, market differentiation, and what auditors expect to see in 2026.</p>
+  <h3>Autonomous AI Agents: Governance Failing at Scale</h3>
+  <p>No approval gates, no audit trails, no liability framework. What documented agent failures reveal about the controls most organisations are missing.</p>
+  <div class="issue-tags"><span class="tag agents">Agents</span></div>
+</div>
+</li>
+<li class="issue">
+<div class="issue-date">24 Aug</div>
+<div class="issue-body">
+  <h3>ISO 42001 Certification: What Auditors Actually Look For</h3>
+  <p>Cost against regulatory credit, overlap with an existing ISO 27001 estate, and the evidence that separates a passing AIMS from a paper one.</p>
   <div class="issue-tags"><span class="tag iso">ISO 42001</span></div>
 </div>
 </li>
-
 <li class="issue">
-<div class="issue-date">7 Jul</div>
+<div class="issue-date">31 Aug</div>
 <div class="issue-body">
-  <h3>NIST AI RMF 2.0: What Organisations Must Do Now</h3>
-  <p>Updated Govern function, new implementation guidance, and mapping to EU AI Act compliance.</p>
-  <div class="issue-tags"><span class="tag nist">NIST</span></div>
+  <h3>Building Your First Compliance Agent</h3>
+  <p>A practical walkthrough: choosing a narrow process, wrapping deterministic tools, gating the writes, and evaluating output before you trust it.</p>
+  <div class="issue-tags"><span class="tag nist">GRC Engineering</span></div>
 </div>
 </li>
-
 <li class="issue">
-<div class="issue-date">28 Jun</div>
+<div class="issue-date">7 Sep</div>
 <div class="issue-body">
-  <h3>The EU AI Act Clock is Ticking: August 2026 Deadline</h3>
-  <p>Article 50 transparency live 2 August 2026. Digital Omnibus pushed high-risk to December 2027 — chatbot disclosure non-negotiable from day one.</p>
-  <div class="issue-tags"><span class="tag act">EU AI Act</span></div>
+  <h3>Third-Party AI Risk: Inheriting Someone Else's Model</h3>
+  <p>When a vendor's model sits inside your regulated process, their governance gap becomes your finding. Contract terms, diligence, and continuous monitoring that work.</p>
+  <div class="issue-tags"><span class="tag safety">Vendor Risk</span></div>
 </div>
 </li>
-
 <li class="issue">
-<div class="issue-date">21 Jun</div>
+<div class="issue-date">14 Sep</div>
 <div class="issue-body">
-  <h3>GPAI Model Obligations: What Providers Must Prepare For</h3>
-  <p>Technical documentation, copyright transparency, and systemic risk evaluation duties for general-purpose AI providers.</p>
-  <div class="issue-tags"><span class="tag act">EU AI Act</span></div>
+  <h3>Evidence Automation: Killing the Pre-Audit Scramble</h3>
+  <p>Moving from evidence as a project to evidence as a query — API pulls, immutable storage, and one control test mapped to many frameworks.</p>
+  <div class="issue-tags"><span class="tag nist">GRC Engineering</span></div>
 </div>
 </li>
-
-<li class="issue">
-<div class="issue-date">14 Jun</div>
-<div class="issue-body">
-  <h3>Bias Testing: Moving from Aspiration to Audit-Ready Practice</h3>
-  <p>What a credible bias testing programme looks like — from dataset audits to disparate impact analysis.</p>
-  <div class="issue-tags"><span class="tag safety">Ethics</span></div>
-</div>
-</li>
-
-<li class="issue">
-<div class="issue-date">7 Jun</div>
-<div class="issue-body">
-  <h3>Frontier AI Safety: From Bletchley to Brussels</h3>
-  <p>International AI safety dialogue shaping binding obligations. What safety evaluations mean for enterprise GRC.</p>
-  <div class="issue-tags"><span class="tag safety">AI Safety</span><span class="tag agents">Frontier</span></div>
-</div>
-</li>
-
 </ul>
 
 <div class="sub-box">
