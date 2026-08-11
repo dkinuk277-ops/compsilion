@@ -17,6 +17,7 @@
   --sans:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
 }
 html{scroll-behavior:smooth}
+[id]{scroll-margin-top:88px}
 body{font-family:var(--sans);background:var(--bg);color:var(--body);line-height:1.7}
 a{color:inherit;text-decoration:none}
 .grid-bg{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:80px 80px;opacity:.15;pointer-events:none;z-index:0}
@@ -483,8 +484,7 @@ footer a{color:var(--teal)}
 
 <hr class="sep">
 
-<div id="about"></div>
-<div class="sl">About Compsilon</div>
+<div class="sl" id="about">About Compsilon</div>
 <div class="sh">
 <h2>Why This Exists</h2>
 <p>Compsilon is written by Darshan Krishnappa, a governance, risk and compliance practitioner with fifteen years in the field, based in the UK. It started because the gap between what is written about AI governance and what is usable on a Monday morning had become impossible to ignore.</p>
