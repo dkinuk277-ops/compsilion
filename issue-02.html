@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Issue #2 — AI Governance Is Quietly Fixing Compliance Functions | Compsilon</title>
+<meta name="description" content="Why building AI governance uplifts the whole compliance function — and how to sequence the work.">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06060e;--surface:#0d0d1a;--card:#12122a;--border:#1f1f42;
+  --muted:#6366a0;--body:#9396c7;--light:#c4c6e8;--white:#eeeef6;
+  --teal:#06d6a0;--teal-glow:#06d6a040;--amber:#EF9F27;--amber-glow:#EF9F2740;--red:#ef4444;
+  --sans:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--body);line-height:1.7}
+a{color:inherit;text-decoration:none}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:80px 80px;opacity:.15;pointer-events:none;z-index:0}
+
+nav{position:sticky;top:0;z-index:100;background:#06060edd;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px}
+.logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px}
+.logo span{background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav ul{display:flex;gap:22px;list-style:none}
+nav a.lnk{font:500 13px var(--sans);color:var(--muted);transition:color .2s}
+nav a.lnk:hover{color:var(--white)}
+nav a.lnk.active{color:var(--amber)}
+.nav-sub{font:600 13px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:9px 22px;border-radius:100px}
+
+.issue-hero{position:relative;z-index:1;padding:56px 32px 40px;border-bottom:1px solid var(--border);max-width:820px;margin:0 auto}
+.hero-glow{position:absolute;top:-60px;left:20%;width:380px;height:240px;background:radial-gradient(ellipse,var(--teal-glow),transparent 70%);pointer-events:none}
+.breadcrumb{font:400 13px var(--sans);color:var(--muted);margin-bottom:20px;position:relative}
+.breadcrumb a{color:var(--teal)}
+.issue-meta{display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;flex-wrap:wrap}
+.badge{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1.5px;background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:5px 13px;border-radius:100px}
+.issue-date{font:500 12px var(--mono);color:var(--muted)}
+.issue-hero h1{font:800 38px/1.15 var(--sans);color:var(--white);letter-spacing:-1.6px;margin-bottom:14px;position:relative}
+.standfirst{font:400 16px/1.75 var(--sans);color:var(--light);position:relative}
+
+.article{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:48px 32px}
+.article h2{font:700 24px var(--sans);color:var(--white);letter-spacing:-.7px;margin:40px 0 14px}
+.article h2:first-child{margin-top:0}
+.article h3{font:600 17px var(--sans);color:var(--white);margin:28px 0 10px}
+.article p{font:400 15.5px/1.85 var(--sans);color:var(--body);margin-bottom:18px}
+.article p strong{color:var(--light);font-weight:600}
+.article a.inline{color:var(--teal);border-bottom:1px solid #06d6a050}
+.article ul{list-style:none;margin:0 0 20px}
+.article ul li{font:400 15px/1.75 var(--sans);color:var(--body);padding:7px 0 7px 26px;position:relative}
+.article ul li::before{content:'▸';position:absolute;left:0;color:var(--amber)}
+.article ol{list-style:none;counter-reset:n;margin:0 0 20px}
+.article ol li{counter-increment:n;font:400 15px/1.75 var(--sans);color:var(--body);padding:9px 0 9px 40px;position:relative}
+.article ol li::before{content:counter(n);position:absolute;left:0;top:11px;width:24px;height:24px;border-radius:50%;background:var(--teal);color:var(--bg);font:700 11px var(--mono);display:flex;align-items:center;justify-content:center}
+.article ol li strong{color:var(--white);font-weight:600}
+
+.callout{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 12px 12px 0;padding:22px 26px;margin:26px 0}
+.callout p{font:400 14.5px/1.75 var(--sans);color:var(--light);margin:0}
+.callout p+p{margin-top:10px}
+
+.case{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin:24px 0}
+.case-tag{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1.2px;color:var(--amber);margin-bottom:8px}
+.case h4{font:700 17px var(--sans);color:var(--white);margin-bottom:8px}
+.case p{font:400 14px/1.7 var(--sans);color:var(--muted);margin-bottom:12px}
+.case p:last-child{margin-bottom:0}
+.case .src{font:400 12px var(--sans);color:var(--muted);border-top:1px solid var(--border);padding-top:11px}
+.case .src a{color:var(--teal);margin-right:12px}
+
+.checklist{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;margin:26px 0}
+.checklist h4{font:600 11px var(--mono);text-transform:uppercase;letter-spacing:1.2px;color:var(--teal);margin-bottom:14px}
+.checklist ul{margin:0}
+.checklist li{font:400 14px/1.65 var(--sans);color:var(--body);padding:8px 0 8px 28px;border-bottom:1px solid var(--border)}
+.checklist li:last-child{border:none}
+.checklist li::before{content:'☐';color:var(--amber);left:0}
+
+.signoff{border-top:1px solid var(--border);margin-top:40px;padding-top:26px}
+.signoff p{font:400 14.5px/1.8 var(--sans);color:var(--muted);margin-bottom:12px}
+.signoff .name{font:600 15px var(--sans);color:var(--white)}
+
+.sub-box{background:linear-gradient(135deg,#0d2820,#1a1408);border:1px solid var(--border);border-radius:18px;padding:38px;text-align:center;margin-top:40px;position:relative;overflow:hidden}
+.sub-box::before{content:'';position:absolute;top:-60px;right:-40px;width:240px;height:240px;background:radial-gradient(circle,var(--amber-glow),transparent 70%);pointer-events:none}
+.sub-box h3{font:700 22px var(--sans);color:var(--white);letter-spacing:-.5px;margin-bottom:8px;position:relative}
+.sub-box p{font:400 14px var(--sans);color:var(--muted);margin-bottom:20px;position:relative}
+.sub-box a{font:700 13px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:12px 28px;border-radius:100px;display:inline-block;position:relative}
+
+.issue-nav{display:flex;justify-content:space-between;gap:12px;margin-top:32px;flex-wrap:wrap}
+.issue-nav a{font:500 13px var(--sans);color:var(--teal);border:1px solid var(--border);border-radius:100px;padding:10px 22px;transition:border-color .2s}
+.issue-nav a:hover{border-color:var(--teal)}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px;text-align:center;font:400 12px var(--sans);color:var(--muted);max-width:1200px;margin:0 auto}
+footer a{color:var(--teal)}
+
+@media(max-width:900px){
+  nav ul{display:none}
+  .issue-hero{padding:36px 20px 28px}
+  .issue-hero h1{font-size:28px}
+  .article{padding:32px 20px}
+  .sub-box{padding:28px 20px}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<nav><div class="nav-inner"><a href="index.html" class="logo">COMP<span>SILON</span></a><ul><li><a href="grc-engineering.html" class="lnk">GRC Engineering</a></li><li><a href="index.html#grc" class="lnk">AI GRC</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="threats.html" class="lnk">Threat Intel</a></li><li><a href="newsletter.html" class="lnk active">Newsletter</a></li><li><a href="grc-engineering.html#about" class="lnk">About</a></li></ul><a href="index.html#subscribe" class="nav-sub">Subscribe</a></div></nav>
+
+<div class="issue-hero">
+<div class="hero-glow"></div>
+<div class="breadcrumb"><a href="index.html">Home</a> / <a href="newsletter.html">Newsletter</a> / Issue #2</div>
+<div class="issue-meta"><span class="badge">Issue #2</span><span class="issue-date">10 August 2026 · 7 min read</span></div>
+<h1>AI Governance Is Quietly Fixing Compliance Functions That Were Already Broken</h1>
+<p class="standfirst">The most valuable outcome of an AI governance programme is often not the AI governance. It is that building one forces an organisation to fix foundations it had been working around for years.</p>
+</div>
+
+<div class="article">
+
+<p>Here is a pattern worth noticing. An organisation starts an AI governance programme — prompted by the AI Act, a customer questionnaire, or a board that read something unsettling. Six months in, the AI-specific deliverables are progressing. But the more interesting change is elsewhere: the compliance function is measurably better at things that have nothing to do with AI.</p>
+
+<p>This is not a coincidence, and it is worth understanding why, because it changes how you should sequence and justify the work.</p>
+
+<h2>AI governance has no tolerance for missing foundations</h2>
+
+<p>Most compliance programmes carry accumulated gaps that everyone knows about and nobody has had a forcing reason to close. The system inventory is roughly right. Ownership is documented for the systems people remembered. Evidence is gathered when asked. It functions, because traditional controls are forgiving of imprecision.</p>
+
+<p><strong>AI governance is not forgiving of imprecision.</strong> You cannot classify AI systems by risk without knowing which systems exist. You cannot demonstrate human oversight without knowing who the human is. You cannot produce a technical file for something whose data lineage nobody documented. Each AI requirement lands on a foundation, and where the foundation is missing, the requirement simply cannot be satisfied.</p>
+
+<div class="callout">
+<p>The result is that AI governance functions as an unusually effective audit of everything underneath it. It surfaces the gaps that ordinary compliance work had been quietly routing around.</p>
+</div>
+
+<h2>Where the uplift actually shows up</h2>
+
+<h3>System inventory becomes real</h3>
+<p>Almost every organisation discovers, during AI classification, that its asset inventory was aspirational. Shadow AI is part of it, but the larger finding is usually more mundane: systems nobody owned, vendor tools procured outside the process, integrations that were never recorded. Closing that gap improves incident response, access management, and third-party risk simultaneously — none of which were the reason it got funded.</p>
+
+<h3>Ownership stops being nominal</h3>
+<p>Article 14 human oversight and the general expectation of accountability force a question most control frameworks ask politely and never verify: who, by name, is responsible for this? Answering it properly for AI systems tends to expose how many non-AI systems have an owner who left in 2023.</p>
+
+<h3>The control library gets consolidated</h3>
+<p>Organisations adding ISO 42001 to an existing ISO 27001 estate usually discover the overlap is substantial — 42001 was deliberately built on the same management system structure. The rational response is one control library with framework crosswalks rather than parallel sets. Once that exists, adding SOC 2 or a sectoral requirement becomes incremental rather than another full programme.</p>
+
+<h3>Evidence collection gets automated</h3>
+<p>AI systems change faster than annual review cycles accommodate. Models get updated, prompts get tuned, vendors ship changes you did not ask for. Point-in-time evidence is visibly inadequate, which finally makes the case for continuous collection that had been unsuccessfully argued for years on other grounds. The pipelines built for AI evidence work perfectly well for everything else.</p>
+
+<h3>Third-party risk gets teeth</h3>
+<p>AI supply chains make inherited obligation concrete in a way that questionnaires never did. If your vendor's model is embedded in your regulated process, their governance failure is your regulatory problem. That argument lands with procurement in a way that generic vendor risk framing rarely has.</p>
+
+<h3>Board reporting improves</h3>
+<p>AI is a topic boards actively want briefed, which is not true of most compliance subjects. That attention is an opening. Functions that use it to establish a genuine risk reporting rhythm — rather than a one-off AI update — tend to keep the channel afterwards.</p>
+
+<h2>The sequencing this implies</h2>
+
+<p>If the uplift is real, it changes the order of work. The instinct is to build AI-specific artefacts first because those are what the regulation names. The better sequence usually runs the other way.</p>
+
+<ol>
+<li><strong>Inventory before classification.</strong> You cannot risk-classify what you have not found. Do the discovery properly, including procurement records and expense data, not just what IT knows about.</li>
+<li><strong>Ownership before oversight design.</strong> Named accountable owners per system, verified rather than assumed. Human oversight mechanisms built on top of unclear ownership will not survive an audit.</li>
+<li><strong>One control library, mapped many ways.</strong> Resist the parallel AI control set. Extend what exists and crosswalk it, or you will maintain two versions of the same control forever.</li>
+<li><strong>Evidence pipelines before documentation.</strong> If evidence is a query rather than a project, the technical file largely assembles itself and stays current between audits.</li>
+<li><strong>Then the AI-specific work.</strong> Risk classification, oversight design, technical documentation, post-market monitoring — all of which are far cheaper on solid foundations.</li>
+</ol>
+
+<div class="checklist">
+<h4>Diagnostic: is your AI programme uplifting or siloing?</h4>
+<ul>
+<li>AI systems live in the same inventory as everything else, not a separate spreadsheet</li>
+<li>AI controls sit in the existing control library with framework mappings</li>
+<li>Evidence for AI controls is collected by the same pipeline as other evidence</li>
+<li>AI incidents route through the existing incident process, with AI-specific triggers</li>
+<li>The AI risk owner is a business owner, not a member of the compliance team</li>
+<li>Non-AI compliance work has measurably improved since the programme started</li>
+</ul>
+</div>
+
+<h2>The failure mode to avoid</h2>
+
+<p>The uplift is not automatic. It happens when AI governance is built into the existing function and does not happen when it is built beside it.</p>
+
+<p>The siloed version is easy to recognise: a separate AI committee that does not connect to the risk committee, an AI register maintained apart from the asset register, an AI policy that duplicates rather than extends the existing policy set. It produces artefacts that satisfy an auditor looking specifically at AI, and it leaves the organisation with two compliance functions to maintain and reconcile.</p>
+
+<p><strong>The test is simple.</strong> If your AI governance programme were removed tomorrow, would anything else in the function get worse? If the answer is no, you have built a silo. If the answer is yes — the inventory degrades, ownership becomes unclear, evidence collection reverts — then the programme is load-bearing, and that is exactly where you want it.</p>
+
+<h2>Making the argument internally</h2>
+
+<p>This reframing is useful when justifying spend. AI governance pitched as regulatory necessity competes with every other regulatory necessity, and tends to be sized down to the minimum that avoids a finding. Pitched as a foundational upgrade that happens to also satisfy AI obligations, it competes differently — and it is a more honest description of what the work does.</p>
+
+<p>It also survives a delayed deadline. When the Digital Omnibus pushed high-risk obligations to December 2027, programmes justified purely by that date immediately came under pressure to slow down. Programmes justified by foundational improvement did not, because the foundations were needed either way.</p>
+
+<div class="signoff">
+<p>If your AI programme has surfaced something unexpected in the wider function — good or bad — I would like to hear about it. Reply and tell me; reader experience shapes what gets written here.</p>
+<p class="name">Darshan Krishnappa</p>
+<p style="font-size:13px">Compsilon · AI GRC Intelligence</p>
+</div>
+
+<div class="sub-box">
+<h3>Get this in your inbox</h3>
+<p>Weekly AI GRC intelligence for practitioners. Free, every Monday.</p>
+<a href="index.html#subscribe">Subscribe to Compsilon →</a>
+</div>
+
+<div class="issue-nav">
+<a href="issue-01.html">← Previous issue</a>
+<a href="newsletter.html">All issues →</a>
+</div>
+</div>
+<footer>© 2026 Compsilon · <a href="index.html">compsilon.com</a> · Darshan Krishnappa</footer>
+</body>
+</html>
