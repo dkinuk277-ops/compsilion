@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRC Engineering — Compsilon</title>
+<meta name="description" content="Applying engineering discipline to risk and compliance: automating control assurance, audit evidence, and building autonomous GRC agents.">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06060e;--surface:#0d0d1a;--card:#12122a;--card2:#181833;
+  --border:#1f1f42;--muted:#6366a0;--body:#9396c7;--light:#c4c6e8;--white:#eeeef6;
+  --teal:#06d6a0;--teal-glow:#06d6a040;--teal-soft:#06d6a012;
+  --amber:#EF9F27;--amber-glow:#EF9F2740;
+  --pink:#ec4899;--red:#ef4444;
+  --sans:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--body);line-height:1.7}
+a{color:inherit;text-decoration:none}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:80px 80px;opacity:.15;pointer-events:none;z-index:0}
+
+nav{position:sticky;top:0;z-index:100;background:#06060edd;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px}
+.logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px}
+.logo span{background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav ul{display:flex;gap:26px;list-style:none}
+nav a.lnk{font:500 13px var(--sans);color:var(--muted);transition:color .2s}
+nav a.lnk:hover{color:var(--white)}
+nav a.lnk.active{color:var(--amber)}
+.nav-sub{font:600 13px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:9px 22px;border-radius:100px}
+
+.page-hero{position:relative;z-index:1;text-align:center;padding:72px 32px;border-bottom:1px solid var(--border)}
+.hero-glow{position:absolute;top:-80px;left:38%;width:440px;height:280px;background:radial-gradient(ellipse,var(--teal-glow),transparent 70%);pointer-events:none}
+.hero-glow2{position:absolute;top:10px;right:6%;width:340px;height:240px;background:radial-gradient(ellipse,var(--amber-glow),transparent 70%);pointer-events:none}
+.breadcrumb{font:400 13px var(--sans);color:var(--muted);margin-bottom:16px;position:relative}
+.breadcrumb a{color:var(--teal)}
+.page-hero h1{font:800 44px var(--sans);color:var(--white);letter-spacing:-2px;margin-bottom:12px;position:relative}
+.page-hero p{font:400 16px/1.7 var(--sans);color:var(--muted);max-width:620px;margin:0 auto;position:relative}
+
+.content{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:64px 32px}
+.sl{font:600 12px var(--mono);color:var(--teal);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+.sh{margin-bottom:32px}
+.sh h2{font:700 30px var(--sans);color:var(--white);letter-spacing:-1px;margin-bottom:10px}
+.sh p{font:400 15px/1.75 var(--sans);color:var(--body);max-width:740px}
+.sep{border:none;border-top:1px solid var(--border);margin:64px 0}
+
+.lede{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 14px 14px 0;padding:24px 28px;margin-bottom:36px}
+.lede p{font:400 14.5px/1.75 var(--sans);color:var(--light);margin-bottom:10px}
+.lede p:last-child{margin-bottom:0}
+
+/* Shift table */
+.shift{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px}
+.shift-col{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px}
+.shift-col.new{border-color:var(--teal)}
+.shift-col h3{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+.shift-col.old h3{color:var(--muted)}
+.shift-col.new h3{color:var(--teal)}
+.shift-col ul{list-style:none}
+.shift-col li{font:400 13.5px/1.6 var(--sans);color:var(--body);padding:9px 0;border-bottom:1px solid var(--border);display:flex;gap:10px}
+.shift-col li:last-child{border:none}
+.shift-col.old li::before{content:'×';color:var(--muted);flex-shrink:0}
+.shift-col.new li::before{content:'→';color:var(--teal);flex-shrink:0}
+
+/* Automation candidates */
+.auto-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.auto{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;transition:border-color .2s}
+.auto:hover{border-color:var(--amber)}
+.auto-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px}
+.auto h3{font:600 16px var(--sans);color:var(--white)}
+.effort{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1px;padding:4px 9px;border-radius:4px;background:#EF9F2720;color:var(--amber);white-space:nowrap}
+.effort.high{background:#ef444420;color:var(--red)}
+.auto>p{font:400 13px/1.65 var(--sans);color:var(--muted);margin-bottom:14px}
+.auto-what{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:14px}
+.auto-what h4{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1px;color:var(--teal);margin-bottom:8px}
+.auto-what ul{list-style:none}
+.auto-what li{font:400 12.5px/1.55 var(--sans);color:var(--body);padding:4px 0;display:flex;gap:7px}
+.auto-what li::before{content:'▸';color:var(--amber);flex-shrink:0;opacity:.7}
+
+/* Agent build steps */
+.steps{counter-reset:s}
+.step{counter-increment:s;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px 28px 26px 76px;margin-bottom:16px;position:relative;transition:border-color .2s}
+.step:hover{border-color:var(--teal)}
+.step::before{content:counter(s,decimal-leading-zero);position:absolute;left:26px;top:26px;font:700 15px var(--mono);color:var(--amber)}
+.step h3{font:700 18px var(--sans);color:var(--white);letter-spacing:-.2px;margin-bottom:8px}
+.step>p{font:400 13.5px/1.7 var(--sans);color:var(--body);margin-bottom:14px}
+.step-detail{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sd{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:15px}
+.sd h4{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.sd.do h4{color:var(--teal)}
+.sd.watch h4{color:var(--red)}
+.sd ul{list-style:none}
+.sd li{font:400 12px/1.55 var(--sans);color:var(--muted);padding:3px 0;display:flex;gap:7px}
+.sd li::before{content:'▸';flex-shrink:0;opacity:.6}
+
+/* Tool capability cards */
+.cap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px}
+.cap{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;transition:border-color .2s}
+.cap:hover{border-color:var(--teal)}
+.cap-icon{font:700 13px var(--mono);color:var(--bg);background:linear-gradient(135deg,var(--teal),var(--amber));width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.cap h3{font:600 15px var(--sans);color:var(--white);margin-bottom:8px}
+.cap p{font:400 12.5px/1.6 var(--sans);color:var(--muted);margin-bottom:12px}
+.cap-use{font:400 12px/1.55 var(--sans);color:var(--light);background:var(--surface);border-radius:7px;padding:11px;border-left:2px solid var(--teal)}
+.cap-use strong{color:var(--teal);font-weight:600}
+
+/* Reality check */
+.reality{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+.rbox{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px}
+.rbox.good{border-left:3px solid var(--teal)}
+.rbox.bad{border-left:3px solid var(--red)}
+.rbox h3{font:600 14px var(--sans);margin-bottom:12px}
+.rbox.good h3{color:var(--teal)}
+.rbox.bad h3{color:var(--red)}
+.rbox ul{list-style:none}
+.rbox li{font:400 13px/1.6 var(--sans);color:var(--body);padding:7px 0;border-bottom:1px solid var(--border);display:flex;gap:9px}
+.rbox li:last-child{border:none}
+.rbox.good li::before{content:'✓';color:var(--teal);flex-shrink:0}
+.rbox.bad li::before{content:'!';color:var(--red);flex-shrink:0;font-weight:700}
+
+/* Maturity */
+.mat{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.mstage{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;position:relative}
+.mstage:nth-child(1){border-top:3px solid var(--muted)}
+.mstage:nth-child(2){border-top:3px solid var(--amber)}
+.mstage:nth-child(3){border-top:3px solid var(--teal)}
+.mstage:nth-child(4){border-top:3px solid var(--pink)}
+.mnum{font:600 10px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.mstage h3{font:600 14px var(--sans);color:var(--white);margin-bottom:8px}
+.mstage p{font:400 12px/1.55 var(--sans);color:var(--muted)}
+
+/* Conclusion */
+.concl{background:linear-gradient(135deg,#0d2820,#1a1408);border:1px solid var(--border);border-radius:20px;padding:48px;margin-top:64px;position:relative;overflow:hidden}
+.concl::before{content:'';position:absolute;top:-70px;right:-50px;width:280px;height:280px;background:radial-gradient(circle,var(--amber-glow),transparent 70%);pointer-events:none}
+.concl h2{font:700 28px var(--sans);color:var(--white);letter-spacing:-.8px;margin-bottom:14px;position:relative}
+.concl p{font:400 14.5px/1.8 var(--sans);color:var(--light);margin-bottom:14px;position:relative;max-width:780px}
+.cta-row{margin-top:26px;position:relative}
+.cta-row a{font:700 14px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:13px 30px;border-radius:100px;display:inline-block}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px;text-align:center;font:400 12px var(--sans);color:var(--muted);max-width:1200px;margin:0 auto}
+footer a{color:var(--teal)}
+
+@media(max-width:900px){
+  nav ul{display:none}
+  .content{padding:40px 20px}
+  .shift,.auto-grid,.cap-grid,.reality,.mat,.step-detail{grid-template-columns:1fr}
+  .step{padding:26px 22px 26px 22px}
+  .step::before{position:static;display:block;margin-bottom:8px}
+  .concl{padding:32px 24px}
+  .page-hero h1{font-size:32px}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<nav><div class="nav-inner"><a href="index.html" class="logo">COMP<span>SILON</span></a><ul><li><a href="grc-engineering.html" class="lnk active">GRC Engineering</a></li><li><a href="index.html#grc" class="lnk">AI GRC</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="threats.html" class="lnk">Threat Intel</a></li><li><a href="newsletter.html" class="lnk">Newsletter</a></li></ul><a href="index.html#subscribe" class="nav-sub">Subscribe</a></div></nav>
+
+<div class="page-hero">
+<div class="hero-glow"></div>
+<div class="hero-glow2"></div>
+<div class="breadcrumb"><a href="index.html">Home</a> / GRC Engineering</div>
+<h1>GRC Engineering</h1>
+<p>Compliance is not a documentation problem. It is an engineering problem — and the teams that treat it that way stop drowning in evidence requests and start shipping assurance continuously.</p>
+</div>
+
+<div class="content">
+
+<div class="sl">The Premise</div>
+<div class="sh">
+<h2>From Paperwork to Pipelines</h2>
+<p>Most GRC functions spend the majority of their effort re-collecting information the organisation already has. Screenshots of access lists that a directory service could return through an API. Quarterly attestations about configurations a monitoring stack already observes continuously. Evidence packs rebuilt from scratch for each of four overlapping frameworks.</p>
+</div>
+
+<div class="lede">
+<p>GRC engineering applies software engineering discipline to risk and compliance: APIs instead of GUIs, version control instead of shared drives, continuous telemetry instead of periodic inspection. Policies become executable rules. Evidence becomes a query. Audits become a report generated from live data rather than a fire drill.</p>
+<p>The point is not to eliminate judgement — judgement is the part that matters. The point is to stop spending judgement on data collection so it can be spent on risk.</p>
+</div>
+
+<div class="shift">
+<div class="shift-col old"><h3>Traditional GRC</h3><ul>
+  <li>Evidence gathered manually before each audit</li>
+  <li>Controls tested on a quarterly or annual cycle</li>
+  <li>Policies written as documents nobody executes</li>
+  <li>Same evidence recollected per framework</li>
+  <li>Risk registers updated in workshops</li>
+  <li>Assurance is a point-in-time snapshot</li>
+</ul></div>
+<div class="shift-col new"><h3>GRC Engineering</h3><ul>
+  <li>Evidence collected automatically and continuously</li>
+  <li>Controls tested on every change, in the pipeline</li>
+  <li>Policies expressed as code that enforces itself</li>
+  <li>Collected once, mapped to many frameworks</li>
+  <li>Risk signals streamed from production systems</li>
+  <li>Assurance is a live state you can query</li>
+</ul></div>
+</div>
+
+<hr class="sep">
+
+<div class="sl">Where the Effort Goes</div>
+<div class="sh">
+<h2>Manual Work Worth Killing First</h2>
+<p>Not everything should be automated, and not everything can be. These are the processes where the ratio of effort to judgement is worst — which makes them the highest-value automation targets in most compliance functions.</p>
+</div>
+
+<div class="auto-grid">
+
+<div class="auto">
+<div class="auto-head"><h3>Control Assurance & Testing</h3><span class="effort high">Very high effort</span></div>
+<p>Sampling, screenshotting, and re-testing controls that already emit telemetry. Most control tests are questions a system can answer directly, asked instead of a human who then asks the system.</p>
+<div class="auto-what"><h4>What to automate</h4><ul>
+  <li>Configuration checks against a defined baseline</li>
+  <li>Access reviews pulled from identity provider APIs</li>
+  <li>Continuous control monitoring with drift alerts</li>
+  <li>Exception tracking with automatic expiry</li>
+  <li>Test results written to an immutable evidence store</li>
+</ul></div>
+</div>
+
+<div class="auto">
+<div class="auto-head"><h3>Evidence Collection</h3><span class="effort high">Very high effort</span></div>
+<p>The single largest consumer of GRC hours. Evidence is usually re-gathered per audit, per framework, per year — despite being the same underlying facts each time.</p>
+<div class="auto-what"><h4>What to automate</h4><ul>
+  <li>Scheduled API pulls into a central evidence lake</li>
+  <li>Timestamped, hash-verified artefact storage</li>
+  <li>One control test mapped to many frameworks</li>
+  <li>Auditor-facing read-only access to live evidence</li>
+  <li>Automatic gap flagging when a pull fails</li>
+</ul></div>
+</div>
+
+<div class="auto">
+<div class="auto-head"><h3>Internal & External Audit Prep</h3><span class="effort">High effort</span></div>
+<p>The pre-audit scramble is a symptom, not a process. If evidence is continuous, preparation collapses from weeks of chasing to generating a report.</p>
+<div class="auto-what"><h4>What to automate</h4><ul>
+  <li>Request-list matching against existing evidence</li>
+  <li>Population and sample generation with rationale</li>
+  <li>Walkthrough narratives drafted from system data</li>
+  <li>Prior-year finding status tracked automatically</li>
+  <li>Auditor request tracker with SLA visibility</li>
+</ul></div>
+</div>
+
+<div class="auto">
+<div class="auto-head"><h3>Framework Mapping</h3><span class="effort">High effort</span></div>
+<p>Organisations subject to ISO 27001, SOC 2, ISO 42001, and the EU AI Act simultaneously usually maintain four parallel control sets describing the same underlying controls.</p>
+<div class="auto-what"><h4>What to automate</h4><ul>
+  <li>Single control library with framework crosswalks</li>
+  <li>Machine-readable control definitions (e.g. OSCAL)</li>
+  <li>Gap analysis when a new framework is adopted</li>
+  <li>Change propagation across all mapped frameworks</li>
+  <li>Coverage reporting by framework and by control</li>
+</ul></div>
+</div>
+
+<div class="auto">
+<div class="auto-head"><h3>Third-Party & Vendor Risk</h3><span class="effort">High effort</span></div>
+<p>Questionnaire cycles that take weeks and produce assertions nobody verifies. The effort is real; the assurance is largely theatrical.</p>
+<div class="auto-what"><h4>What to automate</h4><ul>
+  <li>Certificate and report expiry monitoring</li>
+  <li>Questionnaire triage and response summarisation</li>
+  <li>Risk tiering from contract and data-flow attributes</li>
+  <li>Continuous monitoring of critical vendors</li>
+  <li>Reassessment triggered by change, not calendar</li>
+</ul></div>
+</div>
+
+<div class="auto">
+<div class="auto-head"><h3>Policy & Regulatory Change</h3><span class="effort">Moderate effort</span></div>
+<p>Tracking what changed in a regulation, deciding whether it touches you, and updating the affected artefacts is slow, repetitive, and easy to fall behind on.</p>
+<div class="auto-what"><h4>What to automate</h4><ul>
+  <li>Monitoring of regulator and standards-body sources</li>
+  <li>Impact triage against your control library</li>
+  <li>Draft redlines routed to a human owner</li>
+  <li>Policy version control with review scheduling</li>
+  <li>Attestation and training assignment on change</li>
+</ul></div>
+</div>
+
+</div>
+
+<hr class="sep">
+
+<div class="sl">Build It Yourself</div>
+<div class="sh">
+<h2>Designing a Compliance Agent From Scratch</h2>
+<p>An agent that runs a compliance process on its own is achievable today — but only if you build it as a system with boundaries, not as a prompt with ambition. This is the sequence that tends to work, and the failure mode at each stage.</p>
+</div>
+
+<div class="steps">
+
+<div class="step">
+<h3>Pick a process narrow enough to fully specify</h3>
+<p>The first agent should do one thing whose correct output you can define precisely. Quarterly user access review for a single system beats "automate compliance". If you cannot write down what a correct result looks like, you cannot evaluate the agent, and you cannot defend it to an auditor.</p>
+<div class="step-detail">
+  <div class="sd do"><h4>Do this</h4><ul>
+    <li>Choose a high-volume, low-ambiguity process</li>
+    <li>Write the acceptance criteria before any code</li>
+    <li>Collect 20–30 historical cases as a test set</li>
+  </ul></div>
+  <div class="sd watch"><h4>Failure mode</h4><ul>
+    <li>Scope so broad no output can be verified</li>
+    <li>Starting with the process nobody understands</li>
+    <li>No baseline to measure improvement against</li>
+  </ul></div>
+</div>
+</div>
+
+<div class="step">
+<h3>Give it deterministic tools, not free rein</h3>
+<p>The model should decide <em>which</em> tool to call and with what arguments. It should not be the thing that computes the answer. Wrap each data source in an explicit function — fetch access list, retrieve control definition, write finding — and let the deterministic code do the deterministic work.</p>
+<div class="step-detail">
+  <div class="sd do"><h4>Do this</h4><ul>
+    <li>Expose narrow, typed, well-documented tools</li>
+    <li>Keep calculations in code, not in the model</li>
+    <li>Return structured data the agent can reason over</li>
+  </ul></div>
+  <div class="sd watch"><h4>Failure mode</h4><ul>
+    <li>Asking the model to do arithmetic or counting</li>
+    <li>Giving raw database or shell access</li>
+    <li>Tools so broad their blast radius is unbounded</li>
+  </ul></div>
+</div>
+</div>
+
+<div class="step">
+<h3>Separate read from write, and gate the writes</h3>
+<p>Let the agent gather, analyse, and draft freely. Require a human decision before anything leaves the system — a finding raised, a ticket closed, an exception approved. This is the control that would have prevented most documented agent failures, and it is the one auditors will ask about first.</p>
+<div class="step-detail">
+  <div class="sd do"><h4>Do this</h4><ul>
+    <li>Read access broad; write access explicitly granted</li>
+    <li>Approval gate on every externally visible action</li>
+    <li>A kill switch that a named person can trigger</li>
+  </ul></div>
+  <div class="sd watch"><h4>Failure mode</h4><ul>
+    <li>Treating a prompt instruction as a permission</li>
+    <li>Production write access "just for convenience"</li>
+    <li>Approval so high-volume it becomes a rubber stamp</li>
+  </ul></div>
+</div>
+</div>
+
+<div class="step">
+<h3>Make the reasoning auditable by default</h3>
+<p>Log the prompt, the retrieved context, every tool call and its result, the model version, and the final output — together, as one replayable record. If you cannot reconstruct why the agent reached a conclusion six months later, the output is not evidence and cannot be relied upon in an audit.</p>
+<div class="step-detail">
+  <div class="sd do"><h4>Do this</h4><ul>
+    <li>Store inputs, intermediate steps, and outputs</li>
+    <li>Pin and record the model version per run</li>
+    <li>Align retention to your limitation periods</li>
+  </ul></div>
+  <div class="sd watch"><h4>Failure mode</h4><ul>
+    <li>Logging only the final answer</li>
+    <li>Silent model upgrades changing behaviour</li>
+    <li>Evidence that cannot be independently replayed</li>
+  </ul></div>
+</div>
+</div>
+
+<div class="step">
+<h3>Evaluate before you trust, and keep evaluating</h3>
+<p>Run the agent against your historical test set and measure it. Precision matters more than recall in most compliance contexts — a false finding wastes an engineer's afternoon and erodes trust in the whole programme. Re-run the evaluation on every model or prompt change.</p>
+<div class="step-detail">
+  <div class="sd do"><h4>Do this</h4><ul>
+    <li>Measure against known-correct historical outcomes</li>
+    <li>Track false positives and false negatives separately</li>
+    <li>Re-run evaluations as a release gate</li>
+  </ul></div>
+  <div class="sd watch"><h4>Failure mode</h4><ul>
+    <li>Judging quality by whether output "looks right"</li>
+    <li>No regression testing after prompt changes</li>
+    <li>Deploying on demo performance alone</li>
+  </ul></div>
+</div>
+</div>
+
+<div class="step">
+<h3>Run it shadow, then assisted, then autonomous</h3>
+<p>Deploy alongside the existing manual process first and compare outputs without acting on them. Then let it draft for human approval. Only then, and only for the lowest-consequence actions, consider letting it act unattended. Most GRC agents should stop permanently at stage two — and that is still a large win.</p>
+<div class="step-detail">
+  <div class="sd do"><h4>Do this</h4><ul>
+    <li>Shadow-run for at least one full process cycle</li>
+    <li>Compare against human output and investigate gaps</li>
+    <li>Expand autonomy per action type, not wholesale</li>
+  </ul></div>
+  <div class="sd watch"><h4>Failure mode</h4><ul>
+    <li>Going straight to autonomous because the demo worked</li>
+    <li>Retiring the manual process before validation</li>
+    <li>Treating autonomy as the goal rather than a means</li>
+  </ul></div>
+</div>
+</div>
+
+</div>
+
+<hr class="sep">
+
+<div class="sl">Tooling</div>
+<div class="sh">
+<h2>AI & LLM Capabilities for GRC</h2>
+<p>Language models are not a compliance product. They are a set of capabilities that happen to map unusually well onto the parts of GRC work that are text-heavy, repetitive, and judgement-light. Understanding which capability you are using — and its failure mode — matters more than which vendor you buy.</p>
+</div>
+
+<div class="cap-grid">
+
+<div class="cap">
+<div class="cap-icon">01</div>
+<h3>Document Comprehension</h3>
+<p>Reading long, dense regulatory text, contracts, audit reports, and vendor documentation, then extracting specific structured facts from them.</p>
+<div class="cap-use"><strong>GRC use:</strong> Pull obligations out of a new regulation and map them to your existing control library, in hours rather than weeks.</div>
+</div>
+
+<div class="cap">
+<div class="cap-icon">02</div>
+<h3>Semantic Mapping</h3>
+<p>Recognising that two differently worded requirements describe the same underlying control — the task that makes multi-framework compliance so expensive.</p>
+<div class="cap-use"><strong>GRC use:</strong> Draft crosswalks between ISO 27001, ISO 42001, SOC 2, and NIST for human review instead of human authorship.</div>
+</div>
+
+<div class="cap">
+<div class="cap-icon">03</div>
+<h3>Structured Extraction</h3>
+<p>Turning unstructured input — emails, tickets, meeting notes, questionnaire responses — into consistent, machine-readable records.</p>
+<div class="cap-use"><strong>GRC use:</strong> Convert incoming vendor questionnaire responses into a scored, comparable dataset automatically.</div>
+</div>
+
+<div class="cap">
+<div class="cap-icon">04</div>
+<h3>Retrieval-Grounded Answering</h3>
+<p>Answering questions against your own document corpus, with citations back to source, rather than from the model's general knowledge.</p>
+<div class="cap-use"><strong>GRC use:</strong> An internal assistant that answers "what is our policy on X" with the actual clause and document version.</div>
+</div>
+
+<div class="cap">
+<div class="cap-icon">05</div>
+<h3>Drafting & Summarisation</h3>
+<p>Producing a competent first draft of a repetitive artefact, which a practitioner then corrects — far faster than authoring from blank.</p>
+<div class="cap-use"><strong>GRC use:</strong> Draft control narratives, risk descriptions, DPIA sections, and audit walkthroughs for expert revision.</div>
+</div>
+
+<div class="cap">
+<div class="cap-icon">06</div>
+<h3>Tool Use & Orchestration</h3>
+<p>Deciding which system to query and in what order, then chaining the results — the capability that turns a chatbot into an agent.</p>
+<div class="cap-use"><strong>GRC use:</strong> Run an end-to-end access review: pull the roster, pull entitlements, flag anomalies, draft findings for approval.</div>
+</div>
+
+</div>
+
+<div class="reality">
+<div class="rbox good"><h3>Where these tools genuinely earn their place</h3><ul>
+  <li>High-volume text work with a human reviewing output</li>
+  <li>First drafts of repetitive, structured artefacts</li>
+  <li>Mapping and crosswalk generation across frameworks</li>
+  <li>Triage — deciding what a human should look at first</li>
+  <li>Making your own documentation searchable in plain language</li>
+  <li>Summarising long regulatory or audit material</li>
+</ul></div>
+<div class="rbox bad"><h3>Where they will let you down</h3><ul>
+  <li>Anything requiring exact arithmetic or counting</li>
+  <li>Being the sole determinant of a compliance conclusion</li>
+  <li>Legal interpretation presented as settled advice</li>
+  <li>Deterministic evidence handling that must reproduce exactly</li>
+  <li>Processing untrusted external content with broad access</li>
+  <li>Tasks where a plausible wrong answer is worse than none</li>
+</ul></div>
+</div>
+
+<hr class="sep">
+
+<div class="sl">Getting There</div>
+<div class="sh">
+<h2>A Realistic Maturity Path</h2>
+<p>Nobody jumps from spreadsheets to autonomous agents. Each stage makes the next one cheaper, and most organisations get the majority of the benefit by stage three.</p>
+</div>
+
+<div class="mat">
+<div class="mstage"><div class="mnum">Stage 01</div><h3>Consolidate</h3><p>One control library, one evidence store, one source of truth. Stop duplicating per framework before automating anything.</p></div>
+<div class="mstage"><div class="mnum">Stage 02</div><h3>Integrate</h3><p>Replace manual collection with API pulls from the systems that already hold the facts. Evidence becomes a query.</p></div>
+<div class="mstage"><div class="mnum">Stage 03</div><h3>Continuous</h3><p>Controls tested on change rather than on schedule. Drift alerts replace quarterly discovery. Audit prep collapses.</p></div>
+<div class="mstage"><div class="mnum">Stage 04</div><h3>Agentic</h3><p>Narrow agents run defined processes end to end, gated by human approval on anything consequential.</p></div>
+</div>
+
+<div class="concl">
+<h2>The Function This Builds</h2>
+<p>A GRC function built this way looks different from the inside. The compliance team is smaller in headcount terms but more technical. Evidence requests are answered by pointing at a system rather than by starting a project. Audits are shorter because nothing has to be reconstructed. Most importantly, the people doing the work spend their time on the questions that actually require judgement — whether a risk is acceptable, whether a control is designed correctly, whether a new regulation changes the answer.</p>
+<p>The uncomfortable part is that this requires GRC practitioners to become at least somewhat technical. Not necessarily engineers, but people who can read an API response, reason about a data pipeline, and specify a system precisely enough that it can be built. That shift is already underway, and AI tooling has lowered the barrier considerably — the same models that automate the work also help write the automation.</p>
+<p>Start with one process. Measure it. Make the next one cheaper.</p>
+<div class="cta-row"><a href="index.html#subscribe">Get weekly AI GRC intelligence →</a></div>
+</div>
+
+</div>
+<footer>© 2026 Compsilon · <a href="index.html">compsilon.com</a> · Darshan Krishnappa</footer>
+</body>
+</html>
