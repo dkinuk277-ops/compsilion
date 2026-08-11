@@ -130,6 +130,13 @@ nav a.lnk.active{color:var(--amber)}
 .mstage h3{font:600 14px var(--sans);color:var(--white);margin-bottom:8px}
 .mstage p{font:400 12px/1.55 var(--sans);color:var(--muted)}
 
+/* Byline */
+.byline{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;margin-top:20px;text-align:center;position:relative;overflow:hidden}
+.byline::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:260px;height:160px;background:radial-gradient(ellipse,var(--amber-glow),transparent 70%);pointer-events:none}
+.byline-name{font:700 20px var(--sans);color:var(--white);letter-spacing:-.4px;margin-bottom:6px;position:relative}
+.byline-role{font:600 11px var(--mono);text-transform:uppercase;letter-spacing:2px;background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;position:relative}
+.byline-note{font:400 13px var(--sans);color:var(--muted);position:relative}
+
 /* Conclusion */
 .concl{background:linear-gradient(135deg,#0d2820,#1a1408);border:1px solid var(--border);border-radius:20px;padding:48px;margin-top:64px;position:relative;overflow:hidden}
 .concl::before{content:'';position:absolute;top:-70px;right:-50px;width:280px;height:280px;background:radial-gradient(circle,var(--amber-glow),transparent 70%);pointer-events:none}
@@ -487,7 +494,9 @@ footer a{color:var(--teal)}
 <div class="sl" id="about">About Compsilon</div>
 <div class="sh">
 <h2>Why This Exists</h2>
-<p>Compsilon is written by Darshan Krishnappa, a governance, risk and compliance practitioner with fifteen years in the field, based in the UK. It started because the gap between what is written about AI governance and what is usable on a Monday morning had become impossible to ignore.</p>
+<p>Compsilon is written by Darshan Krishnappa, a governance, risk and compliance practitioner with fifteen years across risk, compliance and audit, based in the UK.</p>
+<p>The conviction behind it is practical rather than theoretical. It comes from working hands-on with large language models — building automations with them, testing where they hold up and where they fail — while watching how fast organisations are moving to adopt them. Adoption is outpacing governance almost everywhere. In smaller organisations AI governance is often minimal or absent entirely; in larger ones it frequently exists on paper but degrades under the scale, speed and fragmentation of actual deployment.</p>
+<p>Compsilon is written to close that distance for the people who carry the accountability. It is for GRC practitioners who need to adopt AI within their own function, govern it credibly across the business, and stay ahead of risk that is arriving faster than the frameworks written to contain it.</p>
 </div>
 
 <div class="cap-grid">
@@ -534,6 +543,12 @@ footer a{color:var(--teal)}
 <div class="cap-use"><strong>The conviction:</strong> Say a tool does not help when it does not help. That is only possible without a commercial stake in the answer.</div>
 </div>
 
+</div>
+
+<div class="byline">
+<div class="byline-name">Darshan Krishnappa</div>
+<div class="byline-role">AI GRC · GRC Practitioner · Audits</div>
+<div class="byline-note">Writing Compsilon weekly from the UK.</div>
 </div>
 
 <div class="concl">
