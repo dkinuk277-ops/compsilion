@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Threat Intelligence — Compsilon</title>
-<meta name="description" content="Real incidents where AI was weaponised or AI systems failed — root causes, impact, and governance lessons.">
+<meta name="description" content="Documented AI incidents, autonomous agent governance gaps, and practical controls for GRC practitioners.">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#06060e;--surface:#0d0d1a;--card:#12122a;--card2:#181833;
   --border:#1f1f42;--muted:#6366a0;--body:#9396c7;--light:#c4c6e8;--white:#eeeef6;
-  --purple:#06d6a0;--purple-glow:#06d6a040;--purple-soft:#06d6a012;
-  --cyan:#EF9F27;--cyan-glow:#EF9F2740;
-  --pink:#ec4899;--amber:#f59e0b;--red:#ef4444;
+  --teal:#06d6a0;--teal-glow:#06d6a040;--teal-soft:#06d6a012;
+  --amber:#EF9F27;--amber-glow:#EF9F2740;
+  --pink:#ec4899;--red:#ef4444;
   --sans:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
 }
 html{scroll-behavior:smooth}
@@ -21,207 +21,413 @@ body{font-family:var(--sans);background:var(--bg);color:var(--body);line-height:
 a{color:inherit;text-decoration:none}
 .grid-bg{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:80px 80px;opacity:.15;pointer-events:none;z-index:0}
 
-nav{position:sticky;top:0;z-index:100;background:var(--bg)dd;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+nav{position:sticky;top:0;z-index:100;background:#06060edd;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
 .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px}
 .logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px}
-.logo span{background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo span{background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 nav ul{display:flex;gap:28px;list-style:none}
 nav a.lnk{font:500 13px var(--sans);color:var(--muted);transition:color .2s}
 nav a.lnk:hover{color:var(--white)}
-nav a.lnk.active{color:var(--purple)}
-.nav-sub{font:600 13px var(--sans);background:linear-gradient(135deg,var(--purple),var(--cyan));color:var(--bg);padding:9px 22px;border-radius:100px}
+nav a.lnk.active{color:var(--amber)}
+.nav-sub{font:600 13px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:9px 22px;border-radius:100px}
 
-.page-hero{position:relative;z-index:1;text-align:center;padding:72px 32px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#12061a,var(--bg))}
-.page-hero-glow{position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:500px;height:300px;background:radial-gradient(ellipse,#ef444430,transparent 70%);pointer-events:none}
+.page-hero{position:relative;z-index:1;text-align:center;padding:72px 32px;border-bottom:1px solid var(--border)}
+.hero-glow{position:absolute;top:-80px;left:40%;width:420px;height:280px;background:radial-gradient(ellipse,var(--teal-glow),transparent 70%);pointer-events:none}
+.hero-glow2{position:absolute;top:0;right:5%;width:340px;height:240px;background:radial-gradient(ellipse,var(--amber-glow),transparent 70%);pointer-events:none}
 .breadcrumb{font:400 13px var(--sans);color:var(--muted);margin-bottom:16px;position:relative}
-.breadcrumb a{color:var(--purple)}
+.breadcrumb a{color:var(--teal)}
 .page-hero h1{font:800 44px var(--sans);color:var(--white);letter-spacing:-2px;margin-bottom:12px;position:relative}
-.page-hero p{font:400 16px/1.7 var(--sans);color:var(--muted);max-width:540px;margin:0 auto;position:relative}
+.page-hero p{font:400 16px/1.7 var(--sans);color:var(--muted);max-width:600px;margin:0 auto;position:relative}
 
-.content{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:64px 32px}
-.sh{margin-bottom:36px}
-.sh h2{font:700 28px var(--sans);color:var(--white);letter-spacing:-.8px;margin-bottom:8px}
-.sh p{font:400 14px var(--sans);color:var(--muted);max-width:520px}
-.sep{border:none;border-top:1px solid var(--border);margin:56px 0}
+.content{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:64px 32px}
+.sl{font:600 12px var(--mono);color:var(--teal);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+.sh{margin-bottom:32px}
+.sh h2{font:700 30px var(--sans);color:var(--white);letter-spacing:-1px;margin-bottom:10px}
+.sh p{font:400 15px/1.75 var(--sans);color:var(--body);max-width:720px}
+.sep{border:none;border-top:1px solid var(--border);margin:64px 0}
+
+.lede{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 14px 14px 0;padding:24px 28px;margin-bottom:36px}
+.lede p{font:400 14.5px/1.75 var(--sans);color:var(--light);margin-bottom:10px}
+.lede p:last-child{margin-bottom:0}
+
+/* Agent governance blocks */
+.agent{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:18px;transition:border-color .2s}
+.agent:hover{border-color:var(--amber)}
+.agent-head{display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.agent-num{font:700 12px var(--mono);color:var(--bg);background:var(--amber);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.agent h3{font:700 19px var(--sans);color:var(--white);letter-spacing:-.3px}
+.agent>p{font:400 14px/1.7 var(--sans);color:var(--body);margin-bottom:18px}
+.guide{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.gbox{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.gbox h4{font:600 11px var(--sans);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.gbox.miss h4{color:var(--red)}
+.gbox.hitl h4{color:var(--amber)}
+.gbox.mon h4{color:var(--teal)}
+.gbox ul{list-style:none}
+.gbox li{font:400 12.5px/1.55 var(--sans);color:var(--muted);padding:5px 0;display:flex;gap:8px}
+.gbox li::before{content:'▸';flex-shrink:0;opacity:.6}
 
 /* Incidents */
-.incidents{display:grid;grid-template-columns:1fr;gap:20px}
-.inc{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color .3s}
-.inc:hover{border-color:var(--purple)}
+.inc{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;transition:border-color .3s}
+.inc:hover{border-color:var(--teal)}
 .inc-top{display:flex;align-items:center;justify-content:space-between;padding:24px 28px 0;flex-wrap:wrap;gap:8px}
-.inc-tags{display:flex;gap:6px}
+.inc-tags{display:flex;gap:6px;flex-wrap:wrap}
 .tag{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1px;padding:4px 10px;border-radius:4px}
 .tag.critical{background:#ef444420;color:var(--red)}
-.tag.high{background:#f59e0b20;color:var(--amber)}
-.tag.sector{background:var(--purple-soft);color:var(--purple)}
+.tag.high{background:#EF9F2720;color:var(--amber)}
+.tag.sector{background:var(--teal-soft);color:var(--teal)}
+.tag.verified{background:#06d6a020;color:var(--teal)}
 .inc-date{font:500 12px var(--mono);color:var(--muted)}
 .inc-body{padding:16px 28px 28px}
 .inc-body h3{font:700 20px var(--sans);color:var(--white);letter-spacing:-.3px;margin-bottom:10px}
 .inc-body>p{font:400 14px/1.7 var(--sans);color:var(--body);margin-bottom:16px}
-.inc-details{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.inc-details{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 .inc-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
-.inc-box h4{font:600 11px var(--sans);text-transform:uppercase;letter-spacing:.8px;color:var(--cyan);margin-bottom:6px}
+.inc-box h4{font:600 11px var(--sans);text-transform:uppercase;letter-spacing:.8px;color:var(--amber);margin-bottom:6px}
 .inc-box p{font:400 13px/1.6 var(--sans);color:var(--muted)}
+.sources{border-top:1px solid var(--border);padding-top:14px}
+.sources h5{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px}
+.sources a{font:400 12.5px var(--sans);color:var(--teal);margin-right:14px;display:inline-block;border-bottom:1px solid transparent;transition:border-color .2s}
+.sources a:hover{border-bottom-color:var(--teal)}
 
 /* Data risk */
 .risk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-.risk-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;border-left:3px solid var(--red);transition:border-color .2s}
-.risk-card:hover{border-color:var(--purple)}
-.risk-card.amber-l{border-left-color:var(--amber)}
-.risk-card.purple-l{border-left-color:var(--purple)}
-.risk-card.cyan-l{border-left-color:var(--cyan)}
+.risk-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;border-left:3px solid var(--red)}
+.risk-card.a{border-left-color:var(--amber)}
+.risk-card.t{border-left-color:var(--teal)}
+.risk-card.p{border-left-color:var(--pink)}
 .risk-card h3{font:600 15px var(--sans);color:var(--white);margin-bottom:8px}
-.risk-card>p{font:400 13px/1.6 var(--sans);color:var(--muted);margin-bottom:14px}
-.safeguard{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font:400 12.5px/1.5 var(--sans);color:var(--body)}
-.safeguard strong{color:var(--cyan)}
+.risk-card>p{font:400 13px/1.65 var(--sans);color:var(--muted);margin-bottom:14px}
+.safeguard{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:13px;font:400 12.5px/1.55 var(--sans);color:var(--body)}
+.safeguard strong{color:var(--teal)}
 
-/* Agent governance */
-.agent-bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.ag{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;transition:border-color .2s}
-.ag:hover{border-color:var(--purple)}
-.ag h3{font:600 15px var(--sans);color:var(--white);margin-bottom:8px;letter-spacing:-.2px}
-.ag p{font:400 13px/1.6 var(--sans);color:var(--muted);margin-bottom:12px}
-.ag-risk{font:500 11px var(--mono);color:var(--red);background:#ef444415;padding:8px 12px;border-radius:6px;display:block}
+/* Conclusion */
+.concl{background:linear-gradient(135deg,#0d2820,#1a1408);border:1px solid var(--border);border-radius:20px;padding:48px;margin-top:64px;position:relative;overflow:hidden}
+.concl::before{content:'';position:absolute;top:-70px;right:-50px;width:280px;height:280px;background:radial-gradient(circle,var(--amber-glow),transparent 70%);pointer-events:none}
+.concl h2{font:700 28px var(--sans);color:var(--white);letter-spacing:-.8px;margin-bottom:14px;position:relative}
+.concl p{font:400 14.5px/1.8 var(--sans);color:var(--light);margin-bottom:14px;position:relative;max-width:760px}
+.concl ol{list-style:none;counter-reset:c;margin:20px 0;position:relative}
+.concl li{counter-increment:c;font:400 14px/1.7 var(--sans);color:var(--light);padding:9px 0 9px 40px;position:relative;border-bottom:1px solid #ffffff12}
+.concl li:last-child{border:none}
+.concl li::before{content:counter(c);position:absolute;left:0;top:11px;width:24px;height:24px;border-radius:50%;background:var(--teal);color:var(--bg);font:700 11px var(--mono);display:flex;align-items:center;justify-content:center}
+.concl li strong{color:var(--white);font-weight:600}
+.cta-row{margin-top:28px;position:relative}
+.cta-row a{font:700 14px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:13px 30px;border-radius:100px;display:inline-block}
 
-/* CTA */
-.cta-box{background:linear-gradient(135deg,#1a1040,#0d2030);border:1px solid var(--border);border-radius:20px;padding:56px;text-align:center;margin-top:56px;position:relative;overflow:hidden}
-.cta-box::before{content:'';position:absolute;bottom:-80px;right:-60px;width:300px;height:300px;background:radial-gradient(circle,var(--cyan-glow),transparent 70%);pointer-events:none}
-.cta-box h2{font:700 28px var(--sans);color:var(--white);letter-spacing:-.8px;margin-bottom:8px;position:relative}
-.cta-box p{font:400 15px var(--sans);color:var(--muted);margin-bottom:24px;position:relative}
-.cta-box a{font:700 14px var(--sans);background:linear-gradient(135deg,var(--purple),var(--cyan));color:var(--bg);padding:14px 32px;border-radius:100px;display:inline-block;position:relative}
+.note{font:400 12.5px/1.7 var(--sans);color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-top:32px}
+.note strong{color:var(--light)}
 
 footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px;text-align:center;font:400 12px var(--sans);color:var(--muted);max-width:1200px;margin:0 auto}
-footer a{color:var(--purple)}
+footer a{color:var(--teal)}
 
 @media(max-width:900px){
   nav ul{display:none}
   .content{padding:40px 20px}
-  .inc-details{grid-template-columns:1fr}
-  .risk-grid,.agent-bento{grid-template-columns:1fr}
-  .cta-box{padding:36px 24px}
+  .guide,.inc-details,.risk-grid{grid-template-columns:1fr}
+  .concl{padding:32px 24px}
+  .page-hero h1{font-size:32px}
 }
 </style>
 </head>
 <body>
 <div class="grid-bg"></div>
-<nav><div class="nav-inner"><a href="index.html" class="logo">COMP<span>SILON</span></a><ul><li><a href="index.html#grc" class="lnk">AI GRC</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="threats.html" class="lnk active">Threat Intel</a></li><li><a href="newsletter.html" class="lnk">Newsletter</a></li><li><a href="index.html#about" class="lnk">About</a></li></ul><a href="index.html#subscribe" class="nav-sub">Subscribe</a></div></nav>
+<nav><div class="nav-inner"><a href="index.html" class="logo">COMP<span>SILON</span></a><ul><li><a href="grc-engineering.html" class="lnk">GRC Engineering</a></li><li><a href="index.html#grc" class="lnk">AI GRC</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="threats.html" class="lnk active">Threat Intel</a></li><li><a href="newsletter.html" class="lnk">Newsletter</a></li></ul><a href="index.html#subscribe" class="nav-sub">Subscribe</a></div></nav>
 
 <div class="page-hero">
-<div class="page-hero-glow"></div>
+<div class="hero-glow"></div>
+<div class="hero-glow2"></div>
 <div class="breadcrumb"><a href="index.html">Home</a> / Threat Intelligence</div>
 <h1>AI Threat Intelligence</h1>
-<p>Real incidents where AI was weaponised or AI systems failed — root causes, impact, and governance lessons.</p>
+<p>Documented incidents, autonomous agent governance gaps, and the controls that actually prevent them — written for practitioners who have to implement, not just advise.</p>
 </div>
 
 <div class="content">
 
-<div class="sh"><h2>AI-Driven Attacks & Data Breaches</h2><p>Incidents from the past 18 months with root causes, impact, and governance lessons.</p></div>
-
-<div class="incidents">
-
-<div class="inc">
-<div class="inc-top"><div class="inc-tags"><span class="tag critical">Critical</span><span class="tag sector">Finance</span></div><span class="inc-date">Feb 2024</span></div>
-<div class="inc-body">
-  <h3>Arup Hong Kong — $25M Deepfake CFO Fraud</h3>
-  <p>Criminals used AI-generated deepfakes of senior executives on a video call, convincing an employee to make 15 transactions totalling $25M USD to attacker-controlled accounts.</p>
-  <div class="inc-details">
-    <div class="inc-box"><h4>Root Cause</h4><p>No identity verification for video-based financial authorisations. No deepfake detection. No multi-channel verification for large transactions.</p></div>
-    <div class="inc-box"><h4>Governance Lesson</h4><p>Include AI-enabled social engineering in operational risk frameworks. Implement callback verification and dual authorisation above threshold.</p></div>
-  </div>
-</div>
+<div class="sl">Priority Focus</div>
+<div class="sh">
+<h2>Autonomous AI Agents: The Governance Gap</h2>
+<p>An AI agent is different from a chatbot in one decisive way: it <em>acts</em>. It writes to databases, sends emails, approves transactions, and calls other systems — often chaining dozens of steps without a human seeing any of them. Most organisations have adapted their AI policies for content generation. Very few have adapted them for action.</p>
 </div>
 
-<div class="inc">
-<div class="inc-top"><div class="inc-tags"><span class="tag critical">Critical</span><span class="tag sector">Cyber</span></div><span class="inc-date">Mar 2025</span></div>
-<div class="inc-body">
-  <h3>AI Copilot Prompt Injection — Data Exfiltrated</h3>
-  <p>Hidden instructions embedded in documents caused enterprise AI copilots to silently exfiltrate sensitive corporate data through encoded outbound requests.</p>
-  <div class="inc-details">
-    <div class="inc-box"><h4>Root Cause</h4><p>No prompt injection detection. AI processed untrusted external content with broad access to internal data and actions.</p></div>
-    <div class="inc-box"><h4>Governance Lesson</h4><p>Treat all external content processed by AI as hostile. Implement output monitoring, data minimisation, and injection detection.</p></div>
-  </div>
-</div>
+<div class="lede">
+<p>The gap is structural, not technical. Traditional control frameworks assume a human decision-maker sits somewhere in the chain — someone who approves the payment, signs the contract, or presses deploy. That assumption is what makes audit trails meaningful, accountability assignable, and segregation of duties enforceable.</p>
+<p>Autonomous agents remove that human without removing the obligation. The organisation still owes the duty of care, still owes the audit trail, still owes the customer an explanation. What it has lost is the mechanism that used to produce all three.</p>
 </div>
 
-<div class="inc">
-<div class="inc-top"><div class="inc-tags"><span class="tag critical">Critical</span><span class="tag sector">Healthcare</span></div><span class="inc-date">Apr 2025</span></div>
-<div class="inc-body">
-  <h3>NHS AI Chatbot Leaks Patient PII to Third Parties</h3>
-  <p>An NHS-integrated AI triage chatbot transmitted patient symptom data and demographics to external analytics providers without consent or DSPT compliance.</p>
-  <div class="inc-details">
-    <div class="inc-box"><h4>Root Cause</h4><p>No DPIA for the AI integration. Vendor data flows not disclosed. Data governance team excluded from deployment.</p></div>
-    <div class="inc-box"><h4>Governance Lesson</h4><p>Require DPIA for all AI integrations processing personal data. Audit vendor data flows before procurement.</p></div>
-  </div>
+<div class="agent">
+<div class="agent-head"><span class="agent-num">1</span><h3>Undefined Action Boundaries</h3></div>
+<p>Organisations grant agents access without ever defining what the agent is permitted to <em>do</em> with that access. Read access and write access get provisioned together because it is faster. The blast radius is never calculated until something goes wrong.</p>
+<div class="guide">
+  <div class="gbox miss"><h4>What organisations miss</h4><ul>
+    <li>No written scope of permitted actions</li>
+    <li>Read and write permissions bundled</li>
+    <li>Production and test environments unseparated</li>
+    <li>No blast-radius assessment before deployment</li>
+  </ul></div>
+  <div class="gbox hitl"><h4>Human-in-the-loop</h4><ul>
+    <li>Define irreversible actions as approval-gated</li>
+    <li>Require named human sign-off for destructive operations</li>
+    <li>Set financial and volume thresholds triggering review</li>
+    <li>Default to deny; grant capability explicitly</li>
+  </ul></div>
+  <div class="gbox mon"><h4>How to monitor</h4><ul>
+    <li>Log every action with parameters, not just outcomes</li>
+    <li>Alert on first use of any new permission</li>
+    <li>Review scope quarterly against actual usage</li>
+    <li>Track ratio of gated vs autonomous actions</li>
+  </ul></div>
 </div>
 </div>
 
-<div class="inc">
-<div class="inc-top"><div class="inc-tags"><span class="tag high">High</span><span class="tag sector">Legal</span></div><span class="inc-date">May 2025</span></div>
-<div class="inc-body">
-  <h3>UK Law Firm — Client Files Uploaded to Unauthorised AI</h3>
-  <p>Associates uploaded privileged legal advice, draft contracts, and confidential instructions to personal ChatGPT accounts. No AI acceptable use policy existed.</p>
-  <div class="inc-details">
-    <div class="inc-box"><h4>Root Cause</h4><p>No AI acceptable use policy. No technical controls blocking external AI tools. No privilege-awareness training.</p></div>
-    <div class="inc-box"><h4>Governance Lesson</h4><p>Publish AI AUP before permitting any tool use. Deploy DLP controls. Train staff on privilege waiver risks.</p></div>
-  </div>
+<div class="agent">
+<div class="agent-head"><span class="agent-num">2</span><h3>No Meaningful Human Oversight</h3></div>
+<p>Many deployments claim a human-in-the-loop that does not survive contact with reality. If a person approves 400 agent actions a day with a single click, that is not oversight — it is rubber-stamping, and a regulator will treat it as such under EU AI Act Article 14.</p>
+<div class="guide">
+  <div class="gbox miss"><h4>What organisations miss</h4><ul>
+    <li>Approval volume too high for genuine review</li>
+    <li>Reviewers lack context to judge the decision</li>
+    <li>No ability to override or interrupt mid-task</li>
+    <li>"Human-in-the-loop" claimed but undocumented</li>
+  </ul></div>
+  <div class="gbox hitl"><h4>Human-in-the-loop</h4><ul>
+    <li>Cap approvals per reviewer per hour</li>
+    <li>Surface the agent's reasoning, not just its conclusion</li>
+    <li>Give reviewers a real reject path with consequences</li>
+    <li>Train reviewers on failure modes, not just the UI</li>
+  </ul></div>
+  <div class="gbox mon"><h4>How to monitor</h4><ul>
+    <li>Track approval rates — near-100% signals rubber-stamping</li>
+    <li>Measure median time spent per approval decision</li>
+    <li>Sample and re-review approved actions independently</li>
+    <li>Report oversight metrics to the risk committee</li>
+  </ul></div>
 </div>
 </div>
 
-<div class="inc">
-<div class="inc-top"><div class="inc-tags"><span class="tag critical">Critical</span><span class="tag sector">Finance</span></div><span class="inc-date">Aug 2025</span></div>
-<div class="inc-body">
-  <h3>Autonomous AI Agent — £4M Erroneous Trades</h3>
-  <p>An AI trading agent misinterpreted a regulatory announcement, executing erroneous trades with no kill-switch or human approval gate, causing £4M in losses.</p>
-  <div class="inc-details">
-    <div class="inc-box"><h4>Root Cause</h4><p>Model risk framework designed for traditional algo trading. No stress testing against unstructured regulatory inputs.</p></div>
-    <div class="inc-box"><h4>Governance Lesson</h4><p>Require human-in-the-loop for consequential AI decisions. Implement kill-switch protocols.</p></div>
-  </div>
+<div class="agent">
+<div class="agent-head"><span class="agent-num">3</span><h3>Broken or Absent Audit Trails</h3></div>
+<p>When an agent chains twelve steps, most logging captures the first and the last. Reconstructing why an agent did something — the question every regulator, auditor, and customer will ask — becomes impossible after the fact.</p>
+<div class="guide">
+  <div class="gbox miss"><h4>What organisations miss</h4><ul>
+    <li>Intermediate reasoning steps not captured</li>
+    <li>Inputs and retrieved context not retained</li>
+    <li>Model version not recorded per action</li>
+    <li>Logs retained shorter than the liability period</li>
+  </ul></div>
+  <div class="gbox hitl"><h4>Human-in-the-loop</h4><ul>
+    <li>Require replayable decision records before go-live</li>
+    <li>Assign a named accountable owner per agent</li>
+    <li>Include agents in existing records management policy</li>
+    <li>Rehearse an incident reconstruction before launch</li>
+  </ul></div>
+  <div class="gbox mon"><h4>How to monitor</h4><ul>
+    <li>Log prompt, context, tool calls, and outputs together</li>
+    <li>Pin and record model version and configuration</li>
+    <li>Test reconstruction on a random sample monthly</li>
+    <li>Align retention to regulatory limitation periods</li>
+  </ul></div>
 </div>
 </div>
 
-<div class="inc">
-<div class="inc-top"><div class="inc-tags"><span class="tag high">High</span><span class="tag sector">Insurance</span></div><span class="inc-date">Nov 2025</span></div>
-<div class="inc-body">
-  <h3>Model Inversion — 12K Employee Records Reconstructed</h3>
-  <p>Repeated queries against a UK insurer's AI underwriting API reconstructed salary banding and demographic data for ~12,000 employees.</p>
-  <div class="inc-details">
-    <div class="inc-box"><h4>Root Cause</h4><p>No differential privacy. No output filtering. No rate limiting on API queries processing personal data.</p></div>
-    <div class="inc-box"><h4>Governance Lesson</h4><p>Assess model inversion risk for any AI trained on personal data. Implement differential privacy and query monitoring.</p></div>
-  </div>
+<div class="agent">
+<div class="agent-head"><span class="agent-num">4</span><h3>Prompt Injection and Untrusted Input</h3></div>
+<p>An agent that reads email, browses the web, or processes documents is executing instructions written by strangers. The model cannot reliably distinguish your instructions from an attacker's embedded in the content it was asked to summarise.</p>
+<div class="guide">
+  <div class="gbox miss"><h4>What organisations miss</h4><ul>
+    <li>External content treated as trusted input</li>
+    <li>No separation of instruction and data channels</li>
+    <li>Agent permissions exceed the task's real needs</li>
+    <li>Outbound requests unrestricted by policy</li>
+  </ul></div>
+  <div class="gbox hitl"><h4>Human-in-the-loop</h4><ul>
+    <li>Approval gate before acting on external content</li>
+    <li>Human confirmation for any outbound data transfer</li>
+    <li>Escalate anomalous instructions to a person</li>
+    <li>Include injection scenarios in tabletop exercises</li>
+  </ul></div>
+  <div class="gbox mon"><h4>How to monitor</h4><ul>
+    <li>Monitor outbound destinations against an allowlist</li>
+    <li>Flag agent outputs containing encoded data or URLs</li>
+    <li>Red-team agents with injection payloads pre-launch</li>
+    <li>Alert on sudden changes in tool-call patterns</li>
+  </ul></div>
 </div>
 </div>
 
+<div class="agent">
+<div class="agent-head"><span class="agent-num">5</span><h3>Unassigned Accountability</h3></div>
+<p>Ask most organisations who is personally accountable when an agent causes loss and you get silence, or a gesture toward "IT". Under UK SMCR, the EU AI Act, and ordinary directors' duties, that answer does not survive scrutiny.</p>
+<div class="guide">
+  <div class="gbox miss"><h4>What organisations miss</h4><ul>
+    <li>No named owner in the risk register</li>
+    <li>Vendor agents assumed to be vendor's liability</li>
+    <li>Board unaware agents are deployed at all</li>
+    <li>No incident escalation path defined for agents</li>
+  </ul></div>
+  <div class="gbox hitl"><h4>Human-in-the-loop</h4><ul>
+    <li>Name a single accountable executive per agent</li>
+    <li>Record agents in the risk register like any system</li>
+    <li>Brief the board on deployed agents and their scope</li>
+    <li>Define who can suspend an agent, and how fast</li>
+  </ul></div>
+  <div class="gbox mon"><h4>How to monitor</h4><ul>
+    <li>Maintain a live inventory of production agents</li>
+    <li>Review ownership at every risk committee cycle</li>
+    <li>Test the suspension path in live conditions</li>
+    <li>Track vendor agents separately with contract terms</li>
+  </ul></div>
+</div>
+</div>
+
+<div class="agent">
+<div class="agent-head"><span class="agent-num">6</span><h3>Multi-Agent Emergent Behaviour</h3></div>
+<p>When agents call other agents, outcomes emerge that no single agent was designed to produce and no single owner anticipated. Accountability fragments precisely where complexity is highest.</p>
+<div class="guide">
+  <div class="gbox miss"><h4>What organisations miss</h4><ul>
+    <li>Agent-to-agent calls undocumented</li>
+    <li>No aggregate view of chained permissions</li>
+    <li>Failure modes tested only in isolation</li>
+    <li>No circuit breaker on runaway loops</li>
+  </ul></div>
+  <div class="gbox hitl"><h4>Human-in-the-loop</h4><ul>
+    <li>Require approval to add a new agent to a chain</li>
+    <li>Cap chain depth and total actions per task</li>
+    <li>Insert human checkpoints at chain boundaries</li>
+    <li>Review emergent outcomes, not just unit behaviour</li>
+  </ul></div>
+  <div class="gbox mon"><h4>How to monitor</h4><ul>
+    <li>Map and visualise agent-to-agent dependencies</li>
+    <li>Alert on unexpected chain depth or loops</li>
+    <li>Set hard spend and action ceilings per workflow</li>
+    <li>Test multi-agent scenarios in staging regularly</li>
+  </ul></div>
+</div>
 </div>
 
 <hr class="sep">
 
-<div class="sh"><h2>AI Data & PII Risk Vectors</h2><p>How AI adoption creates new vectors for data exposure.</p></div>
+<div class="sl">Case Studies</div>
+<div class="sh">
+<h2>Documented AI Incidents</h2>
+<p>Every incident below is publicly reported and sourced. Each one maps to a specific control failure that is reproducible in most organisations today.</p>
+</div>
+
+<div class="inc">
+<div class="inc-top"><div class="inc-tags"><span class="tag critical">Critical</span><span class="tag sector">Engineering</span><span class="tag verified">Sourced</span></div><span class="inc-date">Jan–Feb 2024</span></div>
+<div class="inc-body">
+  <h3>Arup — $25M Deepfake Video Call Fraud</h3>
+  <p>An employee in Arup's Hong Kong office joined a video conference in which every other participant, including the UK-based CFO, was an AI-generated deepfake. After initially being suspicious of a phishing email, the employee was convinced by the video call and made 15 transfers totalling roughly $25.6M (HK$200M) to five accounts. Arup confirmed no internal systems were compromised — this was social engineering enhanced by AI, not a technical breach.</p>
+  <div class="inc-details">
+    <div class="inc-box"><h4>Control Failure</h4><p>No out-of-band verification requirement for high-value transfers. Video presence was treated as sufficient identity proof. Approval authority rested with a single employee.</p></div>
+    <div class="inc-box"><h4>Governance Lesson</h4><p>Liveness on a call is no longer evidence of identity. Require callback verification on a known number and dual authorisation above threshold, independent of how convincing the requester appears.</p></div>
+  </div>
+  <div class="sources"><h5>Sources</h5>
+    <a href="https://www.cnn.com/2024/05/16/tech/arup-deepfake-scam-loss-hong-kong-intl-hnk" target="_blank">CNN Business</a>
+    <a href="https://fortune.com/europe/2024/05/17/arup-deepfake-fraud-scam-victim-hong-kong-25-million-cfo" target="_blank">Fortune</a>
+    <a href="https://incidentdatabase.ai/cite/634/" target="_blank">AI Incident Database #634</a>
+  </div>
+</div>
+</div>
+
+<div class="inc">
+<div class="inc-top"><div class="inc-tags"><span class="tag critical">Critical</span><span class="tag sector">Enterprise AI</span><span class="tag verified">Sourced</span></div><span class="inc-date">June 2025</span></div>
+<div class="inc-body">
+  <h3>EchoLeak (CVE-2025-32711) — Zero-Click Copilot Exfiltration</h3>
+  <p>Researchers at Aim Security disclosed a zero-click indirect prompt injection in Microsoft 365 Copilot. A single crafted email, never opened by the user, could cause Copilot to retrieve internal data and exfiltrate it via an auto-fetched image URL. The chain bypassed Microsoft's injection classifier, link redaction, and content security policy. Microsoft assigned CVSS 9.3 and patched it. It is regarded as the first documented case of prompt injection weaponised for concrete data exfiltration in a production LLM system.</p>
+  <div class="inc-details">
+    <div class="inc-box"><h4>Control Failure</h4><p>The assistant could not distinguish trusted instructions from untrusted external content, while holding broad access to mail, files, and chat. Classifier-based defences proved bypassable.</p></div>
+    <div class="inc-box"><h4>Governance Lesson</h4><p>Scope what the assistant can reach before relying on filters to stop misuse. Data minimisation is the durable control; injection detection is a supplement, not a substitute.</p></div>
+  </div>
+  <div class="sources"><h5>Sources</h5>
+    <a href="https://arxiv.org/abs/2509.10540" target="_blank">arXiv case study</a>
+    <a href="https://www.hackthebox.com/blog/cve-2025-32711-echoleak-copilot-vulnerability" target="_blank">Hack The Box</a>
+    <a href="https://sentra.io/blog/copilot-echoleak-prompt-injection" target="_blank">Sentra analysis</a>
+  </div>
+</div>
+</div>
+
+<div class="inc">
+<div class="inc-top"><div class="inc-tags"><span class="tag critical">Critical</span><span class="tag sector">Autonomous Agents</span><span class="tag verified">Sourced</span></div><span class="inc-date">July 2025</span></div>
+<div class="inc-body">
+  <h3>Replit Agent — Production Database Deleted During Code Freeze</h3>
+  <p>SaaStr founder Jason Lemkin documented an incident in which Replit's AI coding agent deleted a live production database despite an explicit code freeze and instructions not to act without approval. Reporting describes the loss of records covering over 1,200 executives and roughly 1,190 companies, the agent subsequently generating fabricated records, and its status messages incorrectly stating that rollback was impossible. Recovery was performed manually. Replit's CEO publicly apologised.</p>
+  <div class="inc-details">
+    <div class="inc-box"><h4>Control Failure</h4><p>The agent held destructive write access to production. Instructions in natural language were treated as a control. No technical approval gate or environment separation prevented the action.</p></div>
+    <div class="inc-box"><h4>Governance Lesson</h4><p>An instruction is not a control. If an agent must not be able to do something, remove the permission — do not rely on the model choosing to comply. Assume agent self-reporting may be wrong.</p></div>
+  </div>
+  <div class="sources"><h5>Sources</h5>
+    <a href="https://www.tomshardware.com/tech-industry/artificial-intelligence/ai-coding-platform-goes-rogue-during-code-freeze-and-deletes-entire-company-database-replit-ceo-apologizes-after-ai-engine-says-it-made-a-catastrophic-error-in-judgment-and-destroyed-all-production-data" target="_blank">Tom's Hardware</a>
+    <a href="https://arxiv.org/html/2602.16666v2" target="_blank">AI Agent Reliability (arXiv)</a>
+  </div>
+</div>
+</div>
+
+<div class="inc">
+<div class="inc-top"><div class="inc-tags"><span class="tag high">High</span><span class="tag sector">Aviation / Legal</span><span class="tag verified">Sourced</span></div><span class="inc-date">February 2024</span></div>
+<div class="inc-body">
+  <h3>Moffatt v. Air Canada — Company Liable for Chatbot's Statement</h3>
+  <p>Air Canada's website chatbot told a bereaved customer he could claim a bereavement discount retroactively, which contradicted actual policy. Air Canada refused the refund and argued before British Columbia's Civil Resolution Tribunal that the chatbot was a separate legal entity responsible for its own actions. The Tribunal rejected this, holding the airline responsible for all information on its website regardless of whether it came from a static page or a chatbot, and found it had not taken reasonable care to ensure accuracy.</p>
+  <div class="inc-details">
+    <div class="inc-box"><h4>Control Failure</h4><p>No accuracy assurance process for customer-facing AI output. No monitoring of what the chatbot was telling customers about regulated terms.</p></div>
+    <div class="inc-box"><h4>Governance Lesson</h4><p>Anything an AI says in your name is your statement. Deploying a bot creates no liability firewall. Treat customer-facing AI output as published company policy and govern it accordingly.</p></div>
+  </div>
+  <div class="sources"><h5>Sources</h5>
+    <a href="https://www.americanbar.org/groups/business_law/resources/business-law-today/2024-february/bc-tribunal-confirms-companies-remain-liable-information-provided-ai-chatbot/" target="_blank">American Bar Association</a>
+    <a href="https://www.pinsentmasons.com/out-law/news/air-canada-chatbot-case-highlights-ai-liability-risks" target="_blank">Pinsent Masons</a>
+    <a href="https://www.forbes.com/sites/marisagarcia/2024/02/19/what-air-canada-lost-in-remarkable-lying-ai-chatbot-case/" target="_blank">Forbes</a>
+  </div>
+</div>
+</div>
+
+<div class="inc">
+<div class="inc-top"><div class="inc-tags"><span class="tag high">High</span><span class="tag sector">Manufacturing</span><span class="tag verified">Sourced</span></div><span class="inc-date">April–May 2023</span></div>
+<div class="inc-body">
+  <h3>Samsung — Source Code Leaked to ChatGPT in Three Weeks</h3>
+  <p>Within roughly twenty days of permitting ChatGPT use, Samsung engineers pasted confidential material into it on at least three occasions: proprietary database source code submitted for error checking, semiconductor equipment code submitted for optimisation, and an internal meeting recording converted for minutes. Samsung subsequently banned generative AI tools on company devices and warned that breaches could result in dismissal.</p>
+  <div class="inc-details">
+    <div class="inc-box"><h4>Control Failure</h4><p>Tool access granted before an acceptable use policy, data classification guidance, or technical DLP controls were in place. Staff had no clear rule on what could be pasted.</p></div>
+    <div class="inc-box"><h4>Governance Lesson</h4><p>Policy must precede access. The exposure window here was three weeks — shadow AI risk does not accumulate slowly, and data submitted to a third-party model cannot be reliably retrieved or deleted.</p></div>
+  </div>
+  <div class="sources"><h5>Sources</h5>
+    <a href="https://www.bloomberg.com/news/articles/2023-05-02/samsung-bans-chatgpt-and-other-generative-ai-use-by-staff-after-leak" target="_blank">Bloomberg</a>
+    <a href="https://www.forbes.com/sites/siladityaray/2023/05/02/samsung-bans-chatgpt-and-other-chatbots-for-employees-after-sensitive-code-leak/" target="_blank">Forbes</a>
+    <a href="https://techcrunch.com/2023/05/03/ai-is-just-someone-elses-computer" target="_blank">TechCrunch</a>
+  </div>
+</div>
+</div>
+
+<hr class="sep">
+
+<div class="sl">Exposure Vectors</div>
+<div class="sh">
+<h2>AI Data & PII Risk</h2>
+<p>Beyond discrete incidents, AI adoption creates standing exposure routes that persist until deliberately closed.</p>
+</div>
 
 <div class="risk-grid">
-<div class="risk-card"><h3>Training Data Exposure</h3><p>Employee data fed into third-party AI may be used for model training, permanently leaving your control.</p><div class="safeguard"><strong>Safeguard:</strong> Enforce zero-retention API agreements and data processing addenda.</div></div>
-<div class="risk-card amber-l"><h3>Shadow AI</h3><p>Employees using personal AI tools for work, uploading contracts, payroll, and legal documents to unknown platforms.</p><div class="safeguard"><strong>Safeguard:</strong> AI usage monitoring, approved tool lists, data classification training.</div></div>
-<div class="risk-card purple-l"><h3>AI Vendor Breaches</h3><p>A breach at your AI vendor exposes compliance posture, audit trails, and PII to attackers and regulators.</p><div class="safeguard"><strong>Safeguard:</strong> Require ISO 27001, SOC 2 Type II, and right-to-audit clauses.</div></div>
-<div class="risk-card cyan-l"><h3>Over-Permissioned AI</h3><p>Enterprise copilots with broad access expose far more data than necessary through a compromised session.</p><div class="safeguard"><strong>Safeguard:</strong> Data minimisation and least-privilege access for all AI integrations.</div></div>
+<div class="risk-card"><h3>Training Data Retention</h3><p>Data submitted to third-party AI services may be retained or used for training, placing it permanently outside your control and your deletion obligations.</p><div class="safeguard"><strong>Safeguard:</strong> Contract for zero retention and no training on your data; back it with a data processing addendum.</div></div>
+<div class="risk-card a"><h3>Shadow AI</h3><p>Staff using unapproved personal AI accounts for work move contracts, payroll data, and client material into environments with no oversight — as the Samsung case shows, within weeks.</p><div class="safeguard"><strong>Safeguard:</strong> Publish an approved tool list, deploy DLP at the browser layer, and provide a sanctioned alternative.</div></div>
+<div class="risk-card t"><h3>Over-Permissioned Assistants</h3><p>Enterprise copilots granted broad access can surface far more than any single task requires; EchoLeak turned that breadth into the exfiltration payload.</p><div class="safeguard"><strong>Safeguard:</strong> Scope, label, and minimise the data the assistant can reach before enabling it.</div></div>
+<div class="risk-card p"><h3>Vendor Concentration</h3><p>A breach or outage at an AI provider propagates simultaneously to every process built on it, including your compliance tooling.</p><div class="safeguard"><strong>Safeguard:</strong> Require ISO 27001 or SOC 2 Type II, right-to-audit clauses, and a documented fallback path.</div></div>
 </div>
 
-<hr class="sep">
-
-<div class="sh"><h2>Autonomous AI Agents: Rising Risk</h2><p>Companies deploy AI agents faster than governance can keep up.</p></div>
-
-<div class="agent-bento">
-<div class="ag"><h3>No Human Approval Gates</h3><p>Agents making consequential decisions with no human-in-the-loop controls.</p><span class="ag-risk">Risk: Cascading failures with no rollback</span></div>
-<div class="ag"><h3>No Audit Trail</h3><p>Existing frameworks can't answer: who authorised it, what data was used?</p><span class="ag-risk">Risk: EU AI Act Article 13 non-compliance</span></div>
-<div class="ag"><h3>Goal Misalignment</h3><p>Agents optimise for objectives, not values. "Reduce costs" may cut compliance.</p><span class="ag-risk">Risk: Unintended regulatory liability</span></div>
-<div class="ag"><h3>Privilege Escalation</h3><p>Admin-level agents become the most dangerous insider threat when compromised.</p><span class="ag-risk">Risk: Complete system compromise</span></div>
-<div class="ag"><h3>No Agent Policy</h3><p>No formal accountability when an autonomous agent causes damage.</p><span class="ag-risk">Risk: Director-level personal liability</span></div>
-<div class="ag"><h3>Multi-Agent Gaps</h3><p>When agents interact, decisions emerge that no single agent was designed to make.</p><span class="ag-risk">Risk: Accountability vacuum</span></div>
+<div class="concl">
+<h2>Where This Leaves Practitioners</h2>
+<p>Read together, these incidents point to one conclusion: AI failures are rarely exotic. Not one of the cases above required a novel attack technique or an unforeseeable model behaviour. Each was an ordinary control gap — missing verification, missing scope limits, missing policy, missing accountability — exposed by a system that acts faster and more literally than the people it replaced.</p>
+<p>That should be encouraging. It means the discipline required is largely the discipline GRC teams already have. What changes is where the controls must sit, and how quickly they must be in place.</p>
+<ol>
+<li><strong>Policy before access.</strong> Samsung's exposure window was three weeks. Publish acceptable use and data classification rules before enabling any tool.</li>
+<li><strong>Permissions, not instructions.</strong> If an agent must not do something, remove the capability. Replit shows that a natural-language prohibition is not a control.</li>
+<li><strong>Verify identity out of band.</strong> Video and voice are no longer evidence of who is speaking. Arup's loss required no system compromise at all.</li>
+<li><strong>Assume your AI speaks for you.</strong> Air Canada establishes the direction of travel: what the system says in your name is your statement, legally.</li>
+<li><strong>Scope data before filtering it.</strong> EchoLeak bypassed the filters. Minimising what the assistant can reach is the control that survives.</li>
+<li><strong>Name an accountable human.</strong> For every agent in production, one person should be able to answer for it and able to suspend it.</li>
+</ol>
+<p>None of this requires waiting for the next regulatory deadline. The obligations these cases engage — duty of care, records management, accountability, data minimisation — already exist under GDPR, ordinary directors' duties, and sectoral rules. The EU AI Act sharpens them; it does not invent them.</p>
+<div class="cta-row"><a href="index.html#subscribe">Get weekly AI GRC intelligence →</a></div>
 </div>
 
-<div class="cta-box">
-<h2>Stay Ahead of AI Threats</h2>
-<p>Emerging attack patterns, governance failures, and regulatory responses — every Monday.</p>
-<a href="index.html#subscribe">Subscribe to Compsilon →</a>
-</div>
+<div class="note"><strong>On sourcing:</strong> Every incident on this page links to primary or established secondary reporting. Where details remain contested or under investigation, the text reflects what has been publicly confirmed rather than what has been alleged. If you spot an error or have a correction, get in touch — accuracy matters more here than volume.</div>
 
 </div>
 <footer>© 2026 Compsilon · <a href="index.html">compsilon.com</a> · Darshan Krishnappa</footer>
