@@ -11,8 +11,8 @@
 :root{
   --bg:#06060e;--surface:#0d0d1a;--card:#12122a;--card2:#181833;
   --border:#1f1f42;--muted:#6366a0;--body:#9396c7;--light:#c4c6e8;--white:#eeeef6;
-  --purple:#8b5cf6;--purple-glow:#8b5cf640;--purple-soft:#8b5cf612;
-  --cyan:#06d6a0;--cyan-glow:#06d6a040;
+  --purple:#06d6a0;--purple-glow:#06d6a040;--purple-soft:#06d6a012;
+  --cyan:#EF9F27;--cyan-glow:#EF9F2740;
   --pink:#ec4899;--amber:#f59e0b;--red:#ef4444;
   --sans:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
 }
@@ -76,12 +76,11 @@ nav a.lnk.active{color:var(--purple)}
 .sub-box::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:300px;height:200px;background:radial-gradient(circle,var(--cyan-glow),transparent 70%);pointer-events:none}
 .sub-box h2{font:700 24px var(--sans);color:var(--white);letter-spacing:-.5px;margin-bottom:8px;position:relative}
 .sub-box>p{font:400 14px var(--sans);color:var(--muted);margin-bottom:24px;position:relative}
-.sub-form{display:flex;gap:8px;max-width:600px;margin:0 auto;position:relative;flex-wrap:wrap;justify-content:center}
-.sub-form input{flex:1;min-width:130px;font:400 14px var(--sans);padding:12px 16px;border-radius:100px;border:1px solid var(--border);background:var(--bg);color:var(--white);outline:none}
+.sub-form{display:flex;gap:8px;max-width:380px;margin:0 auto;position:relative}
+.sub-form input{flex:1;font:400 14px var(--sans);padding:12px 16px;border-radius:100px;border:1px solid var(--border);background:var(--bg);color:var(--white);outline:none}
 .sub-form input:focus{border-color:var(--purple)}
 .sub-form input::placeholder{color:var(--muted)}
 .sub-form button{font:700 13px var(--sans);background:linear-gradient(135deg,var(--purple),var(--cyan));color:var(--bg);padding:12px 22px;border-radius:100px;border:none;cursor:pointer}
-.sub-success{font:600 14px var(--sans);color:var(--cyan);margin-top:4px;position:relative}
 
 footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px;text-align:center;font:400 12px var(--sans);color:var(--muted);max-width:1200px;margin:0 auto}
 footer a{color:var(--purple)}
@@ -188,29 +187,13 @@ footer a{color:var(--purple)}
 <div class="sub-box">
 <h2>Never Miss an Issue</h2>
 <p>Join GRC practitioners worldwide. Free, every Monday.</p>
-<form class="sub-form" id="compsilonSubForm" action="https://decompliance.us16.list-manage.com/subscribe/post?u=2a4b60e1a7d31aac8844c6c0d&amp;id=1b5f4532bc&amp;f_id=0084c2e1f0" method="post" name="mc-embedded-subscribe-form" target="compsilon_hidden_iframe" onsubmit="compsilonHandleSubscribe(this)">
-  <input type="text" name="FNAME" placeholder="First name">
-  <input type="text" name="LNAME" placeholder="Last name">
-  <input type="email" name="EMAIL" placeholder="your@email.com" required>
-  <div aria-hidden="true" style="position:absolute;left:-5000px">
-    <input type="text" name="b_2a4b60e1a7d31aac8844c6c0d_1b5f4532bc" tabindex="-1" value="">
-  </div>
-  <button type="submit">Subscribe</button>
-</form>
-<div class="sub-success" id="compsilonSubSuccess" style="display:none;">&#10003; Thanks — check your inbox to confirm your subscription.</div>
-<iframe name="compsilon_hidden_iframe" style="display:none" title="subscribe"></iframe>
+<div class="sub-form">
+  <input type="email" placeholder="your@email.com">
+  <button>Subscribe</button>
+</div>
 </div>
 
 </div>
 <footer>© 2026 Compsilon · <a href="index.html">compsilon.com</a> · Darshan Krishnappa</footer>
-<script>
-function compsilonHandleSubscribe(form){
-  setTimeout(function(){
-    form.style.display = 'none';
-    var success = document.getElementById('compsilonSubSuccess');
-    if(success) success.style.display = 'block';
-  }, 300);
-}
-</script>
 </body>
 </html>
