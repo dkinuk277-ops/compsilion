@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Issue #1 — The AI Act Just Became Enforceable | Compsilon</title>
+<meta name="description" content="Article 50 transparency obligations are live and enforceable. What the Digital Omnibus moved, and what it did not.">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06060e;--surface:#0d0d1a;--card:#12122a;--border:#1f1f42;
+  --muted:#6366a0;--body:#9396c7;--light:#c4c6e8;--white:#eeeef6;
+  --teal:#06d6a0;--teal-glow:#06d6a040;--amber:#EF9F27;--amber-glow:#EF9F2740;--red:#ef4444;
+  --sans:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--body);line-height:1.7}
+a{color:inherit;text-decoration:none}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:80px 80px;opacity:.15;pointer-events:none;z-index:0}
+
+nav{position:sticky;top:0;z-index:100;background:#06060edd;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px}
+.logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px}
+.logo span{background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav ul{display:flex;gap:22px;list-style:none}
+nav a.lnk{font:500 13px var(--sans);color:var(--muted);transition:color .2s}
+nav a.lnk:hover{color:var(--white)}
+nav a.lnk.active{color:var(--amber)}
+.nav-sub{font:600 13px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:9px 22px;border-radius:100px}
+
+.issue-hero{position:relative;z-index:1;padding:56px 32px 40px;border-bottom:1px solid var(--border);max-width:820px;margin:0 auto}
+.hero-glow{position:absolute;top:-60px;left:20%;width:380px;height:240px;background:radial-gradient(ellipse,var(--teal-glow),transparent 70%);pointer-events:none}
+.breadcrumb{font:400 13px var(--sans);color:var(--muted);margin-bottom:20px;position:relative}
+.breadcrumb a{color:var(--teal)}
+.issue-meta{display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;flex-wrap:wrap}
+.badge{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1.5px;background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:5px 13px;border-radius:100px}
+.issue-date{font:500 12px var(--mono);color:var(--muted)}
+.issue-hero h1{font:800 38px/1.15 var(--sans);color:var(--white);letter-spacing:-1.6px;margin-bottom:14px;position:relative}
+.standfirst{font:400 16px/1.75 var(--sans);color:var(--light);position:relative}
+
+.article{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:48px 32px}
+.article h2{font:700 24px var(--sans);color:var(--white);letter-spacing:-.7px;margin:40px 0 14px}
+.article h2:first-child{margin-top:0}
+.article h3{font:600 17px var(--sans);color:var(--white);margin:28px 0 10px}
+.article p{font:400 15.5px/1.85 var(--sans);color:var(--body);margin-bottom:18px}
+.article p strong{color:var(--light);font-weight:600}
+.article a.inline{color:var(--teal);border-bottom:1px solid #06d6a050}
+.article ul{list-style:none;margin:0 0 20px}
+.article ul li{font:400 15px/1.75 var(--sans);color:var(--body);padding:7px 0 7px 26px;position:relative}
+.article ul li::before{content:'▸';position:absolute;left:0;color:var(--amber)}
+.article ol{list-style:none;counter-reset:n;margin:0 0 20px}
+.article ol li{counter-increment:n;font:400 15px/1.75 var(--sans);color:var(--body);padding:9px 0 9px 40px;position:relative}
+.article ol li::before{content:counter(n);position:absolute;left:0;top:11px;width:24px;height:24px;border-radius:50%;background:var(--teal);color:var(--bg);font:700 11px var(--mono);display:flex;align-items:center;justify-content:center}
+.article ol li strong{color:var(--white);font-weight:600}
+
+.callout{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 12px 12px 0;padding:22px 26px;margin:26px 0}
+.callout p{font:400 14.5px/1.75 var(--sans);color:var(--light);margin:0}
+.callout p+p{margin-top:10px}
+
+.case{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin:24px 0}
+.case-tag{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1.2px;color:var(--amber);margin-bottom:8px}
+.case h4{font:700 17px var(--sans);color:var(--white);margin-bottom:8px}
+.case p{font:400 14px/1.7 var(--sans);color:var(--muted);margin-bottom:12px}
+.case p:last-child{margin-bottom:0}
+.case .src{font:400 12px var(--sans);color:var(--muted);border-top:1px solid var(--border);padding-top:11px}
+.case .src a{color:var(--teal);margin-right:12px}
+
+.checklist{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;margin:26px 0}
+.checklist h4{font:600 11px var(--mono);text-transform:uppercase;letter-spacing:1.2px;color:var(--teal);margin-bottom:14px}
+.checklist ul{margin:0}
+.checklist li{font:400 14px/1.65 var(--sans);color:var(--body);padding:8px 0 8px 28px;border-bottom:1px solid var(--border)}
+.checklist li:last-child{border:none}
+.checklist li::before{content:'☐';color:var(--amber);left:0}
+
+.signoff{border-top:1px solid var(--border);margin-top:40px;padding-top:26px}
+.signoff p{font:400 14.5px/1.8 var(--sans);color:var(--muted);margin-bottom:12px}
+.signoff .name{font:600 15px var(--sans);color:var(--white)}
+
+.sub-box{background:linear-gradient(135deg,#0d2820,#1a1408);border:1px solid var(--border);border-radius:18px;padding:38px;text-align:center;margin-top:40px;position:relative;overflow:hidden}
+.sub-box::before{content:'';position:absolute;top:-60px;right:-40px;width:240px;height:240px;background:radial-gradient(circle,var(--amber-glow),transparent 70%);pointer-events:none}
+.sub-box h3{font:700 22px var(--sans);color:var(--white);letter-spacing:-.5px;margin-bottom:8px;position:relative}
+.sub-box p{font:400 14px var(--sans);color:var(--muted);margin-bottom:20px;position:relative}
+.sub-box a{font:700 13px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:12px 28px;border-radius:100px;display:inline-block;position:relative}
+
+.issue-nav{display:flex;justify-content:space-between;gap:12px;margin-top:32px;flex-wrap:wrap}
+.issue-nav a{font:500 13px var(--sans);color:var(--teal);border:1px solid var(--border);border-radius:100px;padding:10px 22px;transition:border-color .2s}
+.issue-nav a:hover{border-color:var(--teal)}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px;text-align:center;font:400 12px var(--sans);color:var(--muted);max-width:1200px;margin:0 auto}
+footer a{color:var(--teal)}
+
+@media(max-width:900px){
+  nav ul{display:none}
+  .issue-hero{padding:36px 20px 28px}
+  .issue-hero h1{font-size:28px}
+  .article{padding:32px 20px}
+  .sub-box{padding:28px 20px}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<nav><div class="nav-inner"><a href="index.html" class="logo">COMP<span>SILON</span></a><ul><li><a href="grc-engineering.html" class="lnk">GRC Engineering</a></li><li><a href="index.html#grc" class="lnk">AI GRC</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="threats.html" class="lnk">Threat Intel</a></li><li><a href="newsletter.html" class="lnk active">Newsletter</a></li><li><a href="grc-engineering.html#about" class="lnk">About</a></li></ul><a href="index.html#subscribe" class="nav-sub">Subscribe</a></div></nav>
+
+<div class="issue-hero">
+<div class="hero-glow"></div>
+<div class="breadcrumb"><a href="index.html">Home</a> / <a href="newsletter.html">Newsletter</a> / Issue #1</div>
+<div class="issue-meta"><span class="badge">Issue #1</span><span class="issue-date">3 August 2026 · 7 min read</span></div>
+<h1>The AI Act Just Became Enforceable. Most Organisations Misread Which Part.</h1>
+<p class="standfirst">Yesterday the EU AI Act's transparency obligations became applicable and enforceable. A fortnight earlier, the Digital Omnibus delayed the high-risk regime by sixteen months. Reading the second as cancelling the first is the most expensive mistake available this month.</p>
+</div>
+
+<div class="article">
+
+<p>For most of the past year, compliance planning across Europe converged on a single date: <strong>2 August 2026</strong>. It was to be the day the AI Act's high-risk regime landed — conformity assessments, technical documentation, post-market monitoring, the full apparatus.</p>
+
+<p>Then, on 24 July, the Digital Omnibus on AI was published in the Official Journal, entering into force on 27 July as Regulation (EU) 2026/1744. Headlines announced an AI Act delay. A great many organisations read that as breathing room and moved on.</p>
+
+<div class="callout">
+<p>The Omnibus moved the high-risk deadlines. It left the transparency obligations exactly where they were.</p>
+<p>If your AI Act preparation was driven by the high-risk cliff, you genuinely do have runway. If it was driven by transparency — and for most organisations shipping chatbots or generative content, it is — nothing changed, and the deadline passed yesterday.</p>
+</div>
+
+<h2>What actually moved, and what didn't</h2>
+
+<p>The Omnibus is a simplification package, not a repeal. It is worth being precise about the new calendar, because the imprecision is where the risk sits.</p>
+
+<ul>
+<li><strong>2 August 2026 — now live.</strong> Article 50 transparency obligations apply and are enforceable by national competent authorities. The obligation and the power to fine for breaching it arrived together.</li>
+<li><strong>2 December 2026.</strong> Article 50(2) machine-readable marking applies to systems already on the market as of 2 August 2026 — a four-month transition, shorter than the six originally proposed. New systems comply on placement. Certain new prohibited practices also take effect.</li>
+<li><strong>2 August 2027.</strong> Member states must have established at least one national AI regulatory sandbox.</li>
+<li><strong>2 December 2027.</strong> High-risk obligations apply to Annex III standalone systems — hiring, creditworthiness, education, essential services. Moved from 2 August 2026.</li>
+<li><strong>2 August 2028.</strong> High-risk obligations apply to Annex I embedded systems.</li>
+</ul>
+
+<p>Note what is <em>not</em> on that list: any general postponement of the duty to tell people they are talking to a machine.</p>
+
+<h2>Article 50 is not one rule</h2>
+
+<p>This is where organisations tend to get into difficulty. Article 50 is routinely discussed as "the chatbot disclosure rule", which under-describes it considerably. It is a horizontal transparency chapter that applies regardless of risk classification, and it splits duties between providers who build systems and deployers who put them to use.</p>
+
+<h3>The distinct obligations</h3>
+
+<ul>
+<li><strong>AI interaction disclosure.</strong> People must be informed they are interacting with an AI system, unless it is obvious to a reasonably well-informed person in the circumstances.</li>
+<li><strong>Synthetic content marking.</strong> Providers of systems generating synthetic audio, image, video or text must mark outputs in a machine-readable format detectable as artificially generated.</li>
+<li><strong>Deepfake labelling.</strong> Deployers of systems producing deepfake content must disclose that the content has been artificially generated or manipulated.</li>
+<li><strong>Emotion recognition and biometric categorisation.</strong> Deployers must inform exposed individuals of the operation of such systems.</li>
+<li><strong>Public interest text.</strong> AI-generated text published to inform the public on matters of public interest carries its own disclosure duty, subject to exceptions.</li>
+</ul>
+
+<p>These attach to different actors and carry different exceptions. Treating them as a single requirement produces predictable failure in both directions — over-disclosing where no duty exists, and missing the one that actually binds you.</p>
+
+<h2>The scoping question most organisations get wrong</h2>
+
+<p>A common line of reasoning goes: we do not build AI, we buy it, therefore provider obligations are the vendor's problem. That is half right and dangerously incomplete.</p>
+
+<p><strong>You are a deployer</strong> the moment you put an AI system to use under your own authority in the EU — and deployer duties under Article 50 are real, particularly around deepfake disclosure and emotion recognition. More awkwardly, you can become a provider by putting your name on a system, substantially modifying it, or repurposing it for something the original provider did not intend.</p>
+
+<p>The extraterritorial reach compounds this. A UK, US, or Indian organisation whose AI system's output is used in the Union is in scope. "We are not established in the EU" has never been the answer people hoped it was.</p>
+
+<div class="checklist">
+<h4>Worth confirming this week</h4>
+<ul>
+<li>Every customer-facing AI interaction in EU markets carries a clear disclosure</li>
+<li>You know, per system, whether you are provider, deployer, or both</li>
+<li>Synthetic content your organisation publishes is marked and labelled</li>
+<li>Systems already on the market are tracked against the 2 December 2026 marking transition</li>
+<li>Emotion recognition or biometric categorisation use is inventoried and disclosed</li>
+<li>Vendor contracts allocate Article 50 responsibilities explicitly, not by assumption</li>
+</ul>
+</div>
+
+<h2>What to do with sixteen months</h2>
+
+<p>For organisations genuinely in the high-risk category, the Omnibus is a gift — and the temptation to spend it doing nothing is strong. That would be a mistake for a practical reason rather than a moralising one: a conformity assessment framework is not something that can be assembled in the final quarter.</p>
+
+<p>The work that pays off regardless of deadline is unglamorous. An accurate inventory of AI systems and their classifications. A control library that maps once to several frameworks rather than four times over. Evidence collected continuously rather than reconstructed annually. Named ownership for each system. None of that is wasted if a deadline moves again, and all of it is required whichever way the regime lands.</p>
+
+<div class="callout">
+<p>A useful reframe: the Omnibus did not reduce the obligation. It moved the date on the part of the obligation you have not started, while leaving live the part most likely to touch a mainstream business.</p>
+</div>
+
+<h2>The wider signal</h2>
+
+<p>There is something instructive in how this played out. The Commission delayed the regime that regulators and industry agreed was not ready, and left untouched the one that was straightforwardly implementable. That is not a retreat from regulation — it is a regulator sequencing enforcement toward what can actually be complied with.</p>
+
+<p>Expect more of this shape. The direction of travel has not changed; the calendar has become more responsive to readiness. For compliance functions, the lesson is that building capability beats tracking dates, because the dates will keep moving and the capability will be required either way.</p>
+
+<div class="signoff">
+<p>Next week: what building AI governance does to the rest of your compliance function — and why the uplift often exceeds the AI-specific benefit.</p>
+<p class="name">Darshan Krishnappa</p>
+<p style="font-size:13px">Compsilon · AI GRC Intelligence</p>
+</div>
+
+<div class="sub-box">
+<h3>Get this in your inbox</h3>
+<p>Weekly AI GRC intelligence for practitioners. Free, every Monday.</p>
+<a href="index.html#subscribe">Subscribe to Compsilon →</a>
+</div>
+
+<div class="issue-nav">
+<a href="newsletter.html">← All issues</a>
+<a href="issue-02.html">Next issue →</a>
+</div>
+</div>
+<footer>© 2026 Compsilon · <a href="index.html">compsilon.com</a> · Darshan Krishnappa</footer>
+</body>
+</html>
