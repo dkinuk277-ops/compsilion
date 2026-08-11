@@ -10,9 +10,9 @@
 :root{
   --bg:#06060e;--surface:#0d0d1a;--card:#12122a;--card2:#181833;
   --border:#1f1f42;--muted:#6366a0;--body:#9396c7;--light:#c4c6e8;--white:#eeeef6;
-  --purple:#8b5cf6;--purple-glow:#8b5cf640;--purple-soft:#8b5cf612;
-  --cyan:#06d6a0;--cyan-glow:#06d6a040;
-  --pink:#ec4899;--amber:#f59e0b;--red:#ef4444;
+  --purple:#06d6a0;--purple-glow:#06d6a040;--purple-soft:#06d6a012;
+  --cyan:#EF9F27;--cyan-glow:#EF9F2740;
+  --pink:#ec4899;--amber:#EF9F27;--amber-glow:#EF9F2740;--red:#ef4444;
   --sans:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
 }
 html{scroll-behavior:smooth}
@@ -36,8 +36,9 @@ nav a.lnk:hover{color:var(--white)}
 /* Hero */
 .hero{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:100px 32px 80px;text-align:center}
 .hero-glow{position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,var(--purple-glow),transparent 70%);pointer-events:none;z-index:-1}
+.hero-glow-2{position:absolute;top:20px;right:-80px;width:400px;height:300px;background:radial-gradient(ellipse,var(--amber-glow),transparent 70%);pointer-events:none;z-index:-1}
 .hero-chip{display:inline-flex;align-items:center;gap:8px;font:500 12px var(--mono);color:var(--cyan);background:var(--card);border:1px solid var(--border);padding:8px 18px;border-radius:100px;margin-bottom:32px}
-.hero-chip .live{width:6px;height:6px;background:var(--cyan);border-radius:50%;animation:blink 2s infinite}
+.hero-chip .live{width:6px;height:6px;background:var(--amber);border-radius:50%;animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .hero h1{font:800 clamp(38px,5vw,68px)/1.05 var(--sans);color:var(--white);letter-spacing:-2.5px;margin-bottom:22px;max-width:780px;margin-left:auto;margin-right:auto}
 .hero h1 .grad{background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -74,7 +75,8 @@ section{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:100px
 /* Why now - bento grid */
 .bento{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:auto;gap:16px}
 .bento-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;transition:border-color .2s}
-.bento-card:hover{border-color:var(--purple)}
+.bento-card.hl{border-color:var(--amber);box-shadow:0 0 20px var(--amber-glow)}
+.bento-card:hover{border-color:var(--amber)}
 .bento-card.wide{grid-column:span 2}
 .bento-tag{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1px;padding:4px 10px;border-radius:4px;margin-bottom:12px;display:inline-block}
 .bento-tag.red{background:#ef444420;color:var(--red)}
@@ -109,12 +111,11 @@ section{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:100px
 .sub-box::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,var(--cyan-glow),transparent 70%);pointer-events:none}
 .sub-box h2{font:700 32px var(--sans);color:var(--white);letter-spacing:-.8px;margin-bottom:10px;position:relative}
 .sub-box>p{font:400 15px var(--sans);color:var(--muted);margin-bottom:28px;position:relative}
-.sub-form{display:flex;gap:10px;max-width:640px;margin:0 auto;position:relative;flex-wrap:wrap;justify-content:center}
-.sub-form input{flex:1;min-width:140px;font:400 15px var(--sans);padding:14px 18px;border-radius:100px;border:1px solid var(--border);background:var(--bg);color:var(--white);outline:none}
+.sub-form{display:flex;gap:10px;max-width:420px;margin:0 auto;position:relative}
+.sub-form input{flex:1;font:400 15px var(--sans);padding:14px 18px;border-radius:100px;border:1px solid var(--border);background:var(--bg);color:var(--white);outline:none}
 .sub-form input:focus{border-color:var(--purple)}
 .sub-form input::placeholder{color:var(--muted)}
 .sub-form button{font:700 14px var(--sans);background:linear-gradient(135deg,var(--purple),var(--cyan));color:var(--bg);padding:14px 28px;border-radius:100px;border:none;cursor:pointer}
-.sub-success{font:600 15px var(--sans);color:var(--cyan);margin-top:4px;position:relative}
 
 /* About */
 .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
@@ -171,6 +172,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
 
 <div class="hero">
 <div class="hero-glow"></div>
+<div class="hero-glow-2"></div>
 <div class="hero-chip"><span class="live"></span>AI GRC Intelligence · Updated Weekly</div>
 <h1>Navigate <span class="grad">AI Governance</span>, Risk & Compliance</h1>
 <p>The regulatory landscape for AI is shifting rapidly. Compsilon delivers curated intelligence on what's changing, what matters, and what to act on.</p>
@@ -201,11 +203,11 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
 <div class="st">Why AI GRC Matters Now</div>
 <div class="sd">Regulatory action is no longer theoretical.</div>
 <div class="bento">
-  <div class="bento-card wide"><span class="bento-tag red">Enforcement</span><h3>Regulatory Enforcement is Live</h3><p>EU AI Act phased enforcement began 2024. Fines reach €35M or 7% of global turnover — whichever is higher. Article 50 transparency obligations now mandatory.</p></div>
+  <div class="bento-card wide hl"><span class="bento-tag red">Enforcement</span><h3>Regulatory Enforcement is Live</h3><p>EU AI Act phased enforcement began 2024. Fines reach €35M or 7% of global turnover — whichever is higher. Article 50 transparency obligations now mandatory.</p></div>
   <div class="bento-card"><span class="bento-tag amber">Finance</span><h3>Financial Scrutiny</h3><p>FCA and PRA supervisory guidance on AI model risk is active.</p></div>
   <div class="bento-card"><span class="bento-tag purple">Privacy</span><h3>Data & Privacy</h3><p>GDPR, training data rights, and Article 22 create complex obligations.</p></div>
   <div class="bento-card"><span class="bento-tag cyan">Global</span><h3>Fragmentation</h3><p>US, EU, UK, China, Singapore — diverging philosophies need unified strategy.</p></div>
-  <div class="bento-card wide"><span class="bento-tag amber">Board</span><h3>Board-Level Accountability & Third-Party Risk</h3><p>Directors are personally accountable for AI risks. Vendor AI models inherit regulatory obligations across your supply chain. Governance must flow from board to engineering.</p></div>
+  <div class="bento-card wide hl"><span class="bento-tag amber">Board</span><h3>Board-Level Accountability & Third-Party Risk</h3><p>Directors are personally accountable for AI risks. Vendor AI models inherit regulatory obligations across your supply chain. Governance must flow from board to engineering.</p></div>
 </div>
 </section>
 
@@ -255,18 +257,11 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
 <div class="sub-box">
   <h2>Stay Ahead of AI Regulation</h2>
   <p>Weekly intelligence delivered every Monday. Free.</p>
-  <form class="sub-form" id="compsilonSubForm" action="https://decompliance.us16.list-manage.com/subscribe/post?u=2a4b60e1a7d31aac8844c6c0d&amp;id=1b5f4532bc&amp;f_id=0084c2e1f0" method="post" name="mc-embedded-subscribe-form" target="compsilon_hidden_iframe" onsubmit="compsilonHandleSubscribe(this)">
-    <input type="text" name="FNAME" placeholder="First name">
-    <input type="text" name="LNAME" placeholder="Last name">
-    <input type="email" name="EMAIL" placeholder="your@email.com" required>
-    <div aria-hidden="true" style="position:absolute;left:-5000px">
-      <input type="text" name="b_2a4b60e1a7d31aac8844c6c0d_1b5f4532bc" tabindex="-1" value="">
-    </div>
-    <button type="submit">Subscribe</button>
-  </form>
-  <div class="sub-success" id="compsilonSubSuccess" style="display:none;">&#10003; Thanks — check your inbox to confirm your subscription.</div>
+  <div class="sub-form">
+    <input type="email" placeholder="your@email.com">
+    <button>Subscribe</button>
+  </div>
 </div>
-<iframe name="compsilon_hidden_iframe" style="display:none" title="subscribe"></iframe>
 </div>
 
 <section id="about">
@@ -292,18 +287,5 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
 </div>
 <div class="ft-end">© 2026 Compsilon · compsilon.com · Darshan Krishnappa</div>
 </footer>
-<script>
-function compsilonHandleSubscribe(form){
-  // Native required/email validation already ran before this fires (no
-  // novalidate on the form), so if we're here the fields are valid — the
-  // real submit proceeds into the hidden iframe; we just show our own
-  // confirmation instead of Mailchimp's hosted page.
-  setTimeout(function(){
-    form.style.display = 'none';
-    var success = document.getElementById('compsilonSubSuccess');
-    if(success) success.style.display = 'block';
-  }, 300);
-}
-</script>
 </body>
 </html>
