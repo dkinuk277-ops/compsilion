@@ -138,10 +138,10 @@ nav a.lnk.active{color:var(--amber)}
 .mstage p{font:400 12px/1.55 var(--sans);color:var(--muted)}
 
 /* Byline */
-.byline{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;margin-top:20px;text-align:center;position:relative;overflow:hidden}
-.byline::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:260px;height:160px;background:radial-gradient(ellipse,var(--amber-glow),transparent 70%);pointer-events:none}
-.byline-name{font:700 20px var(--sans);color:var(--white);letter-spacing:-.4px;margin-bottom:6px;position:relative}
-.byline-role{font:600 11px/1.9 var(--mono);text-transform:uppercase;letter-spacing:1.2px;max-width:640px;margin-left:auto;margin-right:auto;background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;position:relative}
+.byline{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 24px;margin-top:20px;text-align:left;display:inline-block;max-width:100%;position:relative;overflow:hidden}
+.byline::before{content:'';position:absolute;top:-70px;left:-30px;width:200px;height:140px;background:radial-gradient(ellipse,var(--amber-glow),transparent 70%);pointer-events:none}
+.byline-name{font:700 17px var(--sans);color:var(--white);letter-spacing:-.3px;margin-bottom:5px;position:relative}
+.byline-role{font:600 10px/1.75 var(--mono);text-transform:uppercase;letter-spacing:.9px;max-width:520px;background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;position:relative}
 .byline-note{font:400 13px var(--sans);color:var(--muted);position:relative}
 
 /* Conclusion */
@@ -150,6 +150,9 @@ nav a.lnk.active{color:var(--amber)}
 .concl h2{font:700 28px var(--sans);color:var(--white);letter-spacing:-.8px;margin-bottom:14px;position:relative}
 .concl p{font:400 14.5px/1.8 var(--sans);color:var(--light);margin-bottom:14px;position:relative;max-width:780px}
 .cta-row{margin-top:26px;position:relative}
+.sub-cta{margin-top:44px}
+.sub-cta p{font:400 15px/1.75 var(--sans);color:var(--body);margin-bottom:16px}
+.sub-cta .cta-row{margin-top:0}
 .cta-row a{font:700 14px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:13px 30px;border-radius:100px;display:inline-block}
 
 footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px;text-align:center;font:400 12px var(--sans);color:var(--muted);max-width:1200px;margin:0 auto}
@@ -512,12 +515,9 @@ footer a{color:var(--teal)}
 <div class="byline-role">Data | AI GRC | GRC Practitioner | SME | Internal/External Audits | Compliance Automation</div>
 </div>
 
-<div class="concl">
-<h2>The Function This Builds</h2>
-<p>A GRC function built this way looks different from the inside. The compliance team is smaller in headcount terms but more technical. Evidence requests are answered by pointing at a system rather than by starting a project. Audits are shorter because nothing has to be reconstructed. Most importantly, the people doing the work spend their time on the questions that actually require judgement — whether a risk is acceptable, whether a control is designed correctly, whether a new regulation changes the answer.</p>
-<p>The uncomfortable part is that this requires GRC practitioners to become at least somewhat technical. Not necessarily engineers, but people who can read an API response, reason about a data pipeline, and specify a system precisely enough that it can be built. That shift is already underway, and AI tooling has lowered the barrier considerably — the same models that automate the work also help write the automation.</p>
-<p>Start with one process. Measure it. Make the next one cheaper.</p>
-<div class="cta-row"><a href="index.html#subscribe">Get weekly AI GRC intelligence →</a></div>
+<div class="sub-cta">
+<p>Subscribe here to get more updates on this space.</p>
+<div class="cta-row"><a href="index.html#subscribe">Get weekly AI GRC intelligence &rarr;</a></div>
 </div>
 
 </div>
