@@ -53,6 +53,11 @@ nav a.lnk.active{color:var(--amber)}
 .hl-mail{color:var(--teal);font-weight:700;text-decoration:none;border-bottom:1px solid var(--teal)}
 .hl-mail:hover{color:var(--amber);border-bottom-color:var(--amber)}
 .sep{border:none;border-top:1px solid var(--border);margin:64px 0}
+.fig{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px 20px;margin-top:36px}
+.fig-cap{font:400 12.5px var(--sans);color:var(--muted);text-align:center;margin-top:14px}
+@keyframes flowdots{to{stroke-dashoffset:-40}}
+.st{stroke-dasharray:3 8;stroke-linecap:round;fill:none;stroke-width:2}
+@media (prefers-reduced-motion:no-preference){.st{animation:flowdots 1.4s linear infinite}.st.s2{animation-duration:1.8s}.st.s3{animation-duration:2.2s}}
 
 .lede{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 14px 14px 0;padding:24px 28px;margin-bottom:36px}
 .lede p{font:400 14.5px/1.75 var(--sans);color:var(--light);margin-bottom:10px}
@@ -211,6 +216,58 @@ footer a{color:var(--teal)}
   <li>Risk signals streamed from production systems</li>
   <li>Assurance is a live state you can query</li>
 </ul></div>
+</div>
+
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 466" role="img" xmlns="http://www.w3.org/2000/svg" style="font-family:var(--sans)"><title>Traditional GRC to agentic GRC, enabled by AI GRC engineering</title><desc>Three stage cards joined by flowing dotted streams, with an AI GRC engineering rail underneath linking the transformation stage to the agentic future state, and a caution band on AI governance.</desc>
+
+<rect x="40" y="50" width="170" height="230" rx="12" fill="var(--card)" stroke="var(--border)" stroke-width="0.5"/>
+<text x="125" y="76" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="var(--white)">Traditional GRC</text>
+<text x="125" y="95" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)" letter-spacing="1.2">CURRENT STATE</text>
+<text x="125" y="130" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--body)">Manual risk triage</text>
+<text x="125" y="158" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--body)">Manual control tests</text>
+<text x="125" y="186" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--body)">Evidence by hand</text>
+<text x="125" y="214" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--body)">Vendor questionnaires</text>
+<text x="125" y="242" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--body)">Full human oversight</text>
+
+<path class="st" d="M214 140 C 228 140, 236 165, 251 165" stroke="var(--amber)" opacity="0.85"/>
+<path class="st s2" d="M214 175 L 251 175" stroke="var(--amber)" opacity="0.6"/>
+<path class="st s3" d="M214 210 C 228 210, 236 185, 251 185" stroke="var(--amber)" opacity="0.45"/>
+
+<rect x="255" y="50" width="170" height="230" rx="12" fill="var(--card)" stroke="var(--amber)" stroke-opacity="0.45" stroke-width="0.5"/>
+<text x="340" y="76" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="var(--amber)">Transformation</text>
+<text x="340" y="95" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)" letter-spacing="1.2">HAPPENING NOW</text>
+<text x="340" y="130" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--light)">AI agents</text>
+<text x="340" y="158" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--light)">AI bots</text>
+<text x="340" y="186" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--light)">LLM applications</text>
+<text x="340" y="214" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--light)">MCP servers</text>
+<text x="340" y="242" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--light)">Automation pipelines</text>
+
+<path class="st" d="M429 165 C 443 165, 452 140, 466 140" stroke="var(--teal)" opacity="0.85"/>
+<path class="st s2" d="M429 175 L 466 175" stroke="var(--teal)" opacity="0.6"/>
+<path class="st s3" d="M429 185 C 443 185, 452 210, 466 210" stroke="var(--teal)" opacity="0.45"/>
+
+<rect x="470" y="50" width="170" height="230" rx="12" fill="var(--card)" stroke="var(--teal)" stroke-opacity="0.45" stroke-width="0.5"/>
+<text x="555" y="76" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="var(--teal)">Agentic GRC</text>
+<text x="555" y="95" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)" letter-spacing="1.2">FUTURE STATE</text>
+<text x="555" y="130" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--light)">Autonomous triage</text>
+<text x="555" y="158" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--light)">Bots collect evidence</text>
+<text x="555" y="186" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--light)">AI vendor assessment</text>
+<text x="555" y="214" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--light)">Continuous compliance</text>
+<text x="555" y="242" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--light)">Less human oversight</text>
+
+<path class="st s2" d="M340 282 L 340 308" stroke="var(--teal)" opacity="0.75"/>
+<path class="st" d="M555 308 L 555 282" stroke="var(--teal)" opacity="0.75"/>
+
+<rect x="300" y="310" width="340" height="52" rx="10" fill="var(--card2)" stroke="var(--teal)" stroke-width="0.5"/>
+<text x="470" y="330" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="var(--teal)">AI GRC Engineering</text>
+<text x="470" y="349" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--light)">Builds what makes the future state work</text>
+
+<rect x="40" y="386" width="600" height="70" rx="12" fill="var(--card)" stroke="var(--amber)" stroke-width="0.5" stroke-dasharray="5 4"/>
+<text x="340" y="412" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="var(--amber)">The focus area: AI governance, not AI speed</text>
+<text x="340" y="434" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--light)">Reliance shifts from human oversight to governed agents</text>
+</svg>
+<div class="fig-cap">Traditional GRC to agentic GRC — and the engineering layer that carries it there.</div>
 </div>
 
 <hr class="sep">
