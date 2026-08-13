@@ -104,6 +104,16 @@ section{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:64px 
 
 /* Frameworks - terminal style */
 .terminal{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.fwgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.fwtile{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 20px;transition:border-color .3s}
+.fwtile:hover{border-color:var(--teal)}
+.fwtile .org{font:600 10px var(--mono);color:var(--amber);letter-spacing:1.4px;text-transform:uppercase}
+.fwtile h3{font:700 16px var(--sans);color:var(--white);letter-spacing:-.3px;margin:8px 0 4px}
+.fwtile .status{font:600 10.5px var(--mono);color:var(--teal);letter-spacing:.6px;margin-bottom:10px;display:block}
+.fwtile p{font:400 12.5px/1.65 var(--sans);color:var(--body);margin-bottom:10px}
+.fwtile .req{font:400 12.5px/1.65 var(--sans);color:var(--light);border-top:1px solid var(--border);padding-top:10px}
+.fwtile .req b{color:var(--teal);font-weight:600}
+@media(max-width:900px){.fwgrid{grid-template-columns:1fr}}
 .term-bar{background:var(--card2);padding:10px 16px;display:flex;align-items:center;gap:8px}
 .term-dot{width:10px;height:10px;border-radius:50%}
 .term-dot.r{background:#ef4444}.term-dot.y{background:#f59e0b}.term-dot.g{background:#22c55e}
@@ -335,17 +345,15 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
 
 <section id="fw">
 <div class="sl">Frameworks</div>
-<div class="st">Key AI GRC Frameworks</div>
-<div class="sd">Standards forming the backbone of mature AI governance.</div>
-<div class="terminal">
-  <div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span>compsilon:~$ list-frameworks</span></div>
-  <div class="term-body">
-    <div class="fw-row"><span class="fw-org">EU</span><span class="fw-name">EU AI Act</span><span class="fw-desc">Risk-tiered comprehensive AI regulation. Mandatory.</span><a href="https://artificialintelligenceact.eu/" class="fw-link" target="_blank">→</a></div>
-    <div class="fw-row"><span class="fw-org">NIST</span><span class="fw-name">AI Risk Management Framework</span><span class="fw-desc">Govern, Map, Measure, Manage. Voluntary, globally adopted.</span><a href="https://www.nist.gov/artificial-intelligence/ai-risk-management-framework" class="fw-link" target="_blank">→</a></div>
-    <div class="fw-row"><span class="fw-org">ISO</span><span class="fw-name">ISO/IEC 42001:2023</span><span class="fw-desc">AI Management Systems. Certifiable. Modelled on ISO 27001.</span><a href="https://www.iso.org/standard/81230.html" class="fw-link" target="_blank">→</a></div>
-    <div class="fw-row"><span class="fw-org">OECD</span><span class="fw-name">OECD AI Principles</span><span class="fw-desc">Five principles: transparency, robustness, accountability.</span><a href="https://oecd.ai/en/ai-principles" class="fw-link" target="_blank">→</a></div>
-    <div class="fw-row"><span class="fw-org">UK</span><span class="fw-name">UK AI Safety Institute</span><span class="fw-desc">Frontier model evals, safety reports, governance toolkits.</span><a href="https://www.gov.uk/government/organisations/ai-safety-institute" class="fw-link" target="_blank">→</a></div>
-  </div>
+<div class="st">Standards and Regulations You Will Be Held To</div>
+<div class="sd">Regulators are folding AI into regimes organisations already answer to. Here is what compliance actually asks of you.</div>
+<div class="fwgrid">
+  <div class="fwtile"><span class="org">EU</span><h3>EU AI Act</h3><span class="status">BINDING &middot; EXTRATERRITORIAL</span><p>Risk-tiered obligations for providers and deployers. Article 50 transparency duties applied from August 2026; high-risk obligations were deferred to December 2027 for standalone systems and August 2028 for AI embedded in regulated products.</p><div class="req"><b>What it takes:</b> a maintained AI inventory with risk classification, technical documentation, logging, human oversight by design, post-market monitoring and AI literacy across staff.</div></div>
+  <div class="fwtile"><span class="org">ISO</span><h3>ISO/IEC 42001</h3><span class="status">CERTIFIABLE &middot; PROCUREMENT-DRIVEN</span><p>The AI management system standard, structured like ISO 27001 and increasingly named in enterprise procurement before any regulator asks.</p><div class="req"><b>What it takes:</b> scope and AI policy, allocated roles, AI risk and impact assessments, Annex A control selection with justification, internal audit and management review &mdash; then certification by an accredited body.</div></div>
+  <div class="fwtile"><span class="org">NIST</span><h3>AI Risk Management Framework</h3><span class="status">VOLUNTARY &middot; CONTRACTUALLY ENFORCED</span><p>Govern, Map, Measure, Manage. No legal force, but written into US federal and enterprise contracts, so it arrives as a customer requirement rather than a regulatory one.</p><div class="req"><b>What it takes:</b> a documented governance structure, context mapping per system, measurable evaluation of performance and bias, and evidence that findings change decisions.</div></div>
+  <div class="fwtile"><span class="org">KOREA</span><h3>AI Basic Act</h3><span class="status">BINDING &middot; IN FORCE</span><p>In effect since January 2026, joining the EU AI Act as a comprehensive regime with confirmed extraterritorial reach. Fines sit under a grace period, except where serious harm is involved.</p><div class="req"><b>What it takes:</b> notify users of high-impact or generative AI, label AI-generated content, run lifecycle risk management for high-impact systems, and appoint a domestic representative above set thresholds.</div></div>
+  <div class="fwtile"><span class="org">US-CO</span><h3>Colorado ADMT Act</h3><span class="status">BINDING &middot; FROM JANUARY 2027</span><p>Signed May 2026, repealing and replacing the Colorado AI Act with a narrower transparency and disclosure regime. The retreat matters: the direction of travel is not uniformly stricter.</p><div class="req"><b>What it takes:</b> know where automated decisions materially affect people, give clear notice, run a structured human review of adverse outcomes, and retain records for at least three years.</div></div>
+  <div class="fwtile"><span class="org">UK</span><h3>No AI Act &mdash; Regulators Instead</h3><span class="status">SECTORAL &middot; INCREMENTAL</span><p>The UK has passed no AI-specific statute and none was announced in the 2026 King&rsquo;s Speech. The ICO, Ofcom and the FCA apply existing law to AI within their remits, with change arriving as amendments rather than a single Act.</p><div class="req"><b>What it takes:</b> treat AI as in scope for the frameworks you already answer to &mdash; data protection, consumer duty, operational resilience &mdash; rather than waiting for an AI rulebook that may not come.</div></div>
 </div>
 </section>
 
