@@ -65,6 +65,9 @@ nav a.lnk.active{color:var(--teal);background:var(--teal-soft);box-shadow:inset 
 .compare{margin-top:48px}
 .compare h2{font:700 28px var(--sans);color:var(--white);letter-spacing:-.8px;margin-bottom:24px}
 .ctable{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.cmp-note{font:400 13px/1.7 var(--sans);color:var(--body);margin:-4px 0 16px;max-width:720px}
+.compare{overflow-x:auto}
+.ctable td:last-child,.ctable th:last-child{min-width:230px}
 .ctable th{background:var(--card2);color:var(--light);font:600 11px var(--sans);text-transform:uppercase;letter-spacing:1px;padding:14px 18px;text-align:left}
 .ctable td{padding:16px 18px;border-bottom:1px solid var(--border);font:400 13.5px var(--sans);color:var(--body);vertical-align:top}
 .ctable tr:last-child td{border:none}
@@ -110,6 +113,34 @@ footer a{color:var(--purple)}
 </div>
 
 <div class="content">
+
+<div class="compare">
+<h2>Frameworks &amp; Standards Comparison</h2>
+<p class="cmp-note">AI-specific regimes only. Dates reflect the position as of August 2026 &mdash; the EU high-risk deadline moved in July 2026.</p>
+<table class="ctable">
+<thead><tr><th>Framework</th><th>Origin</th><th>Type</th><th>Scope</th><th>In force since</th><th>Deadline to comply</th></tr></thead>
+<tbody>
+<tr><td>EU AI Act</td><td>EU</td><td><span class="badge mandatory">Mandatory</span></td><td>Comprehensive risk-tiered AI regulation</td><td>1 Aug 2024</td><td>Transparency live 2 Aug 2026 &middot; high-risk 2 Dec 2027 &middot; embedded AI 2 Aug 2028</td></tr>
+<tr><td>Korea AI Basic Act</td><td>Korea</td><td><span class="badge mandatory">Mandatory</span></td><td>High-impact and generative AI, extraterritorial</td><td>22 Jan 2026</td><td>In force now &middot; fines deferred under grace period</td></tr>
+<tr><td>Colorado ADMT Act</td><td>US &middot; CO</td><td><span class="badge mandatory">Mandatory</span></td><td>Automated decisions affecting consumers</td><td>Signed 14 May 2026</td><td>1 Jan 2027</td></tr>
+<tr><td>ISO/IEC 42001</td><td>Intl</td><td><span class="badge certifiable">Certifiable</span></td><td>AI management systems, modelled on ISO 27001</td><td>Dec 2023</td><td>No legal deadline &mdash; driven by customer and tender dates</td></tr>
+<tr><td>NIST AI RMF</td><td>US</td><td><span class="badge voluntary">Voluntary</span></td><td>Risk management: Govern, Map, Measure, Manage</td><td>Jan 2023</td><td>No legal deadline &mdash; arrives via contract terms</td></tr>
+<tr><td>UK approach</td><td>UK</td><td><span class="badge voluntary">Sectoral</span></td><td>No AI Act; ICO, Ofcom and FCA apply existing law</td><td>&mdash;</td><td>No AI-specific deadline &mdash; existing duties already apply</td></tr>
+<tr><td>Singapore MAIGF</td><td>SG</td><td><span class="badge voluntary">Voluntary</span></td><td>Model AI governance framework</td><td>2020, v2</td><td>No legal deadline</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="timeline">
+<h2>Regulatory Timeline</h2>
+<div class="tl">
+<div class="tl-item"><div class="tl-date">Feb 2024</div><div class="tl-body"><h3>Prohibited Systems Banned</h3><p>Social scoring, manipulative AI practices prohibited under EU AI Act.</p></div></div>
+<div class="tl-item"><div class="tl-date">Aug 2025</div><div class="tl-body"><h3>GPAI Model Obligations</h3><p>General-purpose AI providers face transparency and documentation duties.</p></div></div>
+<div class="tl-item"><div class="tl-date">Aug 2026</div><div class="tl-body"><h3>Article 50 — Transparency Live</h3><p>Chatbot disclosure and AI-generated content labelling now mandatory.</p></div></div>
+<div class="tl-item"><div class="tl-date">Dec 2026</div><div class="tl-body"><h3>AI-Generated NCII Prohibitions</h3><p>New prohibitions on AI-generated non-consensual intimate imagery.</p></div></div>
+<div class="tl-item"><div class="tl-date">Dec 2027</div><div class="tl-body"><h3>High-Risk AI Full Obligations</h3><p>Full conformity requirements enforced (extended by Digital Omnibus).</p></div></div>
+</div>
+</div>
 
 <div class="fw-block">
 <div>
@@ -194,32 +225,6 @@ footer a{color:var(--purple)}
   <li>Operations management requirements</li>
   <li>Stakeholder interaction guidance</li>
 </ul></div>
-</div>
-
-<div class="compare">
-<h2>Framework Comparison</h2>
-<table class="ctable">
-<thead><tr><th>Framework</th><th>Origin</th><th>Type</th><th>Scope</th><th>Status</th></tr></thead>
-<tbody>
-<tr><td>EU AI Act</td><td>EU</td><td><span class="badge mandatory">Mandatory</span></td><td>Comprehensive risk-tiered AI regulation</td><td>Phased enforcement 2024–27</td></tr>
-<tr><td>NIST AI RMF</td><td>US</td><td><span class="badge voluntary">Voluntary</span></td><td>Risk management (Govern, Map, Measure, Manage)</td><td>v2.0 published</td></tr>
-<tr><td>ISO/IEC 42001</td><td>Intl</td><td><span class="badge certifiable">Certifiable</span></td><td>AI Management Systems</td><td>Active, demand rising</td></tr>
-<tr><td>UK AI Approach</td><td>UK</td><td><span class="badge voluntary">Principles</span></td><td>Sector-led, regulator-applied</td><td>Evolving</td></tr>
-<tr><td>Singapore MAIGF</td><td>SG</td><td><span class="badge voluntary">Voluntary</span></td><td>AI governance for financial services</td><td>v2 published</td></tr>
-<tr><td>OECD AI Principles</td><td>OECD</td><td><span class="badge voluntary">Principles</span></td><td>High-level policy alignment</td><td>Global reference</td></tr>
-</tbody>
-</table>
-</div>
-
-<div class="timeline">
-<h2>Regulatory Timeline</h2>
-<div class="tl">
-<div class="tl-item"><div class="tl-date">Feb 2024</div><div class="tl-body"><h3>Prohibited Systems Banned</h3><p>Social scoring, manipulative AI practices prohibited under EU AI Act.</p></div></div>
-<div class="tl-item"><div class="tl-date">Aug 2025</div><div class="tl-body"><h3>GPAI Model Obligations</h3><p>General-purpose AI providers face transparency and documentation duties.</p></div></div>
-<div class="tl-item"><div class="tl-date">Aug 2026</div><div class="tl-body"><h3>Article 50 — Transparency Live</h3><p>Chatbot disclosure and AI-generated content labelling now mandatory.</p></div></div>
-<div class="tl-item"><div class="tl-date">Dec 2026</div><div class="tl-body"><h3>AI-Generated NCII Prohibitions</h3><p>New prohibitions on AI-generated non-consensual intimate imagery.</p></div></div>
-<div class="tl-item"><div class="tl-date">Dec 2027</div><div class="tl-body"><h3>High-Risk AI Full Obligations</h3><p>Full conformity requirements enforced (extended by Digital Omnibus).</p></div></div>
-</div>
 </div>
 
 </div>
