@@ -97,10 +97,10 @@ nav a.lnk.active{color:var(--teal);background:var(--teal-soft);box-shadow:inset 
 .steps{counter-reset:s}
 .step{counter-increment:s;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px 28px 26px 76px;margin-bottom:16px;position:relative;transition:border-color .2s}
 .step:hover{border-color:var(--teal)}
-.step::before{content:counter(s,decimal-leading-zero);position:absolute;left:26px;top:26px;font:700 15px var(--mono);color:var(--amber)}
+.step::before{content:counter(s) ".";position:absolute;left:26px;top:25px;font:700 16px var(--sans);color:var(--amber)}
 .step h3{font:700 18px var(--sans);color:var(--white);letter-spacing:-.2px;margin-bottom:8px}
 .step>p{font:400 13.5px/1.7 var(--sans);color:var(--body);margin-bottom:14px}
-.step-detail{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.step-detail{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-left:-48px}
 .sd{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:15px}
 .sd h4{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
 .sd.do h4{color:var(--teal)}
