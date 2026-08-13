@@ -101,6 +101,24 @@ section{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:64px 
 .bento-tag.cyan{background:#06d6a020;color:var(--cyan)}
 .bento-card h3{font:600 16px var(--sans);color:var(--white);margin-bottom:6px;letter-spacing:-.2px}
 .bento-card p{font:400 13px/1.65 var(--sans);color:var(--body)}
+/* About */
+.about-wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 32px 64px}
+.ab-lbl{font:600 12px var(--mono);color:var(--teal);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+.about-intro h2{font:700 30px var(--sans);color:var(--white);letter-spacing:-1px;margin-bottom:14px}
+.about-intro p{font:400 15px/1.75 var(--sans);color:var(--body);max-width:none;margin-bottom:20px}
+.about-intro p:last-child{margin-bottom:0}
+.about-cta{font:700 21px var(--sans);color:var(--white);letter-spacing:-0.5px;margin:34px 0 12px}
+.hl-teal{color:var(--teal);font-weight:600}
+.hl-amber{color:var(--amber);font-weight:600}
+.hl-mail{color:var(--teal);font-weight:700;text-decoration:none;border-bottom:1px solid var(--teal)}
+.hl-mail:hover{color:var(--amber);border-bottom-color:var(--amber)}
+.byline{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 24px;margin-top:20px;text-align:left;display:inline-block;max-width:100%;position:relative;overflow:hidden}
+.byline::before{content:'';position:absolute;top:-70px;left:-30px;width:200px;height:140px;background:radial-gradient(ellipse,var(--amber-glow),transparent 70%);pointer-events:none}
+.byline-name{font:700 17px var(--sans);color:var(--white);letter-spacing:-.3px;margin-bottom:5px;position:relative}
+.byline-role{font:600 10px/1.75 var(--mono);text-transform:uppercase;letter-spacing:.9px;max-width:520px;background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative}
+.sub-cta{margin-top:44px}
+.sub-cta p{font:400 15px/1.75 var(--sans);color:var(--body);margin-bottom:16px}
+.cta-row a{font:700 14px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:13px 30px;border-radius:100px;display:inline-block}
 @media(max-width:900px){.bento{grid-template-columns:1fr}}
 
 /* Frameworks - terminal style */
@@ -189,7 +207,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
     <li><a href="grc-engineering.html" class="lnk">AI GRC Engineering</a></li>
     <li><a href="frameworks.html" class="lnk">Frameworks</a></li>
     <li><a href="threats.html" class="lnk">Threat Intel</a></li>
-    <li><a href="newsletter.html" class="lnk">Newsletter</a></li><li><a href="grc-engineering.html#about" class="lnk">About</a></li>
+    <li><a href="newsletter.html" class="lnk">Newsletter</a></li><li><a href="#about" class="lnk">About</a></li>
   </ul>
   <a href="#subscribe" class="nav-sub">Subscribe</a>
 </div>
@@ -383,6 +401,27 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
 
 <hr class="sep">
 
+<div class="about-wrap">
+<div class="ab-lbl" id="about">About Compsilon</div>
+<div class="about-intro">
+<h2>Why This Exists</h2>
+<p>Compsilon was founded by Darshan Krishnappa, a <span class="hl-amber">governance, risk and compliance</span> practitioner with fifteen years across risk, compliance and audit, to help organisations make one specific move: out of traditional GRC and into AI GRC, before the ground shifts underneath them. The engineering is already well underway. Everything from risk triage to continuous compliance is being automated, much of it handed to autonomous agents. The conviction behind Compsilon is that automation alone does not get you there. Remove the human from the loop and you have not built assurance &mdash; you have built a faster route to an unverified answer. So AI governance has to be actively sought, not assumed. It keeps a named human accountable at every consequential step, and it constrains the agent to what the evidence actually says: nothing invented, nothing fabricated, nothing asserted beyond the source.</p>
+<p>Compsilon newsletters focus heavily on how this shift is happening across governance, risk and compliance programmes. The content is curated to guide you through the next steps of the transformation &mdash; traditional GRC to AI-based continuous compliance, while meeting customer demand across SOC 1, SOC 2, PCI DSS, ISO 42001, DORA and NIS2 simultaneously.</p>
+<h3 class="about-cta">Are you also part of any such transformation?</h3>
+<p>Or are you curious to know how it can be done irrespective of company size, from start-ups to large organisations? Start-ups are mostly the ones heavily dependent on and seeking benefits from AI transformation. Or are you in the middle of the shift or transformation within your own function? Reach out to Darshan Krishnappa at <a class="hl-mail" href="mailto:hellocompsilon@gmail.com">hellocompsilon@gmail.com</a> for an <span class="hl-teal">open collaboration</span> and <span class="hl-amber">assistance</span>.</p>
+</div>
+
+<div class="byline">
+<div class="byline-name">Darshan Krishnappa</div>
+<div class="byline-role">Data | AI GRC | GRC Practitioner | SME | Internal/External Audits | Compliance Automation</div>
+</div>
+
+<div class="sub-cta">
+<p>Subscribe here to get more updates on this space.</p>
+<div class="cta-row"><a href="#subscribe">Get weekly AI GRC intelligence &rarr;</a></div>
+</div>
+</div>
+
 <div class="sub-wrap" id="subscribe">
 <div class="sub-box">
   <h2>Stay Ahead of AI Regulation</h2>
@@ -409,7 +448,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
 <div class="ft-row">
   <div class="ft-brand"><span class="logo">COMP<span>SILON</span></span><p>AI GRC intelligence for practitioners navigating the future of regulated AI.</p></div>
   <div class="ft-links">
-    <div class="ft-col"><h4>Sections</h4><a href="#grc">AI GRC</a><a href="grc-engineering.html">AI GRC Engineering</a><a href="frameworks.html">Frameworks</a><a href="threats.html">Threat Intel</a><a href="newsletter.html">Newsletter</a><a href="grc-engineering.html#about">About</a></div>
+    <div class="ft-col"><h4>Sections</h4><a href="#grc">AI GRC</a><a href="grc-engineering.html">AI GRC Engineering</a><a href="frameworks.html">Frameworks</a><a href="threats.html">Threat Intel</a><a href="newsletter.html">Newsletter</a><a href="#about">About</a></div>
     <div class="ft-col"><h4>Resources</h4><a href="https://artificialintelligenceact.eu/" target="_blank">EU AI Act</a><a href="https://www.nist.gov/artificial-intelligence/ai-risk-management-framework" target="_blank">NIST AI RMF</a><a href="https://www.iso.org/standard/81230.html" target="_blank">ISO/IEC 42001</a></div>
   </div>
 </div>
