@@ -75,6 +75,18 @@ section{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:100px
 .glass .ltr{font:800 48px var(--sans);background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px;display:block}
 .glass h3{font:600 19px var(--sans);color:var(--white);margin-bottom:10px;letter-spacing:-.3px}
 .glass p{font:400 14px/1.7 var(--sans);color:var(--muted);position:relative}
+.glass-row.mini{gap:14px}
+.glass-row.mini .glass{padding:20px 22px;border-radius:14px}
+.glass-row.mini .ltr{font:800 26px var(--sans);margin-bottom:6px}
+.glass-row.mini h3{font:600 15px var(--sans);margin-bottom:5px}
+.glass-row.mini p{font:400 12.5px/1.6 var(--sans);color:var(--body)}
+.fig-h{font:700 26px var(--sans);color:var(--white);letter-spacing:-.6px;margin:64px 0 10px}
+.fig-sub{font:400 14px/1.7 var(--sans);color:var(--body);max-width:660px;margin-bottom:24px}
+.fig{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 16px}
+@keyframes mvupB{to{stroke-dashoffset:-52}}
+.mv{stroke-dasharray:4 9;stroke-linecap:round;fill:none;stroke-width:2.2}
+.mvs{stroke-dasharray:4 9;stroke-linecap:round;fill:none;stroke-width:1.8}
+@media (prefers-reduced-motion:no-preference){.mv{animation:mvupB 1.6s linear infinite}.mv.b{animation-duration:1.9s}.mv.c{animation-duration:2.2s}.mv.d{animation-duration:2.5s}.mvs{animation:mvupB 1.8s linear infinite}}
 
 /* Why now - bento grid */
 .bento{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:auto;gap:16px}
@@ -190,11 +202,117 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
 <section id="grc">
 <div class="sl">Foundation</div>
 <div class="st">What is AI GRC?</div>
-<div class="sd">Managing AI through structured governance, rigorous risk management, and regulatory compliance.</div>
-<div class="glass-row">
-  <div class="glass"><span class="ltr">G</span><h3>Governance</h3><p>Policies, roles, accountability, and oversight mechanisms guiding AI design, deployment, and monitoring.</p></div>
-  <div class="glass"><span class="ltr">R</span><h3>Risk</h3><p>Identifying and mitigating AI harms — bias, hallucination, data poisoning, model drift, supply chain risks.</p></div>
-  <div class="glass"><span class="ltr">C</span><h3>Compliance</h3><p>Meeting EU AI Act, NIST AI RMF, ISO 42001, and sector-specific regulatory mandates.</p></div>
+<div class="sd">Extending governance, risk and compliance to the AI systems an organisation builds, buys and runs. The disciplines are not new. What they now have to cover is.</div>
+<div class="glass-row mini">
+  <div class="glass"><span class="ltr">G</span><h3>Governance</h3><p>Who may deploy AI, within what limits, and who answers for what it does.</p></div>
+  <div class="glass"><span class="ltr">R</span><h3>Risk</h3><p>What the system can get wrong, how badly, how likely, and what reduces it.</p></div>
+  <div class="glass"><span class="ltr">C</span><h3>Compliance</h3><p>Which obligations apply to those systems, and the evidence that proves you met them.</p></div>
+</div>
+
+<h2 class="fig-h">How AI GRC operates</h2>
+<p class="fig-sub">Doing this well does not require AI tooling. Automating it is a separate decision &mdash; and the subject of <a href="grc-engineering.html" style="color:var(--teal)">AI GRC engineering</a>.</p>
+<div class="fig">
+<svg width="100%" viewBox="0 0 900 600" role="img" xmlns="http://www.w3.org/2000/svg" style="font-family:var(--sans)"><title>How AI GRC operates</title><desc>The AI GRC layer applies four disciplines with AI in the workflow below, chases six departments for evidence, and sends four flows upward across a waterline into results that reach leadership, with an oversight gap on the right.</desc><defs><marker id="upB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+<rect x="270" y="24" width="320" height="46" rx="10" fill="var(--card)" stroke="var(--muted)" stroke-opacity="0.45" stroke-width="1" stroke-dasharray="6 4"/>
+<text x="430" y="47" text-anchor="middle" font-size="14" font-weight="700" fill="var(--white)">CISO &middot; SLT &middot; ELT</text>
+
+<path class="mv" d="M160 124 L160 98" stroke="var(--amber)" opacity="0.85"/>
+<path class="mv b" d="M295 124 L295 98" stroke="var(--amber)" opacity="0.85"/>
+<path class="mv c" d="M565 124 L565 98" stroke="var(--amber)" opacity="0.85"/>
+<path class="mv d" d="M700 124 L700 98" stroke="var(--amber)" opacity="0.85"/>
+<path class="mvs" d="M160 96 L700 96" stroke="var(--amber)" opacity="0.6"/>
+<path class="mv" d="M430 96 L430 74" stroke="var(--amber)" opacity="0.95" stroke-width="2.6" marker-end="url(#upB)"/>
+
+<rect x="97" y="128" width="126" height="46" rx="9" fill="var(--card)" stroke="var(--amber)" stroke-opacity="0.55" stroke-width="1"/>
+<text x="160" y="151" text-anchor="middle" font-size="11" font-weight="700" fill="var(--amber)">Clean audit report</text>
+<rect x="232" y="128" width="126" height="46" rx="9" fill="var(--card)" stroke="var(--amber)" stroke-opacity="0.55" stroke-width="1"/>
+<text x="295" y="151" text-anchor="middle" font-size="11" font-weight="700" fill="var(--amber)">Green dashboard</text>
+<rect x="502" y="128" width="126" height="46" rx="9" fill="var(--card)" stroke="var(--amber)" stroke-opacity="0.55" stroke-width="1"/>
+<text x="565" y="151" text-anchor="middle" font-size="11" font-weight="700" fill="var(--amber)">Certificate renewed</text>
+<rect x="637" y="128" width="126" height="46" rx="9" fill="var(--card)" stroke="var(--amber)" stroke-opacity="0.55" stroke-width="1"/>
+<text x="700" y="151" text-anchor="middle" font-size="11" font-weight="700" fill="var(--amber)">Deals closed</text>
+
+<line x1="40" y1="206" x2="820" y2="206" stroke="var(--muted)" stroke-width="1.2" opacity="0.5" stroke-dasharray="7 5"/>
+<text x="40" y="196" font-size="10" font-weight="700" fill="var(--muted)" letter-spacing="1.4">WHAT LEADERSHIP SEES AND EXPECTS</text>
+<text x="40" y="224" font-size="10" font-weight="700" fill="var(--teal)" letter-spacing="1.4">WHAT IT TAKES TO PRODUCE IT</text>
+
+<path class="mv" d="M160 416 L160 178" stroke="var(--teal)" opacity="0.9" marker-end="url(#upB)"/>
+<path class="mv b" d="M295 416 L295 178" stroke="var(--teal)" opacity="0.9" marker-end="url(#upB)"/>
+<path class="mv c" d="M565 416 L565 178" stroke="var(--teal)" opacity="0.9" marker-end="url(#upB)"/>
+<path class="mv d" d="M700 416 L700 178" stroke="var(--teal)" opacity="0.9" marker-end="url(#upB)"/>
+
+<rect x="40" y="240" width="105" height="62" rx="9" fill="var(--card)" stroke="var(--border)" stroke-width="1"/>
+<text x="92" y="259" text-anchor="middle" font-size="12" font-weight="700" fill="var(--white)">Legal</text>
+<text x="92" y="276" text-anchor="middle" font-size="9.5" fill="var(--body)">contracts</text>
+<text x="92" y="290" text-anchor="middle" font-size="9.5" fill="var(--body)">DPAs</text>
+<rect x="175" y="240" width="105" height="62" rx="9" fill="var(--card)" stroke="var(--border)" stroke-width="1"/>
+<text x="227" y="259" text-anchor="middle" font-size="12" font-weight="700" fill="var(--white)">Finance</text>
+<text x="227" y="276" text-anchor="middle" font-size="9.5" fill="var(--body)">audit</text>
+<text x="227" y="290" text-anchor="middle" font-size="9.5" fill="var(--body)">controls</text>
+<rect x="310" y="240" width="105" height="62" rx="9" fill="var(--card)" stroke="var(--border)" stroke-width="1"/>
+<text x="362" y="259" text-anchor="middle" font-size="12" font-weight="700" fill="var(--white)">Dev &amp; Eng</text>
+<text x="362" y="276" text-anchor="middle" font-size="9.5" fill="var(--body)">config, QA</text>
+<text x="362" y="290" text-anchor="middle" font-size="9.5" fill="var(--body)">SDLC</text>
+<rect x="445" y="240" width="105" height="62" rx="9" fill="var(--card)" stroke="var(--border)" stroke-width="1"/>
+<text x="497" y="259" text-anchor="middle" font-size="12" font-weight="700" fill="var(--white)">SOC</text>
+<text x="497" y="276" text-anchor="middle" font-size="9.5" fill="var(--body)">incident response</text>
+<text x="497" y="290" text-anchor="middle" font-size="9.5" fill="var(--body)">SIEM &middot; EDR/MDR/ADR</text>
+<rect x="580" y="240" width="105" height="62" rx="9" fill="var(--card)" stroke="var(--border)" stroke-width="1"/>
+<text x="632" y="259" text-anchor="middle" font-size="12" font-weight="700" fill="var(--white)">Sales</text>
+<text x="632" y="276" text-anchor="middle" font-size="9.5" fill="var(--body)">customer</text>
+<text x="632" y="290" text-anchor="middle" font-size="9.5" fill="var(--body)">questionnaires</text>
+<rect x="715" y="240" width="105" height="62" rx="9" fill="var(--card)" stroke="var(--border)" stroke-width="1"/>
+<text x="767" y="259" text-anchor="middle" font-size="12" font-weight="700" fill="var(--white)">HR</text>
+<text x="767" y="276" text-anchor="middle" font-size="9.5" fill="var(--body)">policy</text>
+<text x="767" y="290" text-anchor="middle" font-size="9.5" fill="var(--body)">training</text>
+
+<line x1="92" y1="320" x2="92" y2="306" stroke="var(--amber)" stroke-width="1.6" opacity="0.7" marker-end="url(#upB)"/>
+<line x1="227" y1="320" x2="227" y2="306" stroke="var(--amber)" stroke-width="1.6" opacity="0.7" marker-end="url(#upB)"/>
+<line x1="362" y1="320" x2="362" y2="306" stroke="var(--amber)" stroke-width="1.6" opacity="0.7" marker-end="url(#upB)"/>
+<line x1="497" y1="320" x2="497" y2="306" stroke="var(--amber)" stroke-width="1.6" opacity="0.7" marker-end="url(#upB)"/>
+<line x1="632" y1="320" x2="632" y2="306" stroke="var(--amber)" stroke-width="1.6" opacity="0.7" marker-end="url(#upB)"/>
+<line x1="767" y1="320" x2="767" y2="306" stroke="var(--amber)" stroke-width="1.6" opacity="0.7" marker-end="url(#upB)"/>
+<path class="mvs" d="M92 320 L767 320" stroke="var(--amber)" opacity="0.55"/>
+
+<path class="mv b" d="M430 352 L430 326" stroke="var(--amber)" opacity="0.9" stroke-width="2.4" marker-end="url(#upB)"/>
+
+<line x1="430" y1="416" x2="430" y2="394" stroke="var(--amber)" stroke-width="1.6" opacity="0.7"/>
+<rect x="310" y="354" width="240" height="40" rx="10" fill="var(--bg)" stroke="var(--amber)" stroke-width="1.2" stroke-dasharray="5 4"/>
+<text x="430" y="370" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--amber)">The GRC battle</text>
+<text x="430" y="385" text-anchor="middle" font-size="9.5" fill="var(--body)">chasing owners for evidence and answers</text>
+
+<rect x="40" y="416" width="780" height="166" rx="12" fill="var(--card)" stroke="var(--teal)" stroke-width="1.4"/>
+<text x="430" y="438" text-anchor="middle" font-size="15" font-weight="700" fill="var(--teal)">AI GRC &mdash; the backend operations layer</text>
+<text x="430" y="456" text-anchor="middle" font-size="11" fill="var(--light)">The same four disciplines, now covering AI systems and increasingly run with AI</text>
+
+<rect x="54" y="466" width="173" height="38" rx="8" fill="var(--bg)" stroke="var(--teal)" stroke-opacity="0.5" stroke-width="1"/>
+<text x="140" y="485" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--light)">Governance</text>
+<rect x="247" y="466" width="173" height="38" rx="8" fill="var(--bg)" stroke="var(--teal)" stroke-opacity="0.5" stroke-width="1"/>
+<text x="333" y="485" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--light)">Risk management</text>
+<rect x="440" y="466" width="173" height="38" rx="8" fill="var(--bg)" stroke="var(--teal)" stroke-opacity="0.5" stroke-width="1"/>
+<text x="526" y="485" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--light)">Compliance</text>
+<rect x="633" y="466" width="173" height="38" rx="8" fill="var(--bg)" stroke="var(--teal)" stroke-opacity="0.5" stroke-width="1"/>
+<text x="719" y="485" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--light)">Evidence &amp; assurance</text>
+
+<line x1="54" y1="519" x2="300" y2="519" stroke="var(--teal)" stroke-width="1" opacity="0.45" stroke-dasharray="5 4"/>
+<line x1="560" y1="519" x2="806" y2="519" stroke="var(--teal)" stroke-width="1" opacity="0.45" stroke-dasharray="5 4"/>
+<text x="430" y="519" text-anchor="middle" dominant-baseline="central" font-size="9.5" font-weight="700" fill="var(--teal)" letter-spacing="1.3">AI IN THE WORKFLOW</text>
+
+<rect x="54" y="532" width="136" height="38" rx="8" fill="#0a1a18" stroke="var(--teal)" stroke-opacity="0.3" stroke-width="1"/>
+<text x="122" y="551" text-anchor="middle" font-size="10" fill="#8fd4c0">Models in production</text>
+<rect x="208" y="532" width="136" height="38" rx="8" fill="#0a1a18" stroke="var(--teal)" stroke-opacity="0.3" stroke-width="1"/>
+<text x="276" y="551" text-anchor="middle" font-size="10" fill="#8fd4c0">Vendor-embedded AI</text>
+<rect x="362" y="532" width="136" height="38" rx="8" fill="#0a1a18" stroke="var(--teal)" stroke-opacity="0.3" stroke-width="1"/>
+<text x="430" y="551" text-anchor="middle" font-size="10" fill="#8fd4c0">Training data</text>
+<rect x="516" y="532" width="136" height="38" rx="8" fill="#0a1a18" stroke="var(--teal)" stroke-opacity="0.3" stroke-width="1"/>
+<text x="584" y="551" text-anchor="middle" font-size="10" fill="#8fd4c0">Risk triage</text>
+<rect x="670" y="532" width="136" height="38" rx="8" fill="#0a1a18" stroke="var(--teal)" stroke-opacity="0.3" stroke-width="1"/>
+<text x="738" y="551" text-anchor="middle" font-size="10" fill="#8fd4c0">AI questionnaires</text>
+
+<line x1="850" y1="416" x2="850" y2="78" stroke="var(--muted)" stroke-width="1.2" opacity="0.4" stroke-dasharray="4 5" marker-end="url(#upB)"/>
+<text transform="rotate(-90 876 247)" x="876" y="247" text-anchor="middle" font-size="10" font-weight="700" fill="var(--muted)" letter-spacing="1.2">THE OVERSIGHT GAP</text>
+</svg>
 </div>
 </section>
 
