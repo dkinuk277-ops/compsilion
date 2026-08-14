@@ -163,8 +163,8 @@
   #results{ display:none; }
   .rtitle{
     font-family:'Fraunces', serif;
-    font-weight: 600;
-    font-size: 30px;
+    font-weight: 700;
+    font-size: 27px;
     margin: 0 0 6px;
     letter-spacing: -0.01em;
   }
@@ -205,13 +205,18 @@
   .scenario.b{ border-left-color: var(--amber); }
   .scenario .slabel{
     font-family:'IBM Plex Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.08em;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--teal);
-    margin-bottom: 6px;
+    color: #FFFFFF;
+    background: var(--teal);
+    display: inline-block;
+    padding: 5px 11px;
+    border-radius: 2px;
+    margin-bottom: 10px;
   }
-  .scenario.b .slabel{ color: var(--amber); }
+  .scenario.b .slabel{ color: #FFFFFF; background: var(--amber); }
   .scenario h3{
     font-family:'Fraunces', serif;
     font-size: 20px;
@@ -229,12 +234,16 @@
   dl.spec{ margin:0; }
   dl.spec dt{
     font-family:'IBM Plex Mono', monospace;
-    font-size: 10.5px;
-    letter-spacing: 0.07em;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: var(--ink-soft);
-    margin-top: 16px;
+    color: var(--teal);
+    border-bottom: 1px solid var(--teal-soft);
+    padding-bottom: 4px;
+    margin-top: 18px;
   }
+  .scenario.b dl.spec dt{ color: var(--rust); border-bottom-color: var(--amber-soft); }
   dl.spec dt:first-child{ margin-top:0; }
   dl.spec dd{
     margin: 4px 0 0;
@@ -304,7 +313,7 @@
   </div>
 
   <div id="results">
-    <p class="rtitle">Recommended shape</p>
+    <p class="rtitle">Recommendation: Possible Risk Program Set-up Scenarios</p>
     <p class="rsub">Based on your answers. Directional, not a substitute for judgement about your own organization.</p>
     <div class="chips" id="chips"></div>
     <div class="scenarios" id="scenarios"></div>
