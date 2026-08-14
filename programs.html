@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programs Enablement — Compsilon</title>
+<meta name="description" content="How to stand up governance, risk and compliance programmes from scratch in a small or mid-size organisation — including where AI does the lifting and where it must not.">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06060e;--surface:#0d0d1a;--card:#12122a;--card2:#181833;
+  --border:#2c2c5c;--muted:#8c90c4;--body:#b9bce0;--light:#dcdef2;--white:#eeeef6;
+  --teal:#06d6a0;--teal-glow:#06d6a040;--teal-soft:#06d6a012;
+  --amber:#EF9F27;--amber-glow:#EF9F2740;
+  --pink:#ec4899;--red:#ef4444;
+  --sans:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+[id]{scroll-margin-top:88px}
+body{font-family:var(--sans);background:var(--bg);color:var(--body);line-height:1.7}
+a{color:inherit;text-decoration:none}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:80px 80px;opacity:.15;pointer-events:none;z-index:0}
+
+nav{position:sticky;top:0;z-index:100;background:#06060edd;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px}
+.logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px}
+.logo span{background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav ul{display:flex;gap:4px;list-style:none;align-items:center}
+nav a.lnk{font:600 12.5px var(--sans);color:var(--body);padding:7px 12px;border-radius:100px;white-space:nowrap;transition:color .2s,background .2s,box-shadow .2s}
+nav a.lnk:hover{color:var(--white);background:var(--card)}
+nav a.lnk.active{color:var(--teal);background:var(--teal-soft);box-shadow:inset 0 0 0 1px var(--teal-glow)}
+.nav-sub{font:600 13px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:9px 22px;border-radius:100px}
+
+.page-hero{position:relative;z-index:1;text-align:center;padding:72px 32px;border-bottom:1px solid var(--border)}
+.hero-glow{position:absolute;top:-80px;left:40%;width:420px;height:280px;background:radial-gradient(ellipse,var(--teal-glow),transparent 70%);pointer-events:none}
+.hero-glow2{position:absolute;top:0;right:5%;width:340px;height:240px;background:radial-gradient(ellipse,var(--amber-glow),transparent 70%);pointer-events:none}
+.breadcrumb{font:400 13px var(--sans);color:var(--muted);margin-bottom:16px;position:relative}
+.breadcrumb a{color:var(--teal)}
+.page-hero h1{font:800 44px var(--sans);color:var(--white);letter-spacing:-2px;margin-bottom:12px;position:relative}
+.page-hero p{font:400 16px/1.7 var(--sans);color:var(--muted);max-width:600px;margin:0 auto;position:relative}
+
+.content{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:64px 32px}
+.sl{font:600 12px var(--mono);color:var(--teal);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+.sh{margin-bottom:32px}
+.sh h2{font:700 30px var(--sans);color:var(--white);letter-spacing:-1px;margin-bottom:10px}
+.sh p{font:400 15px/1.75 var(--sans);color:var(--body);max-width:720px}
+.sep{border:none;border-top:1px solid var(--border);margin:64px 0}
+
+.lede{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 14px 14px 0;padding:24px 28px;margin-bottom:36px}
+.lede p{font:400 14.5px/1.75 var(--sans);color:var(--light);margin-bottom:10px}
+.lede p:last-child{margin-bottom:0}
+
+/* Agent governance blocks */
+.agent{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:18px;transition:border-color .2s}
+.agent:hover{border-color:var(--amber)}
+.agent-head{display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.agent-num{font:700 12px var(--mono);color:var(--bg);background:var(--amber);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.agent h3{font:700 19px var(--sans);color:var(--white);letter-spacing:-.3px}
+.agent>p{font:400 14px/1.7 var(--sans);color:var(--body);margin-bottom:18px}
+.guide{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.gbox{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.gbox h4{font:600 11px var(--sans);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.gbox.miss h4{color:var(--red)}
+.gbox.hitl h4{color:var(--amber)}
+.gbox.mon h4{color:var(--teal)}
+.gbox ul{list-style:none}
+.gbox li{font:400 12.5px/1.55 var(--sans);color:var(--muted);padding:5px 0;display:flex;gap:8px}
+.gbox li::before{content:'▸';flex-shrink:0;opacity:.6}
+
+/* Incidents */
+.inc{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;transition:border-color .3s}
+.inc:hover{border-color:var(--teal)}
+.inc-top{display:flex;align-items:center;justify-content:space-between;padding:24px 28px 0;flex-wrap:wrap;gap:8px}
+.inc-tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1px;padding:4px 10px;border-radius:4px}
+.tag.critical{background:#ef444420;color:var(--red)}
+.tag.high{background:#EF9F2720;color:var(--amber)}
+.tag.sector{background:var(--teal-soft);color:var(--teal)}
+.tag.verified{background:#06d6a020;color:var(--teal)}
+.inc-date{font:500 12px var(--mono);color:var(--muted)}
+.inc-body{padding:16px 28px 28px}
+.inc-body h3{font:700 20px var(--sans);color:var(--white);letter-spacing:-.3px;margin-bottom:10px}
+.inc-body>p{font:400 14px/1.7 var(--sans);color:var(--body);margin-bottom:16px}
+.inc-details{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.inc-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.inc-box h4{font:600 11px var(--sans);text-transform:uppercase;letter-spacing:.8px;color:var(--amber);margin-bottom:6px}
+.inc-box p{font:400 13px/1.6 var(--sans);color:var(--muted)}
+.sources{border-top:1px solid var(--border);padding-top:14px}
+.sources h5{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px}
+.sources a{font:400 12.5px var(--sans);color:var(--teal);margin-right:14px;display:inline-block;border-bottom:1px solid transparent;transition:border-color .2s}
+.sources a:hover{border-bottom-color:var(--teal)}
+
+/* Data risk */
+.risk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.risk-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;border-left:3px solid var(--red)}
+.risk-card.a{border-left-color:var(--amber)}
+.risk-card.t{border-left-color:var(--teal)}
+.risk-card.p{border-left-color:var(--pink)}
+.risk-card h3{font:600 15px var(--sans);color:var(--white);margin-bottom:8px}
+.risk-card>p{font:400 13px/1.65 var(--sans);color:var(--muted);margin-bottom:14px}
+.safeguard{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:13px;font:400 12.5px/1.55 var(--sans);color:var(--body)}
+.safeguard strong{color:var(--teal)}
+
+/* Conclusion */
+.concl{background:linear-gradient(135deg,#0d2820,#1a1408);border:1px solid var(--border);border-radius:20px;padding:48px;margin-top:64px;position:relative;overflow:hidden}
+.concl::before{content:'';position:absolute;top:-70px;right:-50px;width:280px;height:280px;background:radial-gradient(circle,var(--amber-glow),transparent 70%);pointer-events:none}
+.concl h2{font:700 28px var(--sans);color:var(--white);letter-spacing:-.8px;margin-bottom:14px;position:relative}
+.concl p{font:400 14.5px/1.8 var(--sans);color:var(--light);margin-bottom:14px;position:relative;max-width:760px}
+.concl ol{list-style:none;counter-reset:c;margin:20px 0;position:relative}
+.concl li{counter-increment:c;font:400 14px/1.7 var(--sans);color:var(--light);padding:9px 0 9px 40px;position:relative;border-bottom:1px solid #ffffff12}
+.concl li:last-child{border:none}
+.concl li::before{content:counter(c);position:absolute;left:0;top:11px;width:24px;height:24px;border-radius:50%;background:var(--teal);color:var(--bg);font:700 11px var(--mono);display:flex;align-items:center;justify-content:center}
+.concl li strong{color:var(--white);font-weight:600}
+.cta-row{margin-top:28px;position:relative}
+.cta-row a{font:700 14px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:13px 30px;border-radius:100px;display:inline-block}
+
+.note{font:400 12.5px/1.7 var(--sans);color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-top:32px}
+.note strong{color:var(--light)}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px;text-align:center;font:400 12px var(--sans);color:var(--muted);max-width:1200px;margin:0 auto}
+footer a{color:var(--teal)}
+
+@media(max-width:900px){
+  nav ul{display:none}
+  .content{padding:40px 20px}
+  .guide,.inc-details,.risk-grid{grid-template-columns:1fr}
+  .concl{padding:32px 24px}
+  .page-hero h1{font-size:32px}
+}
+
+.ptabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:40px}
+.ptab{font:600 12.5px var(--sans);color:var(--body);border:1px solid var(--border);border-radius:100px;padding:9px 18px;transition:all .2s}
+.ptab:hover{border-color:var(--teal);color:var(--white)}
+.ptab.on{background:var(--teal-soft);border-color:var(--teal);color:var(--teal)}
+.track{scroll-margin-top:88px}
+.wizwrap{background:var(--surface);border:1px solid var(--amber);border-color:var(--amber-glow);border-radius:16px;padding:14px;margin:24px 0 8px}
+.wizwrap iframe{width:100%;border:0;border-radius:10px;display:block;min-height:620px}
+.wizcap{font:400 12px var(--sans);color:var(--muted);margin-top:10px;text-align:center}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 18px}
+.pcard h4{font:700 14px var(--sans);color:var(--white);margin-bottom:6px}
+.pcard p{font:400 12.5px/1.65 var(--sans);color:var(--body)}
+.pcard .tagx{font:600 9.5px var(--mono);color:var(--amber);letter-spacing:1.2px;display:block;margin-bottom:8px}
+.dolist{margin:14px 0 0;padding-left:18px}
+.dolist li{font:400 14px/1.85 var(--sans);color:var(--body);margin-bottom:4px}
+@media(max-width:900px){.pgrid{grid-template-columns:1fr}}
+
+.sh.wide p{max-width:none;margin-bottom:18px}
+.sh.wide p:last-child{margin-bottom:0}
+.byline{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 24px;margin-top:44px;text-align:left;display:inline-block;max-width:100%;position:relative;overflow:hidden}
+.byline::before{content:'';position:absolute;top:-70px;left:-30px;width:200px;height:140px;background:radial-gradient(ellipse,var(--amber-glow),transparent 70%);pointer-events:none}
+.byline-name{font:700 17px var(--sans);color:var(--white);letter-spacing:-.3px;margin-bottom:5px;position:relative}
+.byline-role{font:600 10px/1.75 var(--mono);text-transform:uppercase;letter-spacing:.9px;max-width:520px;background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative}
+.sub-cta{margin-top:44px;margin-bottom:20px}
+.sub-cta p{font:400 15px/1.75 var(--sans);color:var(--body);margin-bottom:16px}
+.sub-cta .cta-row{margin-top:0}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<nav><div class="nav-inner"><a href="index.html" class="logo">COMP<span>SILON</span></a><ul><li><a href="index.html#grc" class="lnk">AI GRC</a></li><li><a href="grc-engineering.html" class="lnk">AI GRC Engineering</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="programs.html" class="lnk active">Programs Enablement</a></li><li><a href="newsletter.html" class="lnk">Newsletter</a></li><li><a href="index.html#about" class="lnk">About</a></li></ul><a href="index.html#subscribe" class="nav-sub">Subscribe</a></div></nav>
+
+<div class="page-hero">
+<div class="hero-glow"></div>
+<div class="hero-glow2"></div>
+<div class="breadcrumb"><a href="index.html">Home</a> / Programs Enablement</div>
+<h1>Standing Up GRC Programmes</h1>
+<p>For organisations with no function today, and one person about to become it. Governance, risk and compliance from nothing &mdash; including where AI does the lifting, and where it must not.</p>
+</div>
+
+<div class="content">
+
+<div class="ptabs">
+  <a href="#governance" class="ptab">Governance</a>
+  <a href="#risk" class="ptab on">Risk</a>
+  <a href="#compliance" class="ptab">Compliance</a>
+</div>
+
+<div class="sl">Risk Programme</div>
+<div class="sh wide track" id="risk">
+<h2>Where to Start, and How Big to Build It</h2>
+<p>The shape of a risk programme depends on three things: how large the organisation is, how it is structured, and what is forcing the programme to exist at all. A 60-person company answering a customer security questionnaire needs something entirely different from a 2,000-person group facing a regulator &mdash; and most published guidance is written for the second while being read by the first.</p>
+<p>The instrument below asks five questions and returns a recommended shape: analysis method, framework, tooling position, and the first thing to build. It will sometimes tell you to spend nothing, because that is often the right answer.</p>
+</div>
+
+<div class="wizwrap">
+  <iframe id="riskWizard" src="risk-program-wizard.html" title="Risk Program Scoping Instrument" loading="lazy" scrolling="no"></iframe>
+</div>
+<p class="wizcap">Directional guidance, not a substitute for judgement about your own organisation.</p>
+
+<div class="pgrid">
+  <div class="pcard"><span class="tagx">FIRST 30 DAYS</span><h4>Intake before analysis</h4><p>One route for risks to arrive and one owner to receive them. A register nobody feeds is worse than no register, because it looks like coverage.</p></div>
+  <div class="pcard"><span class="tagx">FIRST 60 DAYS</span><h4>A method you can defend</h4><p>Written impact definitions matter more than the scale you choose. Two people scoring the same risk should land in the same band.</p></div>
+  <div class="pcard"><span class="tagx">FIRST 90 DAYS</span><h4>Treatment and reporting</h4><p>Every open risk has an owner, a decision and a date. Report what changed, not what exists.</p></div>
+</div>
+
+<hr class="sep">
+
+<div class="sl">Governance Programme</div>
+<div class="sh wide track" id="governance">
+<h2>Authority Before Paperwork</h2>
+<p>Governance is not a policy library. It is the answer to three questions: who is allowed to decide, on what basis, and who carries it when the decision is wrong. Committees, policies and RACI charts are machinery for making those answers stick &mdash; useful only once the answers exist.</p>
+<p>Before writing anything, find the decisions already being made without you: which tools were bought last quarter, which vendor was onboarded, which model went into production. A programme that starts with a policy document governs nothing. One that starts with real decisions has something to attach authority to.</p>
+</div>
+
+<div class="pgrid">
+  <div class="pcard"><span class="tagx">FIRST 30 DAYS</span><h4>Charter and owner</h4><p>A one-page charter: scope, who owns it, what needs approval before it proceeds. A named person, not a committee. A decision log, however crude.</p></div>
+  <div class="pcard"><span class="tagx">FIRST 60 DAYS</span><h4>Policies you will enforce</h4><p>Acceptable use, third-party and AI procurement, data handling, exceptions. Four enforced beats twelve ignored.</p></div>
+  <div class="pcard"><span class="tagx">FIRST 90 DAYS</span><h4>A forum and a record</h4><p>A recurring meeting with the right attendees, decisions written down, and a first report to leadership on what was decided and what was excepted.</p></div>
+</div>
+
+<div class="sh wide">
+<h2>Where AI Does the Lifting &mdash; and Where It Must Not</h2>
+<p>Drafting policy from your own decisions and documents, summarising regulatory text into obligations that apply to you, cross-mapping policy statements to framework clauses, and flagging where two policies contradict each other: all good uses, all verifiable.</p>
+<p>Setting risk appetite, granting an exception, and signing an approval are not. If the model decides, you do not have governance &mdash; you have automation wearing a governance label. The common failure is subtler than that, though: writing policy for an organisation you do not have. A forty-page AI policy in a 120-person company is ignored by week two and becomes evidence against you in an audit, because you documented a control you do not operate.</p>
+</div>
+
+<hr class="sep">
+
+<div class="sl">Compliance Programme</div>
+<div class="sh wide track" id="compliance">
+<h2>Obligations First, Certificates Second</h2>
+<p>Most compliance programmes start with a framework and work backwards to the organisation. That order is why so many of them produce evidence nobody trusts. Start instead with an obligations register &mdash; what actually applies to you, from regulation, contracts and customer commitments &mdash; then pick the control set that covers the most of it at once.</p>
+<p>The certificate is an output, not the programme. Auditors ask how you know a control operated; they do not ask which framework you admired.</p>
+</div>
+
+<div class="pgrid">
+  <div class="pcard"><span class="tagx">FIRST 30 DAYS</span><h4>Obligations register</h4><p>Every source of requirement in one place, with the clause that creates it. This is the artefact regulators ask for first.</p></div>
+  <div class="pcard"><span class="tagx">FIRST 60 DAYS</span><h4>One control set, cross-mapped</h4><p>Write the control once, map it to every framework it satisfies. Maintaining four parallel control sets is how small teams drown.</p></div>
+  <div class="pcard"><span class="tagx">FIRST 90 DAYS</span><h4>Evidence by design</h4><p>Decide where each control&rsquo;s evidence comes from before the audit window opens. Anything you have to reconstruct will be reconstructed badly.</p></div>
+</div>
+
+<div class="byline">
+<div class="byline-name">Darshan Krishnappa</div>
+<div class="byline-role">Data | AI GRC | GRC Practitioner | SME | Internal/External Audits | Compliance Automation</div>
+</div>
+
+<div class="sub-cta">
+<p>Subscribe here to get more updates on this space.</p>
+<div class="cta-row"><a href="index.html#subscribe">Get weekly AI GRC intelligence &rarr;</a></div>
+</div>
+
+</div>
+<script>
+// resize the wizard frame to its content
+window.addEventListener('message', function(e){
+  var h = e.data && e.data.wizardHeight;
+  if (typeof h === 'number' && h > 200) {
+    document.getElementById('riskWizard').style.height = (h + 8) + 'px';
+  }
+});
+</script>
+<footer>© 2026 Compsilon · <a href="index.html">compsilon.com</a> · <a href="privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a> · <a href="terms-of-use.html" target="_blank" rel="noopener">Terms of Use</a></footer>
+</body>
+</html>
