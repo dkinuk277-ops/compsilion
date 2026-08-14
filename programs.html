@@ -139,6 +139,11 @@ footer a{color:var(--teal)}
 .wizwrap iframe{width:100%;border:0;border-radius:10px;display:block;height:560px;min-height:0;transition:height .18s ease}
 .wizcap{font:400 12px var(--sans);color:var(--muted);margin-top:10px;text-align:center}
 .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px;margin-bottom:40px}
+.tickbox{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:14px;padding:20px 24px;margin-top:22px;max-width:720px}
+.tickbox ul{list-style:none}
+.tickbox li{font:600 14.5px var(--sans);color:var(--white);padding:9px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center}
+.tickbox li:last-child{border:none}
+.tickbox li::before{content:'\2713';color:var(--teal);flex-shrink:0;font-weight:700}
 .pcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 18px}
 .pcard h4{font:700 14px var(--sans);color:var(--white);margin-bottom:6px}
 .pcard p{font:400 12.5px/1.65 var(--sans);color:var(--body)}
@@ -198,6 +203,11 @@ footer a{color:var(--teal)}
 <h2>Authority Before Paperwork</h2>
 <p>Governance is not a policy library. It is the answer to three questions: who is allowed to decide, on what basis, and who carries it when the decision is wrong. Committees, policies and RACI charts are machinery for making those answers stick &mdash; useful only once the answers exist.</p>
 <p>Before writing anything, find the decisions already being made without you: which tools were bought last quarter, which vendor was onboarded, which model went into production. A programme that starts with a policy document governs nothing. One that starts with real decisions has something to attach authority to.</p>
+<div class="tickbox"><ul>
+  <li>Accountability Before Committees</li>
+  <li>Ownership Before Process</li>
+  <li>No Policy Without Ownership</li>
+</ul></div>
 </div>
 
 <div class="sh wide">
