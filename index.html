@@ -18,7 +18,7 @@
   --sans:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
 }
 html{scroll-behavior:smooth}
-[id]{scroll-margin-top:88px}
+section[id],div[id],h2[id]{scroll-margin-top:96px}
 body{font-family:var(--sans);background:var(--bg);color:var(--body);line-height:1.7}
 a{color:inherit;text-decoration:none}
 
@@ -477,6 +477,19 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
       document.getElementById('mcMsg').style.display='block';
     },600);
   });
+})();
+</script>
+<script>
+(function(){
+  function jump(){
+    if(!location.hash) return;
+    var el;
+    try { el = document.querySelector(location.hash); } catch(e){ return; }
+    if(el && el.scrollIntoView) el.scrollIntoView({behavior:'auto', block:'start'});
+  }
+  window.addEventListener('load', function(){ jump(); setTimeout(jump, 120); setTimeout(jump, 400); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ setTimeout(jump, 0); });
+  window.addEventListener('hashchange', function(){ setTimeout(jump, 0); });
 })();
 </script>
 </body>
