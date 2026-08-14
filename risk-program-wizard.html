@@ -701,52 +701,129 @@ function programmeText(size, teamVal, scenarioType){
   return { intro: block.intro, steps };
 }
 
-function methodText(methodologyVal){
+// Industry-specific scoring overlay — appended to whichever methodology is chosen.
+const methodIndustryNote = {
+  itsaas: {
+    lean: "Tie each impact band to something a customer would actually notice — availability, data exposure, missed commitment — so the scores map onto SOC 2 criteria later without a rewrite.",
+    full: "Cross-reference every scored risk to the specific SOC 2 criterion it threatens; an unlinked register gets treated as a parallel artifact rather than as audit evidence.",
+  },
+  banking: {
+    lean: "Express your impact bands in the loss categories your regulator already recognises — operational loss, customer harm, regulatory breach — so the register speaks the exam's language from day one.",
+    full: "Mirror the three-lines-of-defence split in the scoring itself: first line scores inherent risk, second line challenges and signs off residual. An examiner will ask who challenged the score, not just what it was.",
+  },
+  dataauto: {
+    lean: "Add severity-to-the-data-subject as a scoring dimension alongside business impact — a pipeline that's low-cost to the business can still be high-harm downstream.",
+    full: "Score privacy risk on data-subject severity and business impact separately and report both; a DPIA won't accept a purely commercial impact scale, and collapsing them hides the exposure.",
+  },
+  aiproduct: {
+    lean: "Score model risks against the NIST AI RMF characteristics (validity, safety, bias, transparency) rather than forcing them into a generic impact band that wasn't built for them.",
+    full: "Bind every model risk score to a specific model version, not to the product — ISO 42001 and EU AI Act evidence both assume the assessment moves when the model does.",
+  },
+  consulting: {
+    lean: "Score at engagement level rather than firm level — in a services business the exposure concentrates in individual client relationships, and a firm-wide average hides it.",
+    full: "Maintain per-engagement scores that roll up to firm level, and report concentration explicitly; your largest two or three accounts usually carry disproportionate risk that a firm-only view erases.",
+  },
+  other: {
+    lean: "Anchor the impact definitions to your single primary risk concern first — a generic scale built for everything tends to score nothing usefully.",
+    full: "Validate the impact definitions against your primary concern and at least two secondary categories, so the scale holds up as coverage widens beyond the first area.",
+  },
+};
+
+function methodText(methodologyVal, scenarioType, industry){
   const map = {
     qualitative: {
-      intro: "A 5×5 qualitative matrix with clearly written impact and likelihood definitions. The definitions matter far more than the scale.",
-      steps: [
-        "Likelihood bands: Rare, Unlikely, Possible, Likely, Almost certain — define each with a rough frequency (e.g. 'Possible = expected once in 3–5 years').",
-        "Impact bands: Negligible, Minor, Moderate, Major, Severe — define each in concrete terms (financial loss, downtime, data exposed), not just adjectives.",
-        "Score = Likelihood × Impact (1–5 each, 1–25 total). Set your own thresholds — e.g. 15+ red, 8–14 amber, under 8 green.",
-        "Re-score every risk at least twice a year, and immediately after any related incident.",
-        "Write the definitions down once in a one-page reference doc — that's what keeps scores comparable across owners.",
-      ]
+      lean: {
+        intro: "A 5×5 qualitative matrix. In fast-track mode the written definitions are the real deliverable — the matrix itself takes an afternoon.",
+        steps: [
+          "Likelihood bands: Rare, Unlikely, Possible, Likely, Almost certain — put a rough frequency against each (e.g. 'Possible = expected once in 3–5 years').",
+          "Impact bands: Negligible, Minor, Moderate, Major, Severe — define each in concrete terms (financial loss, downtime, records exposed), not adjectives.",
+          "Score = Likelihood × Impact (1–5 each). Pick thresholds once and stop debating them: 15+ red, 8–14 amber, under 8 green.",
+          "Keep the definitions on a single page and resist retuning the scale mid-cycle — re-score after an incident or at the next review, not on instinct.",
+        ]
+      },
+      full: {
+        intro: "The same 5×5 matrix, but calibrated and challenged. At this scope the failure mode isn't a wrong method — it's scores drifting apart between owners until they can't be compared.",
+        steps: [
+          "Write the likelihood and impact definitions, then sanity-check them against events that have actually happened to you or to peers in the last five years.",
+          "Score inherent and residual risk separately, and record the controls that justify the gap — 'residual only' registers can't evidence why anything improved.",
+          "Run a calibration session each cycle: every owner scores the same three sample risks blind, then you reconcile the spread.",
+          "Set a documented risk appetite per category so a score triggers an action automatically, rather than waiting for someone to notice it.",
+          "Re-score twice a year and after any related incident; version the definitions document so score changes can be traced to method changes.",
+        ]
+      }
     },
     quantitative: {
-      intro: "A quantitative approach (FAIR-style loss exceedance modeling) for your top 10–15 risks, where the data exists to support it.",
-      steps: [
-        "Pick 10–15 risks where the potential impact justifies the modeling effort — don't quantify everything.",
-        "For each, estimate a loss range (minimum, most likely, maximum) rather than a single number.",
-        "Run a simple Monte Carlo or FAIR-style calculation to turn those ranges into an annualized loss exceedance estimate.",
-        "Keep the remaining 80%+ of risks on a simple qualitative scale — quantifying them isn't worth the effort.",
-        "Revisit the quantified set annually, or whenever the underlying assumptions change materially.",
-      ]
+      lean: {
+        intro: "FAIR-style modeling on a deliberately short list — the handful of risks where a number actually changes a decision, and nothing else.",
+        steps: [
+          "Cap the modeled set at five risks for the fast-track phase; scope creep here is what stalls quantitative programmes before they produce anything.",
+          "Estimate loss ranges (minimum, most likely, maximum) from data you already hold — don't commission new data collection to get started.",
+          "Use a spreadsheet Monte Carlo or an off-the-shelf FAIR calculator; a bespoke model is not a phase-one deliverable.",
+          "Everything outside the modeled five stays on a simple qualitative scale — say so explicitly, so the gap reads as a decision rather than an omission.",
+        ]
+      },
+      full: {
+        intro: "FAIR-style loss exceedance modeling across the top 10–15 risks, with the data sourcing and assumption review that makes the numbers defensible to someone outside the team.",
+        steps: [
+          "Pick 10–15 risks where the potential impact justifies the modeling effort — quantifying everything is the most reliable way to finish nothing.",
+          "For each, estimate a loss range and document the source of that range: internal incident history, industry loss data, or insurance claims experience.",
+          "Run Monte Carlo or FAIR to an annualized loss exceedance curve, and report the curve rather than a single expected value.",
+          "Have a second person review the assumptions behind every range before results go to the board — unchallenged inputs are the standard finding here.",
+          "Keep the remaining 80%+ of risks qualitative, and revisit the quantified set annually or whenever an underlying assumption shifts materially.",
+        ]
+      }
     },
     undecided: {
-      intro: "Start qualitative, and reserve quantitative modeling for the handful of risks where it would actually change a decision.",
-      steps: [
-        "Start with a 5×5 qualitative matrix — likelihood and impact, 1–5 each — so you have something usable within weeks.",
-        "Write concrete impact definitions before scoring a single risk; vague definitions are the most common reason registers fail.",
-        "After the first full review cycle, flag the handful of risks (usually under 10) where a bad outcome would be existential.",
-        "Quantify only that shortlist once real data exists — treat it as phase two, not a prerequisite to starting.",
-      ]
+      lean: {
+        intro: "Start qualitative and stay there for now. Quantitative modeling is phase two — in fast-track mode it's a distraction with a long lead time.",
+        steps: [
+          "Stand up a 5×5 qualitative matrix this month; usable beats precise at this stage.",
+          "Write concrete impact definitions before scoring a single risk — vague definitions are the most common reason registers quietly stop being used.",
+          "Flag, don't model, the risks where a bad outcome would be existential; a single flag column is enough for now.",
+          "Set the decision point explicitly: revisit quantification after the first full review cycle, not before.",
+        ]
+      },
+      full: {
+        intro: "Qualitative as the standing method, with a written rule for when a risk graduates to quantitative modeling. Committing to one method for everything is the more common mistake at this scope.",
+        steps: [
+          "Run everything through a 5×5 qualitative matrix with written impact definitions as the default method.",
+          "Write the graduation rule down — e.g. any risk scoring 20+, or any risk where the control decision costs more than a set threshold, gets modeled.",
+          "Build quantitative capability only on that shortlist (usually under ten risks), once you have loss data that supports it.",
+          "Report both together: the qualitative register for coverage, the modeled set for the decisions that need a number attached.",
+          "Review the graduation rule annually — it should let a small number through, not none and not most.",
+        ]
+      }
     },
   };
-  return map[methodologyVal];
+
+  const block = map[methodologyVal][scenarioType];
+  const steps = block.steps.slice();
+  const note = methodIndustryNote[industry] && methodIndustryNote[industry][scenarioType];
+  if (note) steps.push(note);
+  return { intro: block.intro, steps };
 }
 
 function toolingText(budgetVal, teamVal, scenarioType){
   if (budgetVal === 'none'){
-    return {
-      intro: "No dedicated budget means no platform yet — the templates need to carry the full weight for now.",
-      steps: [
-        "Build the register in a spreadsheet with locked columns: risk ID, description, owner, likelihood, impact, score, treatment, next review date.",
-        "Use whatever ticketing or project tool you already pay for to track treatment actions — don't buy something new just for this.",
-        "Log the manual hours spent maintaining the register for one quarter — that number is your business case for future budget.",
-        "Revisit the budget conversation once you can point to concrete effort a platform would remove.",
-      ]
-    };
+    return scenarioType === 'lean'
+      ? {
+          intro: "No dedicated budget is not a real constraint on a fast-track programme — templates carry it comfortably at this scope.",
+          steps: [
+            "One spreadsheet register with locked columns: risk ID, description, owner, likelihood, impact, score, treatment, next review date.",
+            "Track treatment actions in whatever ticketing or project tool you already pay for — buy nothing for this phase.",
+            "One shared evidence folder with a fixed naming structure; the discipline costs nothing now and saves the migration later.",
+            "Log the hours the register actually consumes this quarter — that log is your business case if the programme goes comprehensive.",
+          ]
+        }
+      : {
+          intro: "Comprehensive coverage with no tooling budget is achievable, but the manual overhead is real. Build the register so it can migrate, and start the funding conversation now rather than at renewal.",
+          steps: [
+            "Structure the spreadsheet like a database: one row per risk, stable risk IDs, no merged cells, controlled dropdowns for owner, status and category.",
+            "Keep controls and evidence on separate sheets keyed to risk ID rather than embedded in the register — that separation is what makes a later import possible at all.",
+            "Version the register monthly as dated copies; with no platform you have no audit trail otherwise, and an assessor will ask for one.",
+            "Expect roughly a day a week of maintenance at this scope. Track it and take that number into the budget conversation — waiting for a renewal cycle usually means another year on spreadsheets.",
+          ]
+        };
   }
   const multiOwner = (teamVal === 'smallteam' || teamVal === 'function');
 
@@ -935,7 +1012,7 @@ function buildScenarios(a){
     title: 'Lean & Fast Track',
     best: 'Best if the driver is a near-term deal or deadline and you need something credible now, not a full program on day one.',
     programme: programmeText(size, teamVal, 'lean'),
-    method: methodText(methodologyVal),
+    method: methodText(methodologyVal, 'lean', industry),
     tooling: toolingText(budget, teamVal, 'lean'),
     framework: frameworkText(industry, 'lean'),
     aiLayer: aiLayerText(budget, 'lean'),
@@ -946,7 +1023,7 @@ function buildScenarios(a){
     title: 'Audit-Ready & Comprehensive',
     best: 'Best if you expect recurring enterprise deals, investor scrutiny, or regulatory exams and want the program to hold up to outside audit, not just internal comfort.',
     programme: programmeText(size, teamVal, 'full'),
-    method: methodText(methodologyVal),
+    method: methodText(methodologyVal, 'full', industry),
     tooling: toolingText(budget, teamVal, 'full'),
     framework: frameworkText(industry, 'full'),
     aiLayer: aiLayerText(budget, 'full'),
