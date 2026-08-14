@@ -139,6 +139,11 @@ footer a{color:var(--teal)}
 .wizwrap iframe{width:100%;border:0;border-radius:10px;display:block;height:560px;min-height:0;transition:height .18s ease}
 .wizcap{font:400 12px var(--sans);color:var(--muted);margin-top:10px;text-align:center}
 .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px;margin-bottom:40px}
+.subhead{font:700 16px var(--sans);color:var(--white);letter-spacing:-.2px;margin-top:24px;margin-bottom:10px}
+.plist{list-style:none;max-width:720px}
+.plist li{font:400 15px/1.65 var(--sans);color:var(--body);padding:8px 0;border-bottom:1px solid var(--border);display:flex;gap:10px}
+.plist li:last-child{border:none}
+.plist li::before{content:'\2192';color:var(--teal);font-weight:600;flex-shrink:0}
 .tickbox{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:14px;padding:20px 24px;margin-top:22px;max-width:720px}
 .tickbox ul{list-style:none}
 .tickbox li{font:600 14.5px var(--sans);color:var(--white);padding:9px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center}
@@ -235,9 +240,33 @@ footer a{color:var(--teal)}
 
 <div class="sl">Compliance Programme</div>
 <div class="sh wide track" id="compliance">
-<h2>Obligations First, Certificates Second</h2>
-<p>Most compliance programmes start with a framework and work backwards to the organisation. That order is why so many of them produce evidence nobody trusts. Start instead with an obligations register &mdash; what actually applies to you, from regulation, contracts and customer commitments &mdash; then pick the control set that covers the most of it at once.</p>
-<p>The certificate is an output, not the programme. Auditors ask how you know a control operated; they do not ask which framework you admired.</p>
+<h2>Continuous Compliance</h2>
+<p>Compliance is not a tick-box exercise. It is the practice of continuity &mdash; control assurance, audits, evidence collection and validation running throughout the calendar year, not compressed into the weeks before an audit.</p>
+<p>Continuous compliance means ensuring a control is designed and operating effectively on a periodic basis. Designing and operating controls properly should be treated as security best practice in its own right &mdash; it is what keeps you ahead of future cyber attacks and data breaches, not just what satisfies an auditor.</p>
+<p>Evidence collection and validation on their own are not enough. This requires the ground reality of control effectiveness: testing with the control owner to confirm they are actually following it and monitoring it. The passing criteria becomes the evidence &mdash; proof that the process was performed and executed the way it is supposed to be, not just a screenshot that it exists.</p>
+<p>Staying on top of this is genuinely difficult in a fast-moving organisation, where change is the constant, moving target.</p>
+
+<div class="subhead">How to Achieve Continuous Compliance</div>
+<ul class="plist">
+  <li>Test controls with the owner, not just the artefact &mdash; walk the actual process, don&rsquo;t just collect the screenshot.</li>
+  <li>Set a rolling testing cadence through the year, not a rush before the audit window opens.</li>
+  <li>Define the passing criteria before you test &mdash; that is what &ldquo;operating effectively&rdquo; means, and it is what becomes the evidence.</li>
+  <li>Retest whenever the underlying process changes, not only on the fixed schedule.</li>
+  <li>Track control ownership continuously &mdash; a control with no current owner isn&rsquo;t being tested by anyone.</li>
+  <li>Route every failed test into remediation with an owner and a deadline, not just a note in the register.</li>
+  <li>Ground the approach in what regulators and auditors actually test for &mdash; SOC 2 Type II&rsquo;s operating-effectiveness window, ISO 27001 surveillance audits, PCI DSS&rsquo;s quarterly scan cadence, DORA&rsquo;s resilience testing &mdash; not a generic notion of &ldquo;staying compliant.&rdquo;</li>
+</ul>
+</div>
+
+<div class="sh wide">
+<h2>Handing Continuous Compliance to AI</h2>
+<ul class="plist">
+  <li>Identify the gap across standards &mdash; SOC 1, SOC 2, ISO 27001, PCI DSS, ISO 42001, DORA, HIPAA, NIS2 &mdash; and put what&rsquo;s missing into the roadmap for consideration.</li>
+  <li>AI can generate a confidence score for how one standard maps to another. Useful enough to rely on, but not something to trust unconditionally every time.</li>
+  <li>From ticket creation to notifying control owners &mdash; AI can run this end-to-end without human oversight.</li>
+  <li>API-based evidence collection can satisfy some control-test criteria, not all of them.</li>
+  <li>Data protection through to data retention: is customer data being used to train any AI models, what is the retention period, and what do the contractual obligations say. This is sensitive ground &mdash; data fed into systems that turn out not to be GDPR/CCPA compliant creates real exposure to significant penalties.</li>
+</ul>
 </div>
 
 <div class="pgrid">
