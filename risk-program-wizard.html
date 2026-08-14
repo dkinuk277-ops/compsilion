@@ -75,10 +75,12 @@
   .gauge-seg.active{ background: var(--amber); }
 
   .card{
-    background: var(--panel);
+    background: linear-gradient(170deg, #F3F8F6 0%, var(--panel) 55%);
     border: 1px solid var(--line);
+    border-top: 3px solid var(--teal);
     border-radius: var(--radius);
-    padding: 34px 32px;
+    padding: 32px 32px 34px;
+    box-shadow: 0 1px 2px rgba(22,35,42,0.05), 0 8px 24px -18px rgba(22,35,42,0.35);
   }
 
   .eyebrow{
@@ -168,7 +170,11 @@
     margin: 0 0 6px;
     letter-spacing: -0.01em;
   }
-  .rsub{ color: var(--ink-soft); font-size: 14.5px; margin: 0 0 22px; font-style: italic; }
+  .rsub{ color: var(--ink-soft); font-size: 14.5px; margin: 0 0 4px; font-style: italic; }
+  #results .card{
+    background: linear-gradient(170deg, #EDF4F1 0%, var(--panel) 40%);
+    border-top-color: var(--amber);
+  }
 
   .chips{
     display:flex;
@@ -196,13 +202,17 @@
     .scenarios{ grid-template-columns: 1fr; }
   }
   .scenario{
-    background: var(--panel);
+    background: linear-gradient(160deg, #E7F1EE 0%, var(--panel) 46%);
     border: 1px solid var(--line);
-    border-left: 4px solid var(--teal);
+    border-left: 5px solid var(--teal);
     border-radius: var(--radius);
     padding: 26px 24px;
+    box-shadow: 0 1px 2px rgba(22,35,42,0.05), 0 10px 26px -20px rgba(22,35,42,0.4);
   }
-  .scenario.b{ border-left-color: var(--amber); }
+  .scenario.b{
+    border-left-color: var(--amber);
+    background: linear-gradient(160deg, #FAF0DC 0%, var(--panel) 46%);
+  }
   .scenario .slabel{
     font-family:'IBM Plex Mono', monospace;
     font-size: 12px;
