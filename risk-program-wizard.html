@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Risk Program Scoping Instrument</title>
+<title>Risk Program Enablement Discovery Tool</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -282,7 +282,7 @@
 <body>
 <div class="wrap">
   <div class="masthead">
-    <h1>Risk Program Scoping Instrument</h1>
+    <h1>Risk Program Enablement Discovery Tool</h1>
     <div class="tag" id="stepTag">Step 01</div>
   </div>
 
@@ -966,16 +966,28 @@ init();
 </script>
 
 <script>
-// report height to the embedding page so the iframe can resize
+// report true content height to the embedding page
 (function(){
-  function send(){
-    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
-    if (window.parent !== window) window.parent.postMessage({ wizardHeight: h }, '*');
+  var embedded = window.parent !== window;
+  if (embedded) {
+    // 100vh inside a frame feeds back into the height we set, so drop it
+    document.body.style.minHeight = '0';
+    document.body.style.padding = '26px 18px 30px';
   }
-  window.addEventListener('load', send);
+  var last = 0;
+  function send(){
+    if (!embedded) return;
+    var wrap = document.querySelector('.wrap');
+    if (!wrap) return;
+    var cs = getComputedStyle(document.body);
+    var h = Math.ceil(wrap.getBoundingClientRect().height
+          + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom));
+    if (Math.abs(h - last) > 2) { last = h; window.parent.postMessage({ wizardHeight: h }, '*'); }
+  }
+  window.addEventListener('load', function(){ send(); setTimeout(send, 200); });
   window.addEventListener('resize', send);
-  document.addEventListener('click', function(){ setTimeout(send, 60); setTimeout(send, 320); });
-  setInterval(send, 1000);
+  document.addEventListener('click', function(){ setTimeout(send, 60); setTimeout(send, 340); });
+  setInterval(send, 700);
 })();
 </script>
 </body>
