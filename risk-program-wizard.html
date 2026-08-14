@@ -883,25 +883,42 @@ function frameworkText(industry, scenarioType){
   return { intro, steps: frameworkSteps[industry][scenarioType] };
 }
 
-function aiLayerText(budgetVal){
+function aiLayerText(budgetVal, scenarioType){
+  const lean = scenarioType === 'lean';
   if (budgetVal === 'none'){
-    return {
-      intro: "Even without a tooling budget, simple automation is achievable with what you already have.",
+    return lean ? {
+      intro: "At this scope, AI helps you move fast without adding tooling spend \u2014 the goal is a credible register, not full coverage.",
       steps: [
-        "Automate intake with a free form (Google Forms/Microsoft Forms) that writes straight into your spreadsheet register.",
-        "Draft first-pass risk assessments manually using any AI chat tool you already have access to — paste in the vendor doc or policy, ask for a structured draft, then edit.",
-        "Skip automated evidence collection for now — manual screenshots are fine at this budget tier, just standardize the format.",
-        "Keep human: risk appetite, acceptance/escalation decisions, and closing out any risk — automation should never touch these.",
+        "Intake through a free form (Google Forms/Microsoft Forms) writing straight into the spreadsheet register.",
+        "Draft the small number of assessments this scenario actually needs using any AI chat tool you already have \u2014 paste the document, ask for a structured draft, then edit.",
+        "Skip automated evidence collection entirely \u2014 manual screenshots are fine when the register is this small.",
+        "Keep human: risk appetite, acceptance/escalation decisions, and closing out any risk.",
+      ]
+    } : {
+      intro: "Comprehensive coverage without a tooling budget means the AI layer has to do more of the categorisation work by hand.",
+      steps: [
+        "Intake through a structured form covering every risk category in scope, not just the obvious ones \u2014 category selection is where non-technology and vendor risk get missed.",
+        "Use an AI chat tool to draft first-pass assessments for every intake, then batch-review rather than reviewing one at a time.",
+        "Build a simple tagging convention by hand (spreadsheet columns) so cross-mapping to your framework doesn't require a platform.",
+        "Keep human: risk appetite, acceptance/escalation decisions, and closing out any risk \u2014 non-negotiable regardless of scope.",
       ]
     };
   }
-  return {
-    intro: "Automate first, keep judgement calls human.",
+  return lean ? {
+    intro: "Automate the parts that would otherwise slow down a fast-track programme; leave depth for later.",
     steps: [
-      "Automate risk intake: route submissions from tickets, email, or a form directly into the register, tagged by category automatically.",
-      "Automate first-pass drafting: generate a structured risk assessment from an uploaded vendor questionnaire or policy document, then route to the owner for review.",
-      "Automate evidence collection: pull configuration and access data directly from cloud/IT systems instead of manual screenshots.",
+      "Automate intake: route submissions from tickets, email or a form into the register, tagged automatically.",
+      "Automate first-pass drafting for the priority risk categories only \u2014 the ones tied to the deal or deadline driving this.",
+      "Skip automated evidence pulls for now; add them when the programme moves to comprehensive.",
       "Keep human: setting risk appetite, accepting or escalating individual risks, and the final decision to close one out.",
+    ]
+  } : {
+    intro: "Automate across the full intake surface, including the categories a lean programme would defer.",
+    steps: [
+      "Automate intake and category routing across all risk types in scope \u2014 technology, vendor, AI/model, and any others the programme covers \u2014 not just the obvious ones.",
+      "Automate first-pass drafting for every category, generated from uploaded policy or vendor documentation, then routed to the named owner for review.",
+      "Automate evidence collection: pull configuration and access data directly from cloud/IT systems, continuously, rather than point-in-time screenshots.",
+      "Keep human: setting risk appetite, accepting or escalating individual risks, and the final decision to close one out \u2014 automation coverage does not change this.",
     ]
   };
 }
@@ -921,7 +938,7 @@ function buildScenarios(a){
     method: methodText(methodologyVal),
     tooling: toolingText(budget, teamVal, 'lean'),
     framework: frameworkText(industry, 'lean'),
-    aiLayer: aiLayerText(budget),
+    aiLayer: aiLayerText(budget, 'lean'),
   };
 
   const scenarioB = {
@@ -932,7 +949,7 @@ function buildScenarios(a){
     method: methodText(methodologyVal),
     tooling: toolingText(budget, teamVal, 'full'),
     framework: frameworkText(industry, 'full'),
-    aiLayer: aiLayerText(budget),
+    aiLayer: aiLayerText(budget, 'full'),
   };
 
   return [scenarioA, scenarioB];
