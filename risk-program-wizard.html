@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risk Program Scoping Instrument</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #E9EEEC;
+    --panel: #FAFCFB;
+    --ink: #16232A;
+    --ink-soft: #52646B;
+    --line: #C7D2CE;
+    --teal: #2F6E68;
+    --teal-soft: #DCEAE7;
+    --amber: #D79A3A;
+    --amber-soft: #F5E6C8;
+    --rust: #AE5A3E;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+  .wrap{
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  .masthead{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 14px;
+    margin-bottom: 30px;
+  }
+  .masthead h1{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    margin:0;
+  }
+  .masthead .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+  }
+
+  /* progress instrument */
+  .gauge{
+    margin-bottom: 34px;
+  }
+  .gauge-track{
+    display:grid;
+    gap: 4px;
+  }
+  .gauge-seg{
+    height: 6px;
+    background: var(--line);
+    border-radius: 2px;
+    transition: background 0.35s ease;
+  }
+  .gauge-seg.done{ background: var(--teal); }
+  .gauge-seg.active{ background: var(--amber); }
+
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 34px 32px;
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin: 0 0 10px;
+  }
+  h2.q{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-size: 27px;
+    line-height: 1.25;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .sub{
+    color: var(--ink-soft);
+    font-size: 14.5px;
+    margin: 0 0 26px;
+    line-height: 1.5;
+  }
+
+  .options{
+    display: grid;
+    gap: 10px;
+  }
+  .opt{
+    display:flex;
+    align-items:flex-start;
+    gap: 12px;
+    text-align:left;
+    width:100%;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .opt:hover{ border-color: var(--teal); background: var(--teal-soft); }
+  .opt:focus-visible{ outline: 2px solid var(--teal); outline-offset: 2px; }
+  .opt .dot{
+    flex: 0 0 auto;
+    width: 9px; height:9px;
+    margin-top: 5px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink-soft);
+  }
+  .opt.selected{ border-color: var(--teal); background: var(--teal-soft); }
+  .opt.selected .dot{ background: var(--teal); border-color: var(--teal); }
+  .opt .otext strong{ display:block; font-weight:600; }
+  .opt .otext span{ display:block; font-size: 13px; color: var(--ink-soft); margin-top:2px; }
+
+  .navrow{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    margin-top: 26px;
+  }
+  .btn-back{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    background:none;
+    border:none;
+    color: var(--ink-soft);
+    cursor:pointer;
+    padding: 8px 0;
+    text-transform: uppercase;
+    visibility: hidden;
+  }
+  .btn-back.show{ visibility: visible; }
+  .btn-back:hover{ color: var(--ink); }
+
+  /* results */
+  #results{ display:none; }
+  .rtitle{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-size: 30px;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+  .rsub{ color: var(--ink-soft); font-size: 14.5px; margin: 0 0 22px; font-style: italic; }
+
+  .chips{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+  .chip{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.03em;
+    padding: 6px 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    color: var(--ink-soft);
+  }
+
+  .scenarios{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 680px){
+    .scenarios{ grid-template-columns: 1fr; }
+  }
+  .scenario{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--teal);
+    border-radius: var(--radius);
+    padding: 26px 24px;
+  }
+  .scenario.b{ border-left-color: var(--amber); }
+  .scenario .slabel{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 6px;
+  }
+  .scenario.b .slabel{ color: var(--amber); }
+  .scenario h3{
+    font-family:'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    line-height:1.3;
+  }
+  .scenario .best{
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+    line-height:1.5;
+    font-style: italic;
+  }
+  dl.spec{ margin:0; }
+  dl.spec dt{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 16px;
+  }
+  dl.spec dt:first-child{ margin-top:0; }
+  dl.spec dd{
+    margin: 4px 0 0;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  dl.spec dd p{
+    margin: 0 0 8px;
+  }
+  dl.spec dd ul{
+    margin: 0;
+    padding-left: 18px;
+  }
+  dl.spec dd li{
+    font-size: 13.5px;
+    line-height: 1.5;
+    margin-bottom: 5px;
+    color: var(--ink);
+  }
+  dl.spec dd li:last-child{ margin-bottom: 0; }
+
+  .resetrow{
+    margin-top: 34px;
+    text-align:center;
+  }
+  .btn-reset{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: #fff;
+    border:none;
+    padding: 12px 22px;
+    border-radius: var(--radius);
+    cursor:pointer;
+  }
+  .btn-reset:hover{ background:#2A3B43; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="masthead">
+    <h1>Risk Program Scoping Instrument</h1>
+    <div class="tag" id="stepTag">Step 01</div>
+  </div>
+
+  <div class="gauge" id="wizardGauge">
+    <div class="gauge-track" id="gaugeTrack"></div>
+  </div>
+
+  <div id="wizard">
+    <div class="card">
+      <p class="eyebrow" id="stepEyebrow"></p>
+      <h2 class="q" id="stepTitle"></h2>
+      <p class="sub" id="stepSub"></p>
+      <div class="options" id="optionsWrap"></div>
+      <div class="navrow">
+        <button class="btn-back" id="backBtn">&larr; Back</button>
+        <span></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="results">
+    <p class="rtitle">Recommended shape</p>
+    <p class="rsub">Based on your answers. Directional, not a substitute for judgement about your own organization.</p>
+    <div class="chips" id="chips"></div>
+    <div class="scenarios" id="scenarios"></div>
+    <div class="resetrow">
+      <button class="btn-reset" id="resetBtn">Start over</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---------- Question definitions ----------
+const baseSteps = [
+  {
+    id: 'companySize',
+    eyebrow: 'Step 01 — Scale',
+    title: 'What size is the organization?',
+    sub: 'This determines whether you need a single owner, a small team, or a federated function.',
+    options: [
+      { value:'50-100', label:'50–100 employees', sub:'Early-stage, likely no dedicated risk headcount' },
+      { value:'100-200', label:'100–200 employees', sub:'Growing, may have 1–5 person compliance/security team' },
+      { value:'200-500', label:'200–500 employees', sub:'Multiple business units, likely needs a formal function' },
+      { value:'500-1000', label:'500–1,000 employees', sub:'Multiple product lines or geographies' },
+      { value:'1000plus', label:'1,000+ employees', sub:'Enterprise scale, needs a federated operating model' },
+    ]
+  },
+  {
+    id: 'industry',
+    eyebrow: 'Step 02 — Industry',
+    title: 'What industry best describes the business?',
+    sub: 'Your industry determines which regulatory and framework overlays actually apply.',
+    options: [
+      { value:'itsaas', label:'IT / SaaS', sub:'Software delivered to business customers' },
+      { value:'banking', label:'Banking / Financial Services', sub:'Regulated financial institution or fintech' },
+      { value:'dataauto', label:'Data Automation', sub:'Data pipelines, ETL, workflow automation' },
+      { value:'aiproduct', label:'AI Product / AI-native SaaS', sub:'Ships models or AI features to customers' },
+      { value:'consulting', label:'Consulting / Professional Services', sub:'Client-engagement based business' },
+      { value:'other', label:'Other', sub:'None of the above quite fits' },
+    ]
+  },
+  {
+    id: 'driver',
+    eyebrow: 'Step 03 — Driver',
+    title: "What's driving this initiative right now?",
+    sub: 'The trigger shapes how aggressive the timeline and scope need to be.',
+    options: [
+      { value:'customer', label:'Customer / procurement requirement', sub:'A deal is blocked on security or compliance' },
+      { value:'board', label:'Investor or board mandate', sub:'Governance expectation from funding or the board' },
+      { value:'audit', label:'Upcoming audit or certification', sub:'A SOC 2, ISO, or regulatory exam is scheduled' },
+      { value:'incident', label:'Recent incident or near-miss', sub:'Something already went wrong' },
+      { value:'proactive', label:'Proactive / best practice', sub:'No external trigger, just getting ahead of it' },
+    ]
+  },
+  {
+    id: 'maturity',
+    eyebrow: 'Step 04 — Current state',
+    title: 'How mature are your risk practices today?',
+    sub: 'This tells us whether we\'re building from zero or refining something that exists.',
+    options: [
+      { value:'none', label:'Nothing formal exists', sub:'No risk register, no documented policies' },
+      { value:'informal', label:'Some informal practices', sub:'Ad hoc reviews, no consistent process' },
+      { value:'partial', label:'A partial framework in place', sub:'Some policies and controls, gaps remain' },
+      { value:'mature', label:'A mature program needing a refresh', sub:'Established but outdated or fragmented' },
+    ]
+  },
+  {
+    id: 'methodology',
+    eyebrow: 'Step 06 — Methodology',
+    title: 'Qualitative or quantitative risk methodology?',
+    sub: 'This shapes how risks get scored and compared, not just which tool you use.',
+    options: [
+      { value:'qualitative', label:'Qualitative', sub:'Impact / likelihood matrix, judgement-based scoring' },
+      { value:'quantitative', label:'Quantitative', sub:'Numeric loss modeling (e.g. FAIR-style)' },
+      { value:'undecided', label:'Nothing concrete yet', sub:'Open to whichever approach fits once the program takes shape' },
+    ]
+  },
+  {
+    id: 'budget',
+    eyebrow: 'Step 07 — Budget',
+    title: 'What\'s the realistic annual budget for tooling and support?',
+    sub: 'Include tooling, audit fees, and any external help — not internal headcount you already have.',
+    options: [
+      { value:'none', label:'No dedicated budget', sub:'Whatever can be done with existing tools and effort' },
+      { value:'under25', label:'Under $25k / year', sub:'Templates and internal effort only' },
+      { value:'25-100', label:'$25k – $100k / year', sub:'Room for a compliance automation platform' },
+      { value:'100-300', label:'$100k – $300k / year', sub:'GRC platform plus external audit support' },
+      { value:'300plus', label:'$300k+ / year', sub:'Enterprise tooling and dedicated headcount' },
+    ]
+  },
+  {
+    id: 'timeline',
+    eyebrow: 'Step 08 — Timeline',
+    title: 'Is there a hard deadline driving this?',
+    sub: 'This sets the pacing of the rollout plan.',
+    options: [
+      { value:'urgent', label:'Yes — within 3 months', sub:'Deal, audit, or renewal forcing the date' },
+      { value:'medium', label:'3–6 months', sub:'A target exists but there\'s some flexibility' },
+      { value:'relaxed', label:'6–12 months', sub:'Planned, not urgent' },
+      { value:'open', label:'No fixed deadline', sub:'Ongoing improvement, no external date' },
+    ]
+  },
+  {
+    id: 'team',
+    eyebrow: 'Step 09 — Ownership',
+    title: 'Who can actually own this day to day?',
+    sub: 'The realistic staffing model changes what\'s achievable.',
+    options: [
+      { value:'none', label:'No one yet', sub:'This would be a net-new responsibility for someone' },
+      { value:'parttime', label:'One person, part-time', sub:'Added on top of an existing role' },
+      { value:'smallteam', label:'A small team (2–5 people)', sub:'Some dedicated capacity already exists' },
+      { value:'function', label:'A dedicated function', sub:'Risk/compliance is already a named team' },
+    ]
+  },
+];
+
+const industryQuestions = {
+  itsaas: {
+    id:'industryQ', eyebrow:'Step 05 — IT / SaaS specifics',
+    title:'Where do you stand on SOC 2?',
+    sub:'This is usually the single biggest lever for enterprise deal velocity.',
+    options:[
+      { value:'none', label:'No SOC 2 work started', sub:'' },
+      { value:'progress', label:'Working toward Type I', sub:'' },
+      { value:'type1', label:'Type I achieved', sub:'' },
+      { value:'type2', label:'Type II achieved', sub:'Ready to layer on more' },
+    ]
+  },
+  banking: {
+    id:'industryQ', eyebrow:'Step 05 — Banking / Financial specifics',
+    title:'Which regulatory relationship applies most directly?',
+    sub:'This determines which exam framework your controls need to map to.',
+    options:[
+      { value:'primary', label:'Primary regulator (OCC / Fed / FDIC)', sub:'Directly examined institution' },
+      { value:'state', label:'State banking regulator', sub:'' },
+      { value:'aml', label:'AML / KYC / FinCEN focus', sub:'' },
+      { value:'baas', label:'Banking-as-a-Service partner oversight', sub:'Fintech relying on a partner bank' },
+    ]
+  },
+  dataauto: {
+    id:'industryQ', eyebrow:'Step 05 — Data Automation specifics',
+    title:'How sensitive is the data moving through your pipelines?',
+    sub:'This determines whether privacy regulation is a primary or secondary concern.',
+    options:[
+      { value:'low', label:'Mostly non-sensitive business data', sub:'' },
+      { value:'pii', label:'Contains personal data (PII)', sub:'' },
+      { value:'regulated', label:'Contains regulated data (health, financial)', sub:'' },
+      { value:'crossborder', label:'Cross-border data flows', sub:'Multiple jurisdictions involved' },
+    ]
+  },
+  aiproduct: {
+    id:'industryQ', eyebrow:'Step 05 — AI Product specifics',
+    title:'Where are you on AI governance?',
+    sub:'This is the fastest-moving regulatory area right now.',
+    options:[
+      { value:'none', label:'No formal AI governance', sub:'' },
+      { value:'informal', label:'Informal model review process', sub:'' },
+      { value:'nist', label:'Adopting NIST AI RMF', sub:'' },
+      { value:'iso', label:'Pursuing ISO 42001 or preparing for EU AI Act', sub:'' },
+    ]
+  },
+  consulting: {
+    id:'industryQ', eyebrow:'Step 05 — Consulting specifics',
+    title:'What\'s the biggest exposure across client engagements?',
+    sub:'This is usually where the real liability sits in a services business.',
+    options:[
+      { value:'conflict', label:'Confidentiality / conflicts of interest', sub:'' },
+      { value:'liability', label:'Contractual liability caps', sub:'' },
+      { value:'segregation', label:'Cross-client data segregation', sub:'' },
+      { value:'ip', label:'IP ownership disputes', sub:'' },
+    ]
+  },
+  other: {
+    id:'industryQ', eyebrow:'Step 05 — Primary concern',
+    title:'What\'s the primary risk concern right now?',
+    sub:'',
+    options:[
+      { value:'security', label:'Data security', sub:'' },
+      { value:'operational', label:'Operational resilience', sub:'' },
+      { value:'compliance', label:'Regulatory compliance', sub:'' },
+      { value:'fraud', label:'Financial / fraud risk', sub:'' },
+    ]
+  }
+};
+
+// ---------- State ----------
+let steps = [];
+let stepIndex = 0;
+let answers = {};
+
+function buildStepList(){
+  const list = baseSteps.slice(0,4);
+  const industryChoice = answers.industry ? answers.industry.value : null;
+  const iq = industryQuestions[industryChoice] || null;
+  if (iq) list.push(iq);
+  list.push(...baseSteps.slice(4));
+  return list;
+}
+
+function init(){
+  steps = buildStepList();
+  renderStep();
+}
+
+function renderGauge(){
+  const track = document.getElementById('gaugeTrack');
+  track.innerHTML = '';
+  const total = steps.length;
+  track.style.gridTemplateColumns = `repeat(${total}, 1fr)`;
+  for(let i=0;i<total;i++){
+    const seg = document.createElement('div');
+    seg.className = 'gauge-seg' + (i < stepIndex ? ' done' : i === stepIndex ? ' active' : '');
+    track.appendChild(seg);
+  }
+  document.getElementById('stepTag').textContent = `Step ${String(stepIndex+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
+}
+
+function renderStep(){
+  const industryChoice = answers.industry ? answers.industry.value : null;
+  const currentIds = steps.map(s=>s.id);
+  const shouldHaveIq = !!industryChoice;
+  const hasIq = currentIds.includes('industryQ');
+  if (shouldHaveIq !== hasIq || (shouldHaveIq && steps.find(s=>s.id==='industryQ') !== industryQuestions[industryChoice])) {
+    const preservedIndex = stepIndex;
+    steps = buildStepList();
+    stepIndex = Math.min(preservedIndex, steps.length-1);
+  }
+
+  const step = steps[stepIndex];
+  renderGauge();
+  document.getElementById('stepEyebrow').textContent = step.eyebrow;
+  document.getElementById('stepTitle').textContent = step.title;
+  document.getElementById('stepSub').textContent = step.sub;
+
+  const wrap = document.getElementById('optionsWrap');
+  wrap.innerHTML = '';
+  step.options.forEach(opt=>{
+    const btn = document.createElement('button');
+    btn.className = 'opt' + (answers[step.id] && answers[step.id].value === opt.value ? ' selected' : '');
+    btn.innerHTML = `<span class="dot"></span><span class="otext"><strong>${opt.label}</strong>${opt.sub ? `<span>${opt.sub}</span>` : ''}</span>`;
+    btn.addEventListener('click', ()=> selectOption(step, opt));
+    wrap.appendChild(btn);
+  });
+
+  const backBtn = document.getElementById('backBtn');
+  backBtn.classList.toggle('show', stepIndex > 0);
+}
+
+function selectOption(step, opt){
+  answers[step.id] = opt;
+  setTimeout(()=>{
+    if (stepIndex < steps.length - 1){
+      stepIndex++;
+      renderStep();
+    } else {
+      showResults();
+    }
+  }, 180);
+}
+
+document.getElementById('backBtn').addEventListener('click', ()=>{
+  if (stepIndex > 0){
+    stepIndex--;
+    renderStep();
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  answers = {};
+  stepIndex = 0;
+  steps = buildStepList();
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('wizard').style.display = 'block';
+  document.getElementById('wizardGauge').style.display = 'block';
+  renderStep();
+});
+
+// ---------- Recommendation engine ----------
+const frameworkDetail = {
+  itsaas:   { system:'ISO/IEC 27001', method:'a SOC 2 Trust Services Criteria-based control set', regcheck:'a data residency and subprocessor review for every region you sell into' },
+  banking:  { system:'an FFIEC-aligned control set', method:'SOX and GLBA risk-and-control mapping', regcheck:'a state-by-state licensing and exam applicability check alongside your primary regulator' },
+  dataauto: { system:'ISO/IEC 27001', method:'a formal data protection impact assessment (DPIA) process', regcheck:'a GDPR/CCPA applicability check for every jurisdiction your data touches' },
+  aiproduct:{ system:'ISO/IEC 42001', method:'the NIST AI Risk Management Framework', regcheck:'an EU AI Act applicability check even if you are not EU-based' },
+  consulting:{ system:'ISO/IEC 27001', method:'an engagement-level conflict-of-interest and confidentiality review process', regcheck:'a contractual liability and indemnity review across your active client agreements' },
+  other:    { system:'ISO/IEC 27001', method:'a risk assessment method matched to your primary concern', regcheck:'a regulatory applicability check for every jurisdiction you operate in' },
+};
+
+const industryLabel = {
+  itsaas:'IT / SaaS', banking:'Banking / Financial Services', dataauto:'Data Automation',
+  aiproduct:'AI Product / AI-native SaaS', consulting:'Consulting / Professional Services', other:'your industry'
+};
+
+function programmeText(size, teamVal, scenarioType){
+  const group = (size === '50-100' || size === '100-200') ? 'small'
+              : (size === '200-500') ? 'mid' : 'large';
+
+  const copy = {
+    lean: {
+      small: {
+        intro: "One accountable owner holds the register directly and reports informally to leadership as issues surface.",
+        steps: [
+          "Name one accountable owner this week — job title matters less than having one name attached to it.",
+          "Stand up a single shared register with columns: risk, owner, likelihood, impact, score, treatment, review date.",
+          "Put a recurring 30-minute check-in on the calendar — biweekly for the first quarter, then monthly.",
+          "Send a one-page summary (top 5 risks, what changed) to leadership monthly.",
+        ]
+      },
+      mid: {
+        intro: "One owner plus a couple of informal points of contact in your highest-risk teams — no standing committee yet.",
+        steps: [
+          "Name the owner and 2–3 informal contacts in your highest-risk teams (e.g. engineering, finance, whoever touches customer data).",
+          "Run a 30-minute check-in every 2 weeks for the first 90 days, then move to monthly.",
+          "Report the top 5–10 risks to leadership monthly — one page, no more.",
+          "Revisit whether a formal committee is needed once the register passes roughly 25 active risks.",
+        ]
+      },
+      large: {
+        intro: "A single owner won't reach every operating area at this size, even in fast-track mode.",
+        steps: [
+          "Identify 3–5 highest-risk operating areas and name a champion in each within the first two weeks.",
+          "Give each champion their own register section, but keep one shared taxonomy so scores are comparable across areas.",
+          "Report quarterly to leadership — one roll-up of the top 15 risks across all areas, not every area's full list.",
+          "Accept partial coverage for the first two quarters; sequence remaining areas by risk exposure, not convenience.",
+        ]
+      },
+    },
+    full: {
+      small: {
+        intro: "A single accountable owner is enough at this size — give them explicit authority to require action, not just visibility.",
+        steps: [
+          "Name one accountable owner with authority to require action from other teams, not just report on them.",
+          "Set a review cadence: weekly for new or high-scoring risks, monthly for the full register.",
+          "Report monthly to leadership with a one-page summary; move to quarterly once the register stabilizes.",
+          "Plan for the role to become a full-time hire once headcount or deal volume justifies it.",
+        ]
+      },
+      mid: {
+        intro: "A small central team setting method and standards, with embedded champions owning their own registers.",
+        steps: [
+          "Recruit a 2–3 person central team to own method, standards, and reporting.",
+          "Name embedded champions in every business unit or function that generates its own risk — typically 4–8 people.",
+          "Federate the register from month one: one shared taxonomy and scoring method, separate ownership per area.",
+          "Report quarterly to the board: top 10–15 risks, movement since last quarter, anything that changed tier.",
+          "Run a full register review every 6 months to retire stale risks and recalibrate scoring.",
+        ]
+      },
+      large: {
+        intro: "A central second-line risk function setting method and aggregation, with embedded first-line champions everywhere.",
+        steps: [
+          "Build a central second-line risk function (2–5 people) owning method, standards, and aggregation.",
+          "Name first-line champions in every business unit or product line — likely 10+ people — each owning their own register.",
+          "Federate from day one: shared taxonomy and scoring method, but never a single central list at this scale.",
+          "Report monthly at the operating level, rolling up to quarterly board reporting on the top 15–20 risks enterprise-wide.",
+          "Run an annual independent review of the risk method itself, not just the register contents.",
+        ]
+      },
+    }
+  };
+
+  const block = copy[scenarioType][group];
+  const steps = block.steps.slice();
+  if (teamVal === 'none'){
+    steps.unshift("Naming the owner is the first action item — nothing else on this list works without it.");
+  }
+  return { intro: block.intro, steps };
+}
+
+function methodText(methodologyVal){
+  const map = {
+    qualitative: {
+      intro: "A 5×5 qualitative matrix with clearly written impact and likelihood definitions. The definitions matter far more than the scale.",
+      steps: [
+        "Likelihood bands: Rare, Unlikely, Possible, Likely, Almost certain — define each with a rough frequency (e.g. 'Possible = expected once in 3–5 years').",
+        "Impact bands: Negligible, Minor, Moderate, Major, Severe — define each in concrete terms (financial loss, downtime, data exposed), not just adjectives.",
+        "Score = Likelihood × Impact (1–5 each, 1–25 total). Set your own thresholds — e.g. 15+ red, 8–14 amber, under 8 green.",
+        "Re-score every risk at least twice a year, and immediately after any related incident.",
+        "Write the definitions down once in a one-page reference doc — that's what keeps scores comparable across owners.",
+      ]
+    },
+    quantitative: {
+      intro: "A quantitative approach (FAIR-style loss exceedance modeling) for your top 10–15 risks, where the data exists to support it.",
+      steps: [
+        "Pick 10–15 risks where the potential impact justifies the modeling effort — don't quantify everything.",
+        "For each, estimate a loss range (minimum, most likely, maximum) rather than a single number.",
+        "Run a simple Monte Carlo or FAIR-style calculation to turn those ranges into an annualized loss exceedance estimate.",
+        "Keep the remaining 80%+ of risks on a simple qualitative scale — quantifying them isn't worth the effort.",
+        "Revisit the quantified set annually, or whenever the underlying assumptions change materially.",
+      ]
+    },
+    undecided: {
+      intro: "Start qualitative, and reserve quantitative modeling for the handful of risks where it would actually change a decision.",
+      steps: [
+        "Start with a 5×5 qualitative matrix — likelihood and impact, 1–5 each — so you have something usable within weeks.",
+        "Write concrete impact definitions before scoring a single risk; vague definitions are the most common reason registers fail.",
+        "After the first full review cycle, flag the handful of risks (usually under 10) where a bad outcome would be existential.",
+        "Quantify only that shortlist once real data exists — treat it as phase two, not a prerequisite to starting.",
+      ]
+    },
+  };
+  return map[methodologyVal];
+}
+
+function toolingText(budgetVal, teamVal, scenarioType){
+  if (budgetVal === 'none'){
+    return {
+      intro: "No dedicated budget means no platform yet — the templates need to carry the full weight for now.",
+      steps: [
+        "Build the register in a spreadsheet with locked columns: risk ID, description, owner, likelihood, impact, score, treatment, next review date.",
+        "Use whatever ticketing or project tool you already pay for to track treatment actions — don't buy something new just for this.",
+        "Log the manual hours spent maintaining the register for one quarter — that number is your business case for future budget.",
+        "Revisit the budget conversation once you can point to concrete effort a platform would remove.",
+      ]
+    };
+  }
+  const multiOwner = (teamVal === 'smallteam' || teamVal === 'function');
+
+  if (scenarioType === 'lean'){
+    return multiOwner
+      ? {
+          intro: "A lightweight GRC platform becomes worthwhile once you have more than one register owner — but in fast-track mode, templates are enough until certification work actually starts.",
+          steps: [
+            "Stay on a shared spreadsheet plus a shared evidence folder through the fast-track phase.",
+            "Standardize the template now so migrating to a platform later doesn't mean rebuilding the register from scratch.",
+            "Revisit platform spend specifically when audit prep begins — not before.",
+          ]
+        }
+      : {
+          intro: "Stay on templates while there's a single owner — a platform doesn't earn its cost until more than one person is maintaining a register.",
+          steps: [
+            "One shared spreadsheet, one shared folder for supporting evidence — no separate tool needed yet.",
+            "Set a calendar reminder to revisit this the moment a second person starts maintaining risks.",
+          ]
+        };
+  }
+
+  const tierSteps = {
+    under25: [
+      "Use a free-tier or low-cost workflow tool (e.g. Notion, Airtable) layered on top of your templates.",
+      "Hold off on a paid GRC platform until budget grows — templates will carry you through initial certification prep.",
+      "Revisit this budget line at renewal time once you can show what a platform would save in audit-prep hours.",
+    ],
+    '25-100': [
+      "Shortlist 2–3 mid-market platforms (e.g. Vanta, Drata, Secureframe) and run a paid pilot with your top 2 before committing annually.",
+      "Prioritize automated evidence collection (cloud config checks, HR/IT integrations) over risk-register features — that's where the real time savings are.",
+      "Plan a 4–6 week implementation window ahead of your target audit date, not the week before.",
+    ],
+    '100-300': [
+      "Shortlist GRC platforms built for workflow depth (e.g. LogicGate, Hyperproof) rather than pure evidence-collection tools.",
+      "Budget separately for contracted audit support — don't assume the platform replaces an assessor or consultant.",
+      "Plan a 2–3 month implementation window, including migrating data out of any existing spreadsheets.",
+    ],
+    '300plus': [
+      "Shortlist enterprise GRC suites (e.g. ServiceNow GRC, Archer) and evaluate integration with existing ITSM/security tooling before evaluating features.",
+      "Budget for a dedicated platform administrator — enterprise GRC tools aren't self-serve at this scale.",
+      "Plan a 3–6 month phased rollout: pilot with one business unit before enterprise-wide deployment.",
+    ],
+  };
+  const intro = multiOwner
+    ? "A lightweight GRC platform becomes worthwhile once you have more than one register owner. Buy for workflow and evidence, not for the risk matrix."
+    : "A platform is optional with a single owner, but worth moving on early if you expect to add champions soon.";
+  return { intro, steps: tierSteps[budgetVal] };
+}
+
+const frameworkSteps = {
+  itsaas: {
+    lean: [
+      "Start with the SOC 2 common criteria you're weakest on today — access control and change management are the most common gaps.",
+      "Write an incident response policy even before formal monitoring exists — auditors and customers ask for the policy first.",
+      "Run a subprocessor and data residency review now — a half-day exercise today versus a multi-week scramble during an audit.",
+    ],
+    full: [
+      "Engage a SOC 2 readiness assessor before your formal audit window opens, not during it.",
+      "Sequence controls: access control and change management first, then monitoring and incident response, then vendor management.",
+      "Target Type I first if you have no prior audit history, then Type II 6–12 months later once controls have operated long enough to test.",
+      "Layer ISO 27001 on top only once SOC 2 is stable — don't run both certification pushes at once in year one.",
+    ]
+  },
+  banking: {
+    lean: [
+      "Map current controls against the FFIEC handbook sections most relevant to your business line — start with IT and operations, not all sections.",
+      "Confirm which state licenses and exam cycles actually apply before building anything else — this changes control scope materially.",
+      "If AML/KYC isn't already owned by someone, that's usually the single highest-priority gap to close first.",
+    ],
+    full: [
+      "Build one formal control matrix mapped to FFIEC, SOX, and GLBA — not three separate matrices duplicating evidence.",
+      "Engage outside counsel or a regulatory consultant to confirm your specific exam cycle and licensing footprint.",
+      "Schedule an internal mock exam 3–6 months ahead of your actual regulatory exam.",
+      "If operating via a bank partner (BaaS), get their specific control expectations in writing early — they often exceed regulatory minimums.",
+    ]
+  },
+  dataauto: {
+    lean: [
+      "Run a data mapping exercise first — you can't assess privacy risk without knowing what data you hold and where it flows.",
+      "Draft a lightweight DPIA template and apply it to your 2–3 highest-risk pipelines before trying to cover everything.",
+      "Confirm cross-border transfer mechanisms (SCCs, adequacy decisions) for any data leaving its origin jurisdiction.",
+    ],
+    full: [
+      "Build a full data inventory and lineage map as the foundation — every other control depends on this artifact.",
+      "Formalize the DPIA process and apply it to every new pipeline before launch, not retroactively.",
+      "Pursue ISO 27001 certification once the data inventory and DPIA process have run for at least one full cycle.",
+      "Run a GDPR/CCPA applicability review per jurisdiction annually — this landscape shifts faster than most.",
+    ]
+  },
+  aiproduct: {
+    lean: [
+      "Start with an informal model review checklist — training data source, known limitations, intended use case — documented per release.",
+      "Run the EU AI Act applicability check now even if you're not EU-based — it affects roadmap decisions, not just paperwork.",
+      "Document current bias/fairness testing, even if minimal — 'not tested yet' is a valid answer, but it needs to be a documented decision.",
+    ],
+    full: [
+      "Stand up an AI governance committee that signs off on model releases — this is the evidence ISO 42001 will expect to see.",
+      "Adopt the NIST AI RMF's four functions (Govern, Map, Measure, Manage) as your working structure before pursuing certification.",
+      "Run bias, fairness, and explainability testing as a release gate, not a post-launch audit.",
+      "Complete an EU AI Act risk-tier classification for every product line — many enterprise buyers now ask for it regardless of your base.",
+    ]
+  },
+  consulting: {
+    lean: [
+      "Add a conflict-of-interest check to engagement intake — a two-question form is enough to start.",
+      "Standardize liability caps and indemnity language across new contracts before trying to fix legacy ones.",
+      "Set up basic access segregation for client data (separate folders/permissions per client) even without a formal system.",
+    ],
+    full: [
+      "Build a formal conflicts-check process integrated into deal intake, with a named approver.",
+      "Run a liability and indemnity audit across all active contracts — legacy exposure is usually the bigger risk.",
+      "Implement technical access segregation (separate workspaces or tenancy) for competing clients, not just policy-based separation.",
+      "Pursue ISO 27001 certification once client data handling is consistent across engagements — increasingly a procurement requirement.",
+    ]
+  },
+  other: {
+    lean: [
+      "Pick the single risk category you flagged as the primary concern and build your first controls there.",
+      "Write down what 'good' looks like for that one category before expanding to the rest.",
+    ],
+    full: [
+      "Build a control framework anchored on ISO 27001, then layer in category-specific controls as overlays.",
+      "Get a regulatory applicability review done early — 'other' industries often carry more overlooked obligations than well-known regulated ones.",
+    ]
+  },
+};
+
+function frameworkText(industry, scenarioType){
+  const d = frameworkDetail[industry];
+  const intro = scenarioType === 'lean'
+    ? `Work toward ${d.system} informally — certification can wait — using ${d.method} as your risk method, and run ${d.regcheck} early.`
+    : `${d.system} for the management system, ${d.method} for the risk method, and ${d.regcheck}.`;
+  return { intro, steps: frameworkSteps[industry][scenarioType] };
+}
+
+function aiLayerText(budgetVal){
+  if (budgetVal === 'none'){
+    return {
+      intro: "Even without a tooling budget, simple automation is achievable with what you already have.",
+      steps: [
+        "Automate intake with a free form (Google Forms/Microsoft Forms) that writes straight into your spreadsheet register.",
+        "Draft first-pass risk assessments manually using any AI chat tool you already have access to — paste in the vendor doc or policy, ask for a structured draft, then edit.",
+        "Skip automated evidence collection for now — manual screenshots are fine at this budget tier, just standardize the format.",
+        "Keep human: risk appetite, acceptance/escalation decisions, and closing out any risk — automation should never touch these.",
+      ]
+    };
+  }
+  return {
+    intro: "Automate first, keep judgement calls human.",
+    steps: [
+      "Automate risk intake: route submissions from tickets, email, or a form directly into the register, tagged by category automatically.",
+      "Automate first-pass drafting: generate a structured risk assessment from an uploaded vendor questionnaire or policy document, then route to the owner for review.",
+      "Automate evidence collection: pull configuration and access data directly from cloud/IT systems instead of manual screenshots.",
+      "Keep human: setting risk appetite, accepting or escalating individual risks, and the final decision to close one out.",
+    ]
+  };
+}
+
+function buildScenarios(a){
+  const size = a.companySize.value;
+  const industry = a.industry.value;
+  const budget = a.budget.value;
+  const teamVal = a.team.value;
+  const methodologyVal = a.methodology.value;
+
+  const scenarioA = {
+    label: 'Scenario A',
+    title: 'Lean & Fast Track',
+    best: 'Best if the driver is a near-term deal or deadline and you need something credible now, not a full program on day one.',
+    programme: programmeText(size, teamVal, 'lean'),
+    method: methodText(methodologyVal),
+    tooling: toolingText(budget, teamVal, 'lean'),
+    framework: frameworkText(industry, 'lean'),
+    aiLayer: aiLayerText(budget),
+  };
+
+  const scenarioB = {
+    label: 'Scenario B',
+    title: 'Audit-Ready & Comprehensive',
+    best: 'Best if you expect recurring enterprise deals, investor scrutiny, or regulatory exams and want the program to hold up to outside audit, not just internal comfort.',
+    programme: programmeText(size, teamVal, 'full'),
+    method: methodText(methodologyVal),
+    tooling: toolingText(budget, teamVal, 'full'),
+    framework: frameworkText(industry, 'full'),
+    aiLayer: aiLayerText(budget),
+  };
+
+  return [scenarioA, scenarioB];
+}
+
+function chipRow(a){
+  const parts = [
+    a.companySize.label,
+    industryLabel[a.industry.value],
+    a.driver.label,
+    a.maturity.label,
+    a.industryQ ? a.industryQ.label : null,
+    a.methodology.label,
+    a.budget.label,
+    a.timeline.label,
+    a.team.label,
+  ].filter(Boolean);
+  return parts;
+}
+
+function showResults(){
+  document.getElementById('wizard').style.display = 'none';
+  document.getElementById('wizardGauge').style.display = 'none';
+  document.getElementById('stepTag').textContent = 'Complete';
+
+  const chipsWrap = document.getElementById('chips');
+  chipsWrap.innerHTML = '';
+  chipRow(answers).forEach(text=>{
+    const c = document.createElement('span');
+    c.className = 'chip';
+    c.textContent = text;
+    chipsWrap.appendChild(c);
+  });
+
+  const [a, b] = buildScenarios(answers);
+  const scWrap = document.getElementById('scenarios');
+  scWrap.innerHTML = '';
+  [ [a,''], [b,'b'] ].forEach(([sc, cls])=>{
+    const div = document.createElement('div');
+    div.className = 'scenario ' + cls;
+    const section = (block) => `<p>${block.intro}</p><ul>${block.steps.map(s=>`<li>${s}</li>`).join('')}</ul>`;
+    div.innerHTML = `
+      <p class="slabel">${sc.label}</p>
+      <h3>${sc.title}</h3>
+      <p class="best">${sc.best}</p>
+      <dl class="spec">
+        <dt>Programme</dt><dd>${section(sc.programme)}</dd>
+        <dt>Method</dt><dd>${section(sc.method)}</dd>
+        <dt>Tooling</dt><dd>${section(sc.tooling)}</dd>
+        <dt>Framework</dt><dd>${section(sc.framework)}</dd>
+        <dt>AI layer</dt><dd>${section(sc.aiLayer)}</dd>
+      </dl>
+    `;
+    scWrap.appendChild(div);
+  });
+
+  document.getElementById('results').style.display = 'block';
+}
+
+init();
+</script>
+
+<script>
+// report height to the embedding page so the iframe can resize
+(function(){
+  function send(){
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    if (window.parent !== window) window.parent.postMessage({ wizardHeight: h }, '*');
+  }
+  window.addEventListener('load', send);
+  window.addEventListener('resize', send);
+  document.addEventListener('click', function(){ setTimeout(send, 60); setTimeout(send, 320); });
+  setInterval(send, 1000);
+})();
+</script>
+</body>
+</html>
