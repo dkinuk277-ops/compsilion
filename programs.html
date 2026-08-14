@@ -45,6 +45,7 @@ nav a.lnk.active{color:var(--teal);background:var(--teal-soft);box-shadow:inset 
 .sh{margin-bottom:32px}
 .sh h2{font:700 30px var(--sans);color:var(--white);letter-spacing:-1px;margin-bottom:10px}
 .sh p{font:400 15px/1.75 var(--sans);color:var(--body);max-width:720px}
+.sh p:not(:last-child){margin-bottom:16px}
 .sep{border:none;border-top:1px solid var(--border);margin:64px 0}
 
 .lede{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 14px 14px 0;padding:24px 28px;margin-bottom:36px}
@@ -214,9 +215,10 @@ footer a{color:var(--teal)}
 </div>
 
 <div class="sh wide">
-<h2>Where AI Does the Lifting &mdash; and Where It Must Not</h2>
-<p>Drafting policy from your own decisions and documents, summarising regulatory text into obligations that apply to you, cross-mapping policy statements to framework clauses, and flagging where two policies contradict each other: all good uses, all verifiable.</p>
-<p>Setting risk appetite, granting an exception, and signing an approval are not. If the model decides, you do not have governance &mdash; you have automation wearing a governance label. The common failure is subtler than that, though: writing policy for an organisation you do not have. A forty-page AI policy in a 120-person company is ignored by week two and becomes evidence against you in an audit, because you documented a control you do not operate.</p>
+<h2>Decide and Define What AI Governance Is? What Systems Require Proper Governance?</h2>
+<p>Connecting AI systems changes the risk surface, and the change moves faster than most governance frameworks account for. Every new connection &mdash; a plugin, an MCP server wired into an LLM, an agent given a tool it can call on its own &mdash; is a new decision point about what that system can reach and act on, not just what it can say.</p>
+<p>Each of those integrations needs an owner, not just a build ticket. Someone accountable for what the agent is permitted to do, what happens when it does something wrong, and who signs off before it goes into production &mdash; the same way a person, not a policy document, is accountable for any other decision in the business.</p>
+<p>What data goes into the system matters as much as what comes out. Every model, agent and MCP integration needs its inputs tracked and monitored &mdash; what it can see, what it can query, what it can write to &mdash; because the governance question is not only whether the output is right, it is whether the system should have had access to that data in the first place.</p>
 </div>
 
 <hr class="sep">
