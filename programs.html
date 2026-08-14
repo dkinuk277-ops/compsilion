@@ -135,7 +135,7 @@ footer a{color:var(--teal)}
 .ptab.on{background:var(--teal-soft);border-color:var(--teal);color:var(--teal)}
 .track{scroll-margin-top:88px}
 .wizwrap{background:var(--surface);border:1px solid var(--amber);border-color:var(--amber-glow);border-radius:16px;padding:14px;margin:24px 0 8px}
-.wizwrap iframe{width:100%;border:0;border-radius:10px;display:block;min-height:620px}
+.wizwrap iframe{width:100%;border:0;border-radius:10px;display:block;height:560px;min-height:0;transition:height .18s ease}
 .wizcap{font:400 12px var(--sans);color:var(--muted);margin-top:10px;text-align:center}
 .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
 .pcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 18px}
@@ -181,13 +181,13 @@ footer a{color:var(--teal)}
 <div class="sh wide track" id="risk">
 <h2>Where to Start, and How Big to Build It</h2>
 <p>The shape of a risk programme depends on three things: how large the organisation is, how it is structured, and what is forcing the programme to exist at all. A 60-person company answering a customer security questionnaire needs something entirely different from a 2,000-person group facing a regulator &mdash; and most published guidance is written for the second while being read by the first.</p>
-<p>The instrument below asks five questions and returns a recommended shape: analysis method, framework, tooling position, and the first thing to build. It will sometimes tell you to spend nothing, because that is often the right answer.</p>
+<p>The discovery tool below works through nine questions &mdash; scale, sector, driver, maturity, method, budget, timeline and team, plus one tailored to your industry &mdash; and returns a recommended shape: analysis method, framework, tooling position, and the first thing to build. It will sometimes tell you to spend nothing, because that is often the right answer.</p>
 </div>
 
 <div class="wizwrap">
-  <iframe id="riskWizard" src="risk-program-wizard.html" title="Risk Program Scoping Instrument" loading="lazy" scrolling="no"></iframe>
+  <iframe id="riskWizard" src="risk-program-wizard.html" title="Risk Program Enablement Discovery Tool" loading="lazy" scrolling="no"></iframe>
 </div>
-<p class="wizcap">Directional guidance, not a substitute for judgement about your own organisation.</p>
+<p class="wizcap">Risk Program Enablement Discovery Tool &mdash; directional guidance, not a substitute for judgement about your own organisation.</p>
 
 <div class="pgrid">
   <div class="pcard"><span class="tagx">FIRST 30 DAYS</span><h4>Intake before analysis</h4><p>One route for risks to arrive and one owner to receive them. A register nobody feeds is worse than no register, because it looks like coverage.</p></div>
