@@ -478,6 +478,15 @@ export default {
 
     try {
       if (path === "/api/db-check") return await dbCheck(env);
+      if (path === "/api/env-check") {
+        const keys = Object.keys(env).sort();
+        return json({
+          bindings: keys,
+          hasAdminPassword: Boolean(env.ADMIN_PASSWORD),
+          hasResendKey: Boolean(env.RESEND_API_KEY),
+          hasDB: Boolean(env.DB),
+        });
+      }
       if (path === "/api/subscribe" && request.method === "POST")
         return await handleSubscribe(request, env, ctx);
       if (path === "/api/unsubscribe" && request.method === "GET")
