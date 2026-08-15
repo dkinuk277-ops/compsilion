@@ -1,4 +1,5 @@
 // ---------- helpers ----------
+// redeploy-marker: force fresh deployment to pick up current secrets
 
 function escapeHtml(str) {
   return String(str || "").replace(/[&<>"']/g, (c) => ({
