@@ -273,7 +273,8 @@ async function adminPage(env) {
           ${
             issue.sent_at
               ? ""
-              : `&nbsp; <button onclick="sendIssue('${issue.slug}')">Send</button>`
+              : `&nbsp; <button onclick="sendTest('${issue.slug}')" style="background:#2c2c5c;color:#eeeef6;">Send Test</button>
+                 &nbsp; <button onclick="sendIssue('${issue.slug}')">Send</button>`
           }
         </td>
       </tr>`;
@@ -327,6 +328,13 @@ document.getElementById('issueForm').addEventListener('submit', async function(e
   document.getElementById('msg').textContent = j.ok ? 'Saved.' : ('Error: ' + j.error);
   if (j.ok) setTimeout(function(){ location.reload(); }, 500);
 });
+async function sendTest(slug){
+  const email = prompt('Send a test copy of "' + slug + '" to which email address?');
+  if (!email) return;
+  const res = await fetch('/admin/newsletter/test-send', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({slug: slug, email: email}) });
+  const j = await res.json();
+  alert(j.ok ? ('Test sent to ' + email) : ('Error: ' + j.error));
+}
 async function sendIssue(slug){
   if (!confirm('Send "' + slug + '" to every active subscriber? This cannot be undone.')) return;
   const res = await fetch('/admin/newsletter/send', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({slug: slug}) });
@@ -374,6 +382,39 @@ async function previewIssue(env, url) {
     unsubscribe_token: "preview-token",
   });
   return new Response(html, { headers: { "Content-Type": "text/html" } });
+}
+
+async function sendTestHandler(request, env) {
+  await ensureSchema(env);
+  const { slug, email } = await request.json();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return json({ error: "Enter a valid email address" }, 400);
+  }
+  const issue = await env.DB.prepare("SELECT * FROM issues WHERE slug = ?")
+    .bind(slug)
+    .first();
+  if (!issue) return json({ error: "Issue not found" }, 404);
+  if (!env.RESEND_API_KEY) return json({ error: "RESEND_API_KEY is not configured yet" }, 400);
+
+  const resp = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "Compsilon <newsletter@compsilon.com>",
+      to: [email],
+      subject: "[TEST] " + issue.title,
+      html: renderEmailHTML(issue, { first_name: "", unsubscribe_token: "test-token" }),
+    }),
+  });
+
+  if (!resp.ok) {
+    const errText = await resp.text();
+    return json({ error: `Resend error: ${errText}` }, 502);
+  }
+  return json({ ok: true });
 }
 
 async function sendIssueHandler(request, env) {
@@ -453,6 +494,8 @@ export default {
           return await previewIssue(env, url);
         if (path === "/admin/newsletter/send" && request.method === "POST")
           return await sendIssueHandler(request, env);
+        if (path === "/admin/newsletter/test-send" && request.method === "POST")
+          return await sendTestHandler(request, env);
       }
     } catch (err) {
       return new Response("Server error: " + String(err), { status: 500 });
