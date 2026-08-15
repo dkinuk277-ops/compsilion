@@ -15,7 +15,7 @@ function json(obj, status = 200) {
 }
 
 async function ensureSchema(env) {
-  await env.DB.exec(
+  await env.DB.prepare(
     `CREATE TABLE IF NOT EXISTS subscribers (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       email TEXT NOT NULL UNIQUE,
@@ -26,8 +26,8 @@ async function ensureSchema(env) {
       subscribed_at TEXT NOT NULL DEFAULT (datetime('now')),
       unsubscribed_at TEXT
     )`
-  );
-  await env.DB.exec(
+  ).run();
+  await env.DB.prepare(
     `CREATE TABLE IF NOT EXISTS issues (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       slug TEXT NOT NULL UNIQUE,
@@ -40,7 +40,7 @@ async function ensureSchema(env) {
       sent_at TEXT,
       recipient_count INTEGER
     )`
-  );
+  ).run();
 }
 
 function requireAdmin(request, env) {
