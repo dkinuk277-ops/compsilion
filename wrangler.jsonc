@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "de-compliance",
+  "compatibility_date": "2026-08-15",
+  "main": "src/index.js",
+  "assets": {
+    "directory": "./",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/admin/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "compsilon",
+      "database_id": "8f424dc4-39b2-4609-a3b6-f3c8314218c2"
+    }
+  ]
+}
