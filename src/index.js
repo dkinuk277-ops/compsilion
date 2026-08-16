@@ -442,10 +442,11 @@ async function loadSubs() {
 function renderSubs(list) {
   const el = document.getElementById('sub-table');
   if (!list.length) { el.innerHTML = '<div class="empty">No subscribers match.</div>'; return; }
-  el.innerHTML = '<table><tr><th>Email</th><th>Name</th><th>Status</th><th>Subscribed</th><th>Unsubscribed</th></tr>' +
+  el.innerHTML = '<table><tr><th>Email</th><th>First name</th><th>Last name</th><th>Status</th><th>Subscribed</th><th>Unsubscribed</th></tr>' +
     list.map(s => '<tr>' +
       '<td>' + escape(s.email) + '</td>' +
-      '<td>' + escape([s.first_name, s.last_name].filter(Boolean).join(' ')) + '</td>' +
+      '<td>' + escape(s.first_name || '—') + '</td>' +
+      '<td>' + escape(s.last_name || '—') + '</td>' +
       '<td><span class="badge ' + (s.status === 'active' ? 'active' : 'unsub') + '">' + s.status + '</span></td>' +
       '<td>' + fmt(s.subscribed_at) + '</td>' +
       '<td>' + fmt(s.unsubscribed_at) + '</td>' +
