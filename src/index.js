@@ -153,7 +153,7 @@ function renderEmailHTML(issue, subscriber) {
 <tr><td align="center" style="padding:32px 16px;">
 <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background-color:#12122a;border:2px solid #06d6a0;border-radius:16px;overflow:hidden;">
 <tr><td style="padding:26px 32px 18px;">
-<span style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#eeeef6;letter-spacing:-0.5px;">COMP<span style="color:#06d6a0;">SILON</span></span>
+<span style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#eeeef6;letter-spacing:-0.5px;">COMP<span style="color:#06d6a0;background-image:linear-gradient(135deg,#06d6a0,#EF9F27);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">SILON</span></span>
 <span style="float:right;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#8c90c4;line-height:32px;"><a href="${webUrl}" style="color:#8c90c4;text-decoration:none;">View in browser</a></span>
 </td></tr>
 <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
@@ -189,24 +189,64 @@ function unsubscribePageHTML() {
 </body></html>`;
 }
 
-function welcomeIssue() {
-  return {
-    slug: "",
-    title: "Welcome to Compsilon",
-    tags: "Welcome",
-    issue_date: "",
-    body_html: `<p>Thanks for subscribing to Compsilon.</p>
-<p>You'll get one issue a week, usually Monday morning UK time. Each one focuses on a single thing worth thinking about in AI governance, risk, and compliance: a new regulation biting, a control quietly failing, a framework people mis-read. Practical over theoretical. Concrete over abstract. Written for people who actually build and run GRC programmes, not people who write about them.</p>
-<h3>What to expect</h3>
-<ul>
-<li>EU AI Act, NIST AI RMF, ISO 42001 and 27001, SOC 2, DORA</li>
-<li>Agent governance and MCP integration risk</li>
-<li>Continuous compliance and audit readiness</li>
-<li>Where AI helps versus where it dangerously oversteps</li>
-</ul>
-<p>If anything ever misses the mark, reply directly to any issue — <a href="mailto:hellocompsilon@gmail.com">hellocompsilon@gmail.com</a> goes to a real inbox.</p>
-<p>Welcome aboard.</p>`,
-  };
+function welcomeEmailHTML(subscriber) {
+  const unsubUrl = `https://compsilon.com/api/unsubscribe?token=${encodeURIComponent(subscriber.unsubscribe_token || "")}`;
+  const greetingName = subscriber.first_name ? escapeHtml(subscriber.first_name) : "Reader";
+  const topics = [
+    ["AI Governance", "EU AI Act", "NIST AI RMF"],
+    ["ISO 42001", "ISO 27001", "SOC 2"],
+    ["DORA", "Agent Governance", "Continuous Compliance"],
+  ];
+  const tileRow = (row) => row.map(label =>
+    `<td style="background:#06060e;border:1px solid #06d6a0;border-radius:8px;padding:11px 6px;text-align:center;width:33.33%;color:#eeeef6;font-family:Arial,Helvetica,sans-serif;font-size:11.5px;font-weight:700;">${escapeHtml(label)}</td>`
+  ).join("");
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#06060e;font-family:Arial,Helvetica,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#06060e;">
+<tr><td align="center" style="padding:32px 16px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#12122a;border:2px solid #06d6a0;border-radius:16px;overflow:hidden;">
+
+<tr><td style="padding:22px 28px 16px;">
+<span style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#eeeef6;letter-spacing:-0.5px;">COMP<span style="color:#06d6a0;background-image:linear-gradient(135deg,#06d6a0,#EF9F27);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">SILON</span></span>
+<span style="float:right;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#8c90c4;line-height:32px;"><a href="https://compsilon.com" style="color:#8c90c4;text-decoration:none;">View in browser</a></span>
+</td></tr>
+
+<tr><td style="padding:0 28px;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
+
+<tr><td style="padding:22px 28px 0;">
+<h1 style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:800;color:#eeeef6;line-height:1.25;margin:0 0 14px;letter-spacing:-0.4px;">Welcome to Compsilon</h1>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#b9bce0;margin:0 0 12px;">Hi ${greetingName},</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#b9bce0;margin:0 0 12px;">Thanks for subscribing.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#b9bce0;margin:0 0 12px;">AI moves at its own pace, and it's already reshaping how Governance, Risk, and Compliance (GRC) gets done across industry sectors.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#b9bce0;margin:0 0 12px;">Compsilon publishes weekly &mdash; regulatory updates worth knowing, programme enablement moves worth making, and shifts worth spotting before they land.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#b9bce0;margin:0 0 22px;">We also cover AI GRC Engineering &mdash; where governance and compliance stop being spreadsheets and start being systems, automation, and code.</p>
+
+<h3 style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#eeeef6;margin:24px 0 12px;font-weight:600;">Topics we cover</h3>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-spacing:6px;margin:0 -6px;">
+<tr>${tileRow(topics[0])}</tr>
+<tr>${tileRow(topics[1])}</tr>
+<tr>${tileRow(topics[2])}</tr>
+</table>
+
+<div style="text-align:center;padding:28px 0 12px;">
+<a href="https://compsilon.com" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#06060e;background-color:#06d6a0;padding:12px 28px;border-radius:100px;text-decoration:none;">Visit compsilon.com for more &rarr;</a>
+</div>
+</td></tr>
+
+<tr><td style="padding:20px 28px 0;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
+<tr><td style="padding:16px 28px 22px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.7;color:#8c90c4;margin:0;">
+Compsilon &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a><br>
+You're receiving this because you subscribed at compsilon.com.<br>
+<a href="${unsubUrl}" style="color:#8c90c4;text-decoration:underline;">Unsubscribe</a>
+</p>
+</td></tr>
+
+</table></td></tr></table>
+</body></html>`;
 }
 
 async function sendWelcomeEmail(env, subscriber) {
@@ -222,7 +262,7 @@ async function sendWelcomeEmail(env, subscriber) {
         from: "Compsilon <newsletter@compsilon.com>",
         to: [subscriber.email],
         subject: "Welcome to Compsilon",
-        html: renderEmailHTML(welcomeIssue(), subscriber),
+        html: welcomeEmailHTML(subscriber),
       }),
     });
   } catch (err) { /* non-fatal */ }
@@ -1021,7 +1061,7 @@ async function apiNextIssueSlug(env) {
 }
 
 async function apiWelcomePreview() {
-  const html = renderEmailHTML(welcomeIssue(), { first_name: "Reader", unsubscribe_token: "preview-token" });
+  const html = welcomeEmailHTML({ first_name: "Reader", unsubscribe_token: "preview-token" });
   return new Response(html, { headers: { "Content-Type": "text/html" } });
 }
 
@@ -1036,7 +1076,7 @@ async function apiWelcomeTestSend(request, env) {
       from: "Compsilon <newsletter@compsilon.com>",
       to: [email],
       subject: "[TEST] Welcome to Compsilon",
-      html: renderEmailHTML(welcomeIssue(), { first_name: "", unsubscribe_token: "test-token" }),
+      html: welcomeEmailHTML({ first_name: "", unsubscribe_token: "test-token" }),
     }),
   });
   if (!resp.ok) { const t = await resp.text(); return json({ error: `Resend error: ${t}` }, 502); }
