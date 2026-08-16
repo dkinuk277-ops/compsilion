@@ -76,6 +76,10 @@ async function ensureSchema(env) {
       recipient_count INTEGER
     )`
   ).run();
+  // Safe migration: add body_html column if it doesn't exist yet.
+  try {
+    await env.DB.prepare("ALTER TABLE issues ADD COLUMN body_html TEXT").run();
+  } catch (e) { /* column already exists — ignore */ }
 }
 
 // ========== email template ==========
@@ -355,22 +359,56 @@ function adminAppHTML() {
 
 <section id="newsletters" class="panel">
   <h1>Newsletters</h1>
-  <p class="sub">Write, save, preview, test-send, and send weekly issues.</p>
+  <p class="sub">Generate with AI, or write by hand. Preview, test-send, and send weekly issues.</p>
+
   <div class="card">
-    <h2>New draft</h2>
+    <h2>Generate with AI</h2>
+    <p class="sub" style="margin-bottom:16px">Give Claude the topics, sources, and date. It returns a full draft &mdash; title, email teaser, and rich page body &mdash; that you can review, edit, and save.</p>
+    <form id="ai-form">
+      <div class="form-grid">
+        <div class="full"><label>Topics of interest (required)</label><textarea name="topics" placeholder="One per line, or comma-separated. E.g.\nEU AI Act Article 50 enforcement\nCompany AI acceptable-use policy failures\nThird-party model risk assessment gaps" required></textarea></div>
+        <div><label>Publish date (optional)</label><input name="publish_date" placeholder="24 Aug 2026"></div>
+        <div><label>Tag / category</label><input name="tag" placeholder="Governance"></div>
+        <div class="full"><label>Sources (URLs, one per line) &mdash; only these will be cited</label><textarea name="sources" placeholder="https://example.com/report\nhttps://gov.uk/guidance/..."></textarea></div>
+        <div class="full"><label>Angle or notes (optional)</label><textarea name="notes" placeholder="What position or contrarian take should the piece land on?"></textarea></div>
+        <div><label>Length</label><select name="length"><option>standard (~900 words)</option><option>short (~600 words)</option><option>long (~1200 words)</option></select></div>
+        <div><label>&nbsp;</label><button type="submit" class="primary" id="gen-btn">Generate draft</button></div>
+      </div>
+    </form>
+    <div id="gen-result" style="display:none;margin-top:24px;border-top:1px solid #2c2c5c;padding-top:20px">
+      <h2 style="margin-bottom:12px">Generated draft</h2>
+      <div class="form-grid">
+        <div><label>Slug</label><input id="g-slug" placeholder="issue-03"></div>
+        <div><label>Display date</label><input id="g-date"></div>
+        <div class="full"><label>Title</label><input id="g-title"></div>
+        <div class="full"><label>Email teaser</label><textarea id="g-teaser" rows="3"></textarea></div>
+        <div><label>Tag</label><input id="g-tag"></div>
+        <div><label>Full-issue link path (auto)</label><input id="g-link" placeholder="newsletter/issue-03"></div>
+        <div class="full"><label>Full page HTML (edit if needed)</label><textarea id="g-body" rows="10" style="font-family:monospace;font-size:12px"></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <button class="primary" onclick="saveGenerated()">Save as draft</button>
+        <button class="secondary" onclick="previewGenerated()">Preview email</button>
+        <button class="secondary" onclick="discardGenerated()">Discard</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>New draft (manual)</h2>
     <form id="draft-form">
       <div class="form-grid">
         <div><label>Slug (unique)</label><input name="slug" placeholder="issue-03" required></div>
         <div><label>Display date</label><input name="issue_date" placeholder="17 Aug 2026"></div>
         <div class="full"><label>Title</label><input name="title" placeholder="What building AI governance does to the rest of your compliance function" required></div>
-        <div class="full"><label>Teaser paragraph</label><textarea name="teaser" placeholder="Short intro paragraph subscribers will read in the email — a hook before they click through." required></textarea></div>
+        <div class="full"><label>Teaser paragraph</label><textarea name="teaser" placeholder="Short intro paragraph subscribers will read in the email &mdash; a hook before they click through." required></textarea></div>
         <div><label>Tag</label><input name="tags" placeholder="Governance"></div>
-        <div><label>Full-issue link path</label><input name="link" placeholder="issue-03.html"></div>
+        <div><label>Full-issue link path</label><input name="link" placeholder="newsletter/issue-03 (leave blank to auto-generate)"></div>
       </div>
       <button type="submit" class="primary">Save draft</button>
     </form>
   </div>
-  <div class="card"><h2>All issues</h2><div id="issues-table"><div class="empty">Loading…</div></div></div>
+  <div class="card"><h2>All issues</h2><div id="issues-table"><div class="empty">Loading&hellip;</div></div></div>
 </section>
 
 </main>
@@ -461,6 +499,62 @@ document.getElementById('sub-search').addEventListener('input', e => {
   ));
 });
 
+// ---- AI generate ----
+let genCurrent = null;
+document.getElementById('ai-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('gen-btn');
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  btn.disabled = true; btn.textContent = 'Generating (30-60s)…';
+  try {
+    const r = await api('/admin/api/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    const g = r.generated;
+    genCurrent = g;
+    document.getElementById('g-title').value = g.title || '';
+    document.getElementById('g-teaser').value = g.teaser || '';
+    document.getElementById('g-body').value = g.body_html || '';
+    document.getElementById('g-tag').value = data.tag || '';
+    document.getElementById('g-date').value = data.publish_date || '';
+    const suggestedSlug = (g.title || 'issue').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0, 60);
+    document.getElementById('g-slug').value = suggestedSlug;
+    document.getElementById('g-link').value = 'newsletter/' + suggestedSlug;
+    document.getElementById('gen-result').style.display = 'block';
+    toast('Draft generated. Review below.');
+  } catch (err) { toast('Generate failed: ' + err.message, true); }
+  btn.disabled = false; btn.textContent = 'Generate draft';
+});
+document.getElementById('g-slug').addEventListener('input', e => {
+  document.getElementById('g-link').value = 'newsletter/' + e.target.value;
+});
+async function saveGenerated() {
+  const payload = {
+    slug: document.getElementById('g-slug').value.trim(),
+    title: document.getElementById('g-title').value.trim(),
+    teaser: document.getElementById('g-teaser').value.trim(),
+    tags: document.getElementById('g-tag').value.trim(),
+    issue_date: document.getElementById('g-date').value.trim(),
+    link: document.getElementById('g-link').value.trim(),
+    body_html: document.getElementById('g-body').value,
+  };
+  if (!payload.slug || !payload.title || !payload.teaser) { toast('Slug, title, and teaser are required', true); return; }
+  try {
+    await api('/admin/api/issues/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    toast('Draft saved.');
+    discardGenerated();
+    loadIssues(); loadStats();
+  } catch (err) { toast('Save failed: ' + err.message, true); }
+}
+async function previewGenerated() {
+  // Save first (upsert), then preview
+  await saveGenerated();
+  preview(document.getElementById('g-slug').value.trim());
+}
+function discardGenerated() {
+  genCurrent = null;
+  document.getElementById('gen-result').style.display = 'none';
+  document.getElementById('ai-form').reset();
+}
+
 // ---- newsletters ----
 async function loadIssues() {
   try {
@@ -541,13 +635,209 @@ async function apiListIssues(env) {
 async function apiSaveIssue(request, env) {
   await ensureSchema(env);
   const data = await request.json();
-  const { slug, title, teaser, tags, issue_date, link } = data;
+  const { slug, title, teaser, tags, issue_date, link, body_html } = data;
   if (!slug || !title || !teaser) return json({ error: "slug, title and teaser are required" }, 400);
+  const linkFinal = link || `newsletter/${slug}`;
   await env.DB.prepare(
-    `INSERT INTO issues (slug, title, teaser, tags, issue_date, link) VALUES (?, ?, ?, ?, ?, ?)
-     ON CONFLICT(slug) DO UPDATE SET title=excluded.title, teaser=excluded.teaser, tags=excluded.tags, issue_date=excluded.issue_date, link=excluded.link`
-  ).bind(slug, title, teaser, tags || "", issue_date || "", link || "").run();
+    `INSERT INTO issues (slug, title, teaser, tags, issue_date, link, body_html) VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(slug) DO UPDATE SET title=excluded.title, teaser=excluded.teaser, tags=excluded.tags, issue_date=excluded.issue_date, link=excluded.link, body_html=COALESCE(excluded.body_html, issues.body_html)`
+  ).bind(slug, title, teaser, tags || "", issue_date || "", linkFinal, body_html || null).run();
   return json({ ok: true });
+}
+
+// ---------- AI generation ----------
+
+function generationSystemPrompt() {
+  return `You write the Compsilon newsletter — weekly AI GRC intelligence for practitioners (governance, risk, and compliance leads working with AI regulation).
+
+Editorial voice — match this exactly:
+- Punchy, declarative, contrarian in a useful way. Short sentences.
+- Practical over theoretical. Concrete over abstract.
+- Direct: address the reader as "you". No corporate hedging.
+- No filler openings ("In today's rapidly evolving landscape..."). Get to the point in the first line.
+- Prefer patterns like "Not X, but Y" and "X before Y" (e.g. "Authority Before Paperwork", "Obligations First, Certificates Second").
+- Skeptical of vendors, buzzwords, and one-size-fits-all frameworks.
+- No em-dashes in generated text — use commas, colons, or periods.
+
+Output requirements:
+- Return ONE valid JSON object, no markdown fences, no commentary before or after.
+- Schema: {"title": string, "teaser": string, "body_html": string}
+- title: 6-14 words, no clickbait, no colon-subtitle formula
+- teaser: 2-3 sentences (~40-70 words) — the hook that lands in the email inbox
+- body_html: rich HTML for the full issue page. 700-1200 words. Use these classes exactly:
+  * <h2> for major section headings
+  * <h3> for sub-sections
+  * <p> for paragraphs
+  * <ul><li>...</li></ul> for bullet lists
+  * <ol><li>...</li></ol> for numbered/step lists
+  * <div class="callout"><p>...</p></div> — for a key insight or aside, use sparingly (1-2 max)
+  * <div class="case"><div class="case-tag">SOURCE</div><h4>Title</h4><p>Summary...</p><div class="src"><a href="URL">Link name</a></div></div> — for source-backed case tiles; use ONLY when the user provided a real source URL
+  * <div class="checklist"><h4>SECTION LABEL</h4><ul><li>Item</li></ul></div> — for a takeaway checklist
+- Structure: hook paragraph → 2-4 sections with <h2> headings → each section mixes paragraphs and bullets → end with a checklist or clear takeaway
+- Use ONLY the source URLs the user provided. Never invent or hallucinate URLs, statistics, quotes, dates, or organisations.
+- If the user provided no sources, do not use the .case tile — write from principles instead.
+- Do not fabricate specific numbers, percentages, or regulatory dates. If unsure, speak in ranges or omit.
+
+Rules for body_html:
+- No inline styles. Use only the classes above.
+- No <html>, <head>, <body>, <style>, or <script> tags — body_html is inserted inside an existing page.
+- No image tags.`;
+}
+
+function generationUserPrompt(input) {
+  const parts = [];
+  parts.push(`Topics to cover:\n${input.topics || "(none provided)"}`);
+  if (input.publish_date) parts.push(`Publish date: ${input.publish_date}`);
+  if (input.tag) parts.push(`Suggested tag / category: ${input.tag}`);
+  if (input.sources) parts.push(`Sources (only these — do not invent others):\n${input.sources}`);
+  if (input.notes) parts.push(`Additional angle or notes:\n${input.notes}`);
+  parts.push(`Length: ${input.length || "standard (~900 words)"}`);
+  parts.push(`\nReturn exactly one JSON object as specified.`);
+  return parts.join("\n\n");
+}
+
+function stripJsonFences(s) {
+  if (!s) return s;
+  return s.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+}
+
+async function apiGenerateIssue(request, env) {
+  if (!env.ANTHROPIC_API_KEY) return json({ error: "ANTHROPIC_API_KEY is not configured. Add it as a secret on this Worker." }, 400);
+  const input = await request.json();
+  if (!input.topics || !String(input.topics).trim()) return json({ error: "Topics are required" }, 400);
+
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": env.ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-5",
+      max_tokens: 4096,
+      system: generationSystemPrompt(),
+      messages: [{ role: "user", content: generationUserPrompt(input) }],
+    }),
+  });
+
+  if (!resp.ok) {
+    const errText = await resp.text();
+    return json({ error: `Anthropic API error: ${errText}` }, 502);
+  }
+  const data = await resp.json();
+  const rawText = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
+  const cleaned = stripJsonFences(rawText);
+  let parsed;
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch (e) {
+    return json({ error: "Model returned invalid JSON. Try again.", raw: rawText.slice(0, 500) }, 502);
+  }
+  if (!parsed.title || !parsed.teaser || !parsed.body_html) {
+    return json({ error: "Model output missing required fields.", raw: cleaned.slice(0, 500) }, 502);
+  }
+  return json({ ok: true, generated: parsed });
+}
+
+// ---------- public: full-issue page ----------
+
+function issuePageHTML(issue) {
+  const displayDate = issue.issue_date ? escapeHtml(issue.issue_date) : "";
+  const tag = escapeHtml(issue.tags || "Newsletter");
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escapeHtml(issue.title)} | Compsilon</title>
+<meta name="description" content="${escapeHtml(issue.teaser).slice(0, 200)}">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06060e;--surface:#0d0d1a;--card:#12122a;--border:#1f1f42;
+  --muted:#6366a0;--body:#9396c7;--light:#c4c6e8;--white:#eeeef6;
+  --teal:#06d6a0;--teal-glow:#06d6a040;--amber:#EF9F27;--amber-glow:#EF9F2740;
+  --sans:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--body);line-height:1.7}
+a{color:inherit;text-decoration:none}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:80px 80px;opacity:.15;pointer-events:none;z-index:0}
+nav{position:sticky;top:0;z-index:100;background:#06060edd;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px}
+.logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px}
+.logo span{background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.issue-hero{position:relative;z-index:1;padding:56px 32px 40px;border-bottom:1px solid var(--border);max-width:820px;margin:0 auto}
+.hero-glow{position:absolute;top:-60px;left:20%;width:380px;height:240px;background:radial-gradient(ellipse,var(--teal-glow),transparent 70%);pointer-events:none}
+.breadcrumb{font:400 13px var(--sans);color:var(--muted);margin-bottom:20px;position:relative}
+.breadcrumb a{color:var(--teal)}
+.issue-meta{display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;flex-wrap:wrap}
+.badge{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1.5px;background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:5px 13px;border-radius:100px}
+.issue-date{font:500 12px var(--mono);color:var(--muted)}
+.issue-hero h1{font:800 38px/1.15 var(--sans);color:var(--white);letter-spacing:-1.6px;margin-bottom:14px;position:relative}
+.standfirst{font:400 16px/1.75 var(--sans);color:var(--light);position:relative}
+.article{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:48px 32px}
+.article h2{font:700 24px var(--sans);color:var(--white);letter-spacing:-.7px;margin:40px 0 14px}
+.article h2:first-child{margin-top:0}
+.article h3{font:600 17px var(--sans);color:var(--white);margin:28px 0 10px}
+.article p{font:400 15.5px/1.85 var(--sans);color:var(--body);margin-bottom:18px}
+.article p strong{color:var(--light);font-weight:600}
+.article a{color:var(--teal);border-bottom:1px solid #06d6a050}
+.article ul{list-style:none;margin:0 0 20px}
+.article ul li{font:400 15px/1.75 var(--sans);color:var(--body);padding:7px 0 7px 26px;position:relative}
+.article ul li::before{content:'▸';position:absolute;left:0;color:var(--amber)}
+.article ol{list-style:none;counter-reset:n;margin:0 0 20px}
+.article ol li{counter-increment:n;font:400 15px/1.75 var(--sans);color:var(--body);padding:9px 0 9px 40px;position:relative}
+.article ol li::before{content:counter(n);position:absolute;left:0;top:11px;width:24px;height:24px;border-radius:50%;background:var(--teal);color:var(--bg);font:700 11px var(--mono);display:flex;align-items:center;justify-content:center}
+.callout{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 12px 12px 0;padding:22px 26px;margin:26px 0}
+.callout p{font:400 14.5px/1.75 var(--sans);color:var(--light);margin:0}
+.case{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin:24px 0}
+.case-tag{font:600 10px var(--mono);text-transform:uppercase;letter-spacing:1.2px;color:var(--amber);margin-bottom:8px}
+.case h4{font:700 17px var(--sans);color:var(--white);margin-bottom:8px}
+.case p{font:400 14px/1.7 var(--sans);color:var(--muted);margin-bottom:12px}
+.case .src{font:400 12px var(--sans);color:var(--muted);border-top:1px solid var(--border);padding-top:11px}
+.case .src a{color:var(--teal);margin-right:12px}
+.checklist{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;margin:26px 0}
+.checklist h4{font:600 11px var(--mono);text-transform:uppercase;letter-spacing:1.2px;color:var(--teal);margin-bottom:14px}
+.checklist ul{margin:0;list-style:none}
+.checklist li{font:400 14px/1.65 var(--sans);color:var(--body);padding:8px 0 8px 28px;border-bottom:1px solid var(--border);position:relative}
+.checklist li:last-child{border:none}
+.checklist li::before{content:'☐';color:var(--amber);position:absolute;left:0}
+.sub-box{background:linear-gradient(135deg,#0d2820,#1a1408);border:1px solid var(--border);border-radius:18px;padding:38px;text-align:center;margin-top:40px;position:relative;overflow:hidden}
+.sub-box::before{content:'';position:absolute;top:-60px;right:-40px;width:240px;height:240px;background:radial-gradient(circle,var(--amber-glow),transparent 70%);pointer-events:none}
+.sub-box h3{font:700 22px var(--sans);color:var(--white);letter-spacing:-.5px;margin-bottom:8px;position:relative}
+.sub-box p{font:400 14px var(--sans);color:var(--muted);margin-bottom:20px;position:relative}
+.sub-box a{font:700 13px var(--sans);background:linear-gradient(135deg,var(--teal),var(--amber));color:var(--bg);padding:12px 28px;border-radius:100px;display:inline-block;position:relative}
+footer{border-top:1px solid var(--border);padding:24px 32px;text-align:center;font:400 12px var(--sans);color:var(--muted);position:relative;z-index:1}
+footer a{color:var(--teal)}
+</style></head>
+<body>
+<div class="grid-bg"></div>
+<nav><div class="nav-inner"><a href="/" class="logo">COMP<span>SILON</span></a></div></nav>
+<div class="issue-hero">
+  <div class="hero-glow"></div>
+  <div class="breadcrumb"><a href="/newsletter.html">Newsletter</a> &rsaquo; ${escapeHtml(issue.slug)}</div>
+  <div class="issue-meta"><span class="badge">${tag}</span>${displayDate ? `<span class="issue-date">${displayDate}</span>` : ""}</div>
+  <h1>${escapeHtml(issue.title)}</h1>
+  <p class="standfirst">${escapeHtml(issue.teaser)}</p>
+</div>
+<div class="article">
+${issue.body_html || "<p><em>No full content yet — this issue has only the email teaser.</em></p>"}
+<div class="sub-box">
+  <h3>Get the next issue</h3>
+  <p>Weekly AI GRC intelligence, direct to your inbox.</p>
+  <a href="/#subscribe">Subscribe &rarr;</a>
+</div>
+</div>
+<footer>&copy; 2026 Compsilon &middot; <a href="/">compsilon.com</a> &middot; <a href="/privacy-policy.html">Privacy</a> &middot; <a href="/terms-of-use.html">Terms</a></footer>
+</body></html>`;
+}
+
+async function servePublicIssue(env, slug) {
+  await ensureSchema(env);
+  const issue = await env.DB.prepare("SELECT * FROM issues WHERE slug = ?").bind(slug).first();
+  if (!issue) return new Response("Issue not found", { status: 404 });
+  return new Response(issuePageHTML(issue), { headers: { "Content-Type": "text/html" } });
 }
 
 async function apiPreviewIssue(env, url) {
@@ -630,6 +920,7 @@ export default {
           bindings: Object.keys(env).sort(),
           hasAdminPassword: Boolean(env.ADMIN_PASSWORD),
           hasResendKey: Boolean(env.RESEND_API_KEY),
+          hasAnthropicKey: Boolean(env.ANTHROPIC_API_KEY),
           hasDB: Boolean(env.DB),
         });
       }
@@ -654,6 +945,15 @@ export default {
         if (path === "/admin/api/issues/preview" && method === "GET") return await apiPreviewIssue(env, url);
         if (path === "/admin/api/issues/test-send" && method === "POST") return await apiTestSend(request, env);
         if (path === "/admin/api/issues/send" && method === "POST") return await apiSendIssue(request, env);
+        if (path === "/admin/api/generate" && method === "POST") return await apiGenerateIssue(request, env);
+      }
+
+      // public full-issue pages served from DB (e.g. /newsletter/issue-03)
+      if (path.startsWith("/newsletter/") && path.length > "/newsletter/".length) {
+        const slug = path.slice("/newsletter/".length).replace(/\/+$/, "");
+        if (slug && !slug.includes("/") && !slug.includes(".")) {
+          return await servePublicIssue(env, slug);
+        }
       }
 
       // legacy redirect for the old admin URL
