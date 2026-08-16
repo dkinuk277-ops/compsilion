@@ -325,6 +325,10 @@ function adminAppHTML() {
   .preview-body iframe{width:100%;height:70vh;border:0;background:#06060e}
   a.link{color:#06d6a0;text-decoration:none}
   a.link:hover{text-decoration:underline}
+  .topics-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px 14px;background:#06060e;border:1px solid #2c2c5c;border-radius:8px;padding:14px}
+  .tpk{display:flex;align-items:center;gap:8px;font-size:13px;color:#dcdef2;cursor:pointer;padding:4px 0}
+  .tpk input{width:auto;margin:0;accent-color:#06d6a0}
+  input[type="date"]{color-scheme:dark}
 </style></head>
 <body>
 <header>
@@ -366,12 +370,64 @@ function adminAppHTML() {
     <p class="sub" style="margin-bottom:16px">Give Claude the topics, sources, and date. It returns a full draft &mdash; title, email teaser, and rich page body &mdash; that you can review, edit, and save.</p>
     <form id="ai-form">
       <div class="form-grid">
-        <div class="full"><label>Topics of interest (required)</label><textarea name="topics" placeholder="One per line, or comma-separated. E.g.\nEU AI Act Article 50 enforcement\nCompany AI acceptable-use policy failures\nThird-party model risk assessment gaps" required></textarea></div>
-        <div><label>Publish date (optional)</label><input name="publish_date" placeholder="24 Aug 2026"></div>
-        <div><label>Tag / category</label><input name="tag" placeholder="Governance"></div>
-        <div class="full"><label>Sources (URLs, one per line) &mdash; only these will be cited</label><textarea name="sources" placeholder="https://example.com/report\nhttps://gov.uk/guidance/..."></textarea></div>
+        <div class="full">
+          <label>Topics of interest (required &mdash; tick one or more)</label>
+          <div class="topics-picker" id="topics-picker">
+            <label class="tpk"><input type="checkbox" value="EU AI Act enforcement and evolving obligations"> EU AI Act enforcement</label>
+            <label class="tpk"><input type="checkbox" value="NIST AI RMF adoption and mapping"> NIST AI RMF</label>
+            <label class="tpk"><input type="checkbox" value="ISO/IEC 42001 certification pathway"> ISO 42001</label>
+            <label class="tpk"><input type="checkbox" value="ISO 27001 controls extended for AI"> ISO 27001 for AI</label>
+            <label class="tpk"><input type="checkbox" value="SOC 2 Type II operating-effectiveness testing"> SOC 2</label>
+            <label class="tpk"><input type="checkbox" value="DORA operational resilience testing"> DORA</label>
+            <label class="tpk"><input type="checkbox" value="Third-party and vendor AI risk assessment"> Third-party / vendor risk</label>
+            <label class="tpk"><input type="checkbox" value="AI agent governance and accountability"> AI agent governance</label>
+            <label class="tpk"><input type="checkbox" value="MCP server integration security and oversight"> MCP server security</label>
+            <label class="tpk"><input type="checkbox" value="Continuous compliance and control testing"> Continuous compliance</label>
+            <label class="tpk"><input type="checkbox" value="GDPR / CCPA data protection for AI systems"> Data protection (GDPR/CCPA)</label>
+            <label class="tpk"><input type="checkbox" value="Data retention and AI training-data contractual obligations"> Data retention</label>
+            <label class="tpk"><input type="checkbox" value="Model risk management and validation"> Model risk management</label>
+            <label class="tpk"><input type="checkbox" value="AI incident response and post-incident review"> AI incident response</label>
+            <label class="tpk"><input type="checkbox" value="Audit readiness and evidence collection"> Audit readiness</label>
+            <label class="tpk"><input type="checkbox" value="Board and executive oversight of AI risk"> Board / executive oversight</label>
+            <label class="tpk"><input type="checkbox" value="Bias, fairness, and transparency requirements"> Bias &amp; fairness</label>
+            <label class="tpk"><input type="checkbox" value="Regulatory sandboxes and enforcement trends"> Regulatory sandboxes</label>
+          </div>
+          <textarea name="topics_extra" placeholder="Optional: add a custom topic or angle not in the list above" style="margin-top:10px" rows="2"></textarea>
+          <input type="hidden" name="topics" id="topics-hidden">
+        </div>
+        <div>
+          <label>Publish date (optional)</label>
+          <input type="date" name="publish_date">
+        </div>
+        <div>
+          <label>Tag / category</label>
+          <select name="tag">
+            <option value="">— select —</option>
+            <option>Governance</option>
+            <option>Risk</option>
+            <option>Compliance</option>
+            <option>Agents</option>
+            <option>EU AI Act</option>
+            <option>NIST AI RMF</option>
+            <option>ISO 42001</option>
+            <option>ISO 27001</option>
+            <option>SOC 2</option>
+            <option>DORA</option>
+            <option>Data Protection</option>
+            <option>Threat Intel</option>
+            <option>Frameworks</option>
+          </select>
+        </div>
+        <div class="full"><label>Sources (URLs, one per line) &mdash; only these will be cited</label><textarea name="sources" placeholder="https://example.com/report&#10;https://gov.uk/guidance/..."></textarea></div>
         <div class="full"><label>Angle or notes (optional)</label><textarea name="notes" placeholder="What position or contrarian take should the piece land on?"></textarea></div>
-        <div><label>Length</label><select name="length"><option>standard (~900 words)</option><option>short (~600 words)</option><option>long (~1200 words)</option></select></div>
+        <div>
+          <label>Length</label>
+          <select name="length">
+            <option>standard (~900 words)</option>
+            <option>short (~600 words)</option>
+            <option>long (~1200 words)</option>
+          </select>
+        </div>
         <div><label>&nbsp;</label><button type="submit" class="primary" id="gen-btn">Generate draft</button></div>
       </div>
     </form>
@@ -504,7 +560,19 @@ let genCurrent = null;
 document.getElementById('ai-form').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = document.getElementById('gen-btn');
-  const data = Object.fromEntries(new FormData(e.target).entries());
+  const form = e.target;
+  const checked = Array.from(form.querySelectorAll('.topics-picker input:checked')).map(i => i.value);
+  const extra = (form.querySelector('[name="topics_extra"]').value || '').trim();
+  const topicsCombined = [...checked, extra].filter(Boolean).join('\\n');
+  if (!topicsCombined) { toast('Pick at least one topic or add a custom one', true); return; }
+  const data = {
+    topics: topicsCombined,
+    publish_date: form.querySelector('[name="publish_date"]').value,
+    tag: form.querySelector('[name="tag"]').value,
+    sources: form.querySelector('[name="sources"]').value,
+    notes: form.querySelector('[name="notes"]').value,
+    length: form.querySelector('[name="length"]').value,
+  };
   btn.disabled = true; btn.textContent = 'Generating (30-60s)…';
   try {
     const r = await api('/admin/api/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
