@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="145" height="24" viewBox="0 0 145 24">
+  <defs>
+    <linearGradient id="csgrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06d6a0"/>
+      <stop offset="100%" stop-color="#EF9F27"/>
+    </linearGradient>
+  </defs>
+  <text x="0" y="18" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="800" fill="#eeeef6" letter-spacing="-0.5">COMP<tspan fill="url(#csgrad)">SILON</tspan></text>
+</svg>
