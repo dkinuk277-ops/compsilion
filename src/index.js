@@ -105,8 +105,8 @@ async function ensureSchema(env) {
 }
 
 // ========== email template ==========
-// NOTE: [Add your business mailing address here] placeholder must be replaced
-// with a real physical mailing address before first real send (CAN-SPAM).
+// Email template — teal border matches site brand, amber used only for content accents
+// (bullets, callout stripe, case tag) to mirror the article page.
 
 function renderEmailHTML(issue, subscriber) {
   const unsubUrl = `https://compsilon.com/api/unsubscribe?token=${encodeURIComponent(subscriber.unsubscribe_token || "")}`;
@@ -151,14 +151,14 @@ function renderEmailHTML(issue, subscriber) {
 <body style="margin:0;padding:0;background-color:#06060e;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#06060e;">
 <tr><td align="center" style="padding:32px 16px;">
-<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background-color:#12122a;border:2px solid #EF9F27;border-radius:16px;overflow:hidden;">
+<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background-color:#12122a;border:2px solid #06d6a0;border-radius:16px;overflow:hidden;">
 <tr><td style="padding:26px 32px 18px;">
-<span style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#eeeef6;letter-spacing:-0.5px;">COMP<span style="color:#EF9F27;">SILON</span></span>
+<span style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#eeeef6;letter-spacing:-0.5px;">COMP<span style="color:#06d6a0;">SILON</span></span>
 <span style="float:right;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#8c90c4;line-height:32px;"><a href="${webUrl}" style="color:#8c90c4;text-decoration:none;">View in browser</a></span>
 </td></tr>
 <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
 <tr><td style="padding:24px 32px 8px;">
-<span style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#06060e;background-color:#EF9F27;padding:5px 14px;border-radius:100px;">${escapeHtml(issue.tags || "Newsletter")}</span>
+<span style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#06060e;background-color:#06d6a0;padding:5px 14px;border-radius:100px;">${escapeHtml(issue.tags || "Newsletter")}</span>
 ${dateLine ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#8c90c4;margin-left:10px;">${dateLine}</span>` : ""}
 </td></tr>
 <tr><td style="padding:12px 32px 0;">
@@ -173,7 +173,7 @@ ${bodyHtml}
 <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:24px 0 0;"></td></tr>
 <tr><td style="padding:18px 32px 26px;">
 <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8c90c4;margin:0;">
-Compsilon &middot; [Add your business mailing address here]<br>
+Compsilon &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a><br>
 You're receiving this because you subscribed at compsilon.com.<br>
 <a href="${unsubUrl}" style="color:#8c90c4;text-decoration:underline;">Unsubscribe</a> &middot; <a href="${webUrl}" style="color:#8c90c4;text-decoration:underline;">Read on the web</a>
 </p>
