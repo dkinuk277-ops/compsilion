@@ -153,7 +153,7 @@ function renderEmailHTML(issue, subscriber) {
 <tr><td align="center" style="padding:32px 16px;">
 <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background-color:#12122a;border:2px solid #06d6a0;border-radius:16px;overflow:hidden;">
 <tr><td style="padding:26px 32px 18px;">
-<span style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#eeeef6;letter-spacing:-0.5px;">COMP<span style="color:#06d6a0;background-image:linear-gradient(135deg,#06d6a0,#EF9F27);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">SILON</span></span>
+<img src="https://compsilon.com/compsilon-logo.svg" alt="Compsilon" width="145" height="24" style="display:inline-block;vertical-align:middle;border:0;">
 <span style="float:right;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#8c90c4;line-height:32px;"><a href="${webUrl}" style="color:#8c90c4;text-decoration:none;">View in browser</a></span>
 </td></tr>
 <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
@@ -209,7 +209,7 @@ function welcomeEmailHTML(subscriber) {
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#12122a;border:2px solid #06d6a0;border-radius:16px;overflow:hidden;">
 
 <tr><td style="padding:22px 28px 16px;">
-<span style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#eeeef6;letter-spacing:-0.5px;">COMP<span style="color:#06d6a0;background-image:linear-gradient(135deg,#06d6a0,#EF9F27);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">SILON</span></span>
+<img src="https://compsilon.com/compsilon-logo.svg" alt="Compsilon" width="145" height="24" style="display:inline-block;vertical-align:middle;border:0;">
 <span style="float:right;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#8c90c4;line-height:32px;"><a href="https://compsilon.com" style="color:#8c90c4;text-decoration:none;">View in browser</a></span>
 </td></tr>
 
