@@ -111,7 +111,7 @@ async function ensureSchema(env) {
 function renderEmailHTML(issue, subscriber) {
   const unsubUrl = `https://compsilon.com/api/unsubscribe?token=${encodeURIComponent(subscriber.unsubscribe_token || "")}`;
   const greetingName = subscriber.first_name ? escapeHtml(subscriber.first_name) : "there";
-  const webUrl = `https://compsilon.com/newsletter/${escapeHtml(issue.slug)}`;
+  const webUrl = issue.slug ? `https://compsilon.com/newsletter/${escapeHtml(issue.slug)}` : `https://compsilon.com`;
   const bodyHtml = issue.body_html || `<p>${escapeHtml(issue.teaser).replace(/\n/g, '<br>')}</p>`;
   const dateLine = issue.issue_date ? escapeHtml(issue.issue_date) : "";
 
@@ -189,20 +189,40 @@ function unsubscribePageHTML() {
 </body></html>`;
 }
 
+function welcomeIssue() {
+  return {
+    slug: "",
+    title: "Welcome to Compsilon",
+    tags: "Welcome",
+    issue_date: "",
+    body_html: `<p>Thanks for subscribing to Compsilon.</p>
+<p>You'll get one issue a week, usually Monday morning UK time. Each one focuses on a single thing worth thinking about in AI governance, risk, and compliance: a new regulation biting, a control quietly failing, a framework people mis-read. Practical over theoretical. Concrete over abstract. Written for people who actually build and run GRC programmes, not people who write about them.</p>
+<h3>What to expect</h3>
+<ul>
+<li>EU AI Act, NIST AI RMF, ISO 42001 and 27001, SOC 2, DORA</li>
+<li>Agent governance and MCP integration risk</li>
+<li>Continuous compliance and audit readiness</li>
+<li>Where AI helps versus where it dangerously oversteps</li>
+</ul>
+<p>If anything ever misses the mark, reply directly to any issue — <a href="mailto:hellocompsilon@gmail.com">hellocompsilon@gmail.com</a> goes to a real inbox.</p>
+<p>Welcome aboard.</p>`,
+  };
+}
+
 async function sendWelcomeEmail(env, subscriber) {
   if (!env.RESEND_API_KEY) return;
-  const issue = { title: "Welcome to Compsilon", tags: "Welcome",
-    teaser: "Thanks for subscribing. You'll get one issue a week on AI governance, risk and compliance — practical, not theoretical.",
-    link: "newsletter.html" };
   try {
     await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         from: "Compsilon <newsletter@compsilon.com>",
         to: [subscriber.email],
         subject: "Welcome to Compsilon",
-        html: renderEmailHTML(issue, subscriber),
+        html: renderEmailHTML(welcomeIssue(), subscriber),
       }),
     });
   } catch (err) { /* non-fatal */ }
@@ -453,6 +473,15 @@ function adminAppHTML() {
 <section id="newsletters" class="panel">
   <h1>Newsletters</h1>
   <p class="sub">Generate with AI, or write by hand. Preview, test-send, and send weekly issues.</p>
+
+  <div class="card">
+    <h2>Welcome email</h2>
+    <p class="sub" style="margin-bottom:14px">Sent automatically the first time someone subscribes. Edit the content in the code if you want to change it.</p>
+    <div style="display:flex;gap:10px">
+      <button class="secondary" onclick="previewWelcome()">Preview</button>
+      <button class="secondary" onclick="testWelcome()">Send test to me</button>
+    </div>
+  </div>
 
   <div class="card">
     <h2>Generate with AI</h2>
@@ -769,6 +798,22 @@ async function loadIssues() {
       '</tr>').join('') + '</table>';
   } catch (e) { toast('Failed to load issues: ' + e.message, true); }
 }
+async function previewWelcome() {
+  document.getElementById('preview-title').textContent = 'Welcome email';
+  const frame = document.getElementById('preview-frame');
+  frame.removeAttribute('srcdoc');
+  frame.src = '/admin/api/welcome/preview';
+  document.getElementById('preview-modal').classList.add('on');
+}
+async function testWelcome() {
+  const email = prompt('Send the welcome email to which address?');
+  if (!email) return;
+  try {
+    await api('/admin/api/welcome/test-send', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+    toast('Welcome test sent to ' + email);
+  } catch (err) { toast('Send failed: ' + err.message, true); }
+}
+
 async function showInsights(slug) {
   const issue = allIssues.find(i => i.slug === slug);
   document.getElementById('preview-title').textContent = 'Insights — ' + (issue ? issue.title : slug);
@@ -973,6 +1018,29 @@ async function apiNextIssueSlug(env) {
   }
   const next = String(maxN + 1).padStart(2, "0");
   return json({ slug: `issue-${next}` });
+}
+
+async function apiWelcomePreview() {
+  const html = renderEmailHTML(welcomeIssue(), { first_name: "Reader", unsubscribe_token: "preview-token" });
+  return new Response(html, { headers: { "Content-Type": "text/html" } });
+}
+
+async function apiWelcomeTestSend(request, env) {
+  const { email } = await request.json();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Enter a valid email address" }, 400);
+  if (!env.RESEND_API_KEY) return json({ error: "RESEND_API_KEY is not configured" }, 400);
+  const resp = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: "Compsilon <newsletter@compsilon.com>",
+      to: [email],
+      subject: "[TEST] Welcome to Compsilon",
+      html: renderEmailHTML(welcomeIssue(), { first_name: "", unsubscribe_token: "test-token" }),
+    }),
+  });
+  if (!resp.ok) { const t = await resp.text(); return json({ error: `Resend error: ${t}` }, 502); }
+  return json({ ok: true });
 }
 
 async function apiSaveIssue(request, env) {
@@ -1307,6 +1375,8 @@ export default {
         if (path === "/admin/api/issues/send" && method === "POST") return await apiSendIssue(request, env);
         if (path === "/admin/api/generate" && method === "POST") return await apiGenerateIssue(request, env);
         if (path === "/admin/api/issues/insights" && method === "GET") return await apiIssueInsights(env, url);
+        if (path === "/admin/api/welcome/preview" && method === "GET") return await apiWelcomePreview();
+        if (path === "/admin/api/welcome/test-send" && method === "POST") return await apiWelcomeTestSend(request, env);
       }
 
       // Resend webhook (public route with signature verification)
