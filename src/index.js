@@ -823,19 +823,33 @@ async function loadIssues() {
     const el = document.getElementById('issues-table');
     if (!allIssues.length) { el.innerHTML = '<div class="empty">No drafts yet. Create one above.</div>'; return; }
     el.innerHTML = '<table><tr><th>Title</th><th>Slug</th><th>Status</th><th>Recipients</th><th>Actions</th></tr>' +
-      allIssues.map(i => '<tr>' +
-        '<td>' + escape(i.title) + '</td>' +
-        '<td style="color:#8c90c4;font-size:12px;">' + escape(i.slug) + '</td>' +
-        '<td>' + (i.sent_at ? '<span class="badge sent">Sent</span>' : '<span class="badge draft">Draft</span>') + '</td>' +
-        '<td>' + (i.sent_at ? (i.recipient_count || 0) + ' &middot; ' + fmt(i.sent_at) : '—') + '</td>' +
-        '<td class="actions">' +
-          '<button class="secondary" onclick="preview(\\'' + i.slug + '\\')">Preview</button>' +
-          (i.sent_at
-            ? '<button class="secondary" onclick="showInsights(\\'' + i.slug + '\\')">Insights</button>'
-            : '<button class="secondary" onclick="testSend(\\'' + i.slug + '\\')">Send test</button>' +
-              '<button class="primary" style="padding:8px 14px;font-size:12px;" onclick="sendReal(\\'' + i.slug + '\\')">Send to all</button>') +
-        '</td>' +
-      '</tr>').join('') + '</table>';
+      allIssues.map(i => {
+        const inProgress = !i.sent_at && (i.sends_so_far || 0) > 0;
+        const statusBadge = i.sent_at
+          ? '<span class="badge sent">Sent</span>'
+          : inProgress
+            ? '<span class="badge draft" style="background:#3a2a0d;color:#EF9F27;">In progress</span>'
+            : '<span class="badge draft">Draft</span>';
+        const recipientsCell = i.sent_at
+          ? (i.recipient_count || 0) + ' &middot; ' + fmt(i.sent_at)
+          : inProgress
+            ? i.sends_so_far + ' sent so far'
+            : '—';
+        const sendBtnLabel = inProgress ? 'Resume send' : 'Send to all';
+        return '<tr>' +
+          '<td>' + escape(i.title) + '</td>' +
+          '<td style="color:#8c90c4;font-size:12px;">' + escape(i.slug) + '</td>' +
+          '<td>' + statusBadge + '</td>' +
+          '<td>' + recipientsCell + '</td>' +
+          '<td class="actions">' +
+            '<button class="secondary" onclick="preview(\\'' + i.slug + '\\')">Preview</button>' +
+            (i.sent_at
+              ? '<button class="secondary" onclick="showInsights(\\'' + i.slug + '\\')">Insights</button>'
+              : '<button class="secondary" onclick="testSend(\\'' + i.slug + '\\')">Send test</button>' +
+                '<button class="primary" style="padding:8px 14px;font-size:12px;" onclick="sendReal(\\'' + i.slug + '\\')">' + sendBtnLabel + '</button>') +
+          '</td>' +
+        '</tr>';
+      }).join('') + '</table>';
   } catch (e) { toast('Failed to load issues: ' + e.message, true); }
 }
 async function previewWelcome() {
@@ -1044,7 +1058,11 @@ async function apiIssueInsights(env, url) {
 
 async function apiListIssues(env) {
   await ensureSchema(env);
-  const { results } = await env.DB.prepare("SELECT id, slug, title, teaser, tags, issue_date, link, created_at, sent_at, recipient_count FROM issues ORDER BY created_at DESC").all();
+  const { results } = await env.DB.prepare(
+    `SELECT i.id, i.slug, i.title, i.teaser, i.tags, i.issue_date, i.link, i.created_at, i.sent_at, i.recipient_count,
+            (SELECT COUNT(*) FROM email_sends es WHERE es.issue_id = i.id) AS sends_so_far
+     FROM issues i ORDER BY i.created_at DESC`
+  ).all();
   return json(results);
 }
 
@@ -1329,12 +1347,34 @@ async function apiSendIssue(request, env) {
   if (issue.sent_at) return json({ error: "This issue has already been sent" }, 400);
   if (!env.RESEND_API_KEY) return json({ error: "RESEND_API_KEY is not configured" }, 400);
 
-  const { results: subs } = await env.DB.prepare("SELECT * FROM subscribers WHERE status = 'active'").all();
-  if (!subs.length) return json({ error: "No active subscribers" }, 400);
+  // Resumable send: only email active subscribers who don't already have a
+  // recorded send for this issue. A retry after a partial failure (daily
+  // cap, network blip, Resend error) automatically skips everyone already
+  // emailed — no duplicate sends.
+  const { results: pending } = await env.DB.prepare(
+    `SELECT s.* FROM subscribers s
+     WHERE s.status = 'active'
+       AND NOT EXISTS (SELECT 1 FROM email_sends es WHERE es.issue_id = ? AND es.email = s.email)`
+  ).bind(issue.id).all();
 
-  let sent = 0;
-  for (let i = 0; i < subs.length; i += 100) {
-    const chunk = subs.slice(i, i + 100);
+  const alreadySentRow = await env.DB.prepare(
+    "SELECT COUNT(*) AS c FROM email_sends WHERE issue_id = ?"
+  ).bind(issue.id).first();
+  const alreadySent = alreadySentRow ? alreadySentRow.c : 0;
+
+  if (!pending.length) {
+    if (alreadySent > 0) {
+      // Everyone who should have received it already has — finalize now.
+      await env.DB.prepare("UPDATE issues SET sent_at = datetime('now'), recipient_count = ? WHERE id = ?")
+        .bind(alreadySent, issue.id).run();
+      return json({ ok: true, sent: alreadySent, resumed: true });
+    }
+    return json({ error: "No active subscribers" }, 400);
+  }
+
+  let sentThisRun = 0;
+  for (let i = 0; i < pending.length; i += 100) {
+    const chunk = pending.slice(i, i + 100);
     const payload = chunk.map(sub => ({
       from: "Compsilon <newsletter@compsilon.com>",
       to: [sub.email],
@@ -1350,10 +1390,19 @@ async function apiSendIssue(request, env) {
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    if (!resp.ok) { const t = await resp.text(); return json({ error: `Resend error: ${t}`, sentSoFar: sent }, 502); }
+    if (!resp.ok) {
+      const t = await resp.text();
+      const totalSent = alreadySent + sentThisRun;
+      const remaining = pending.length - sentThisRun;
+      return json({
+        error: `Resend error: ${t}`,
+        sentSoFar: totalSent,
+        remaining,
+        note: "This is safe to retry — anyone already emailed will be skipped automatically.",
+      }, 502);
+    }
     const respData = await resp.json();
     const ids = (respData.data || []).map(d => d.id);
-    // Persist the mapping so incoming webhook events can be correlated back to subscribers.
     for (let j = 0; j < chunk.length; j++) {
       const sub = chunk[j];
       const rid = ids[j] || null;
@@ -1361,13 +1410,14 @@ async function apiSendIssue(request, env) {
         await env.DB.prepare(
           "INSERT INTO email_sends (issue_id, subscriber_id, email, resend_email_id) VALUES (?, ?, ?, ?)"
         ).bind(issue.id, sub.id, sub.email, rid).run();
-      } catch (e) { /* duplicate resend id — ignore */ }
+      } catch (e) { /* duplicate — already recorded, ignore */ }
     }
-    sent += chunk.length;
+    sentThisRun += chunk.length;
   }
 
-  await env.DB.prepare("UPDATE issues SET sent_at = datetime('now'), recipient_count = ? WHERE id = ?").bind(sent, issue.id).run();
-  return json({ ok: true, sent });
+  const totalSent = alreadySent + sentThisRun;
+  await env.DB.prepare("UPDATE issues SET sent_at = datetime('now'), recipient_count = ? WHERE id = ?").bind(totalSent, issue.id).run();
+  return json({ ok: true, sent: totalSent });
 }
 
 // ========== router ==========
