@@ -501,6 +501,14 @@ function adminAppHTML() {
 <section id="subscribers" class="panel">
   <h1>Subscribers</h1>
   <p class="sub">Everyone who has signed up via the compsilon.com forms.</p>
+
+  <div class="card">
+    <h2>Add subscribers manually</h2>
+    <p class="sub" style="margin-bottom:12px">Paste emails one per line or comma-separated &mdash; useful for migrating a list from another tool.</p>
+    <textarea id="bulk-add-emails" rows="4" placeholder="jane@example.com&#10;john@example.com"></textarea>
+    <button class="primary" onclick="bulkAddSubscribers()">Add subscribers</button>
+  </div>
+
   <div class="filters" id="sub-filters">
     <button class="filter-btn on" data-f="all">All <span class="n" id="f-n-all">0</span></button>
     <button class="filter-btn" data-f="active">Active <span class="n" id="f-n-active">0</span></button>
@@ -693,6 +701,22 @@ async function loadStats() {
 let allSubs = [];
 let subFilter = 'all';
 let subQuery = '';
+async function bulkAddSubscribers() {
+  const textarea = document.getElementById('bulk-add-emails');
+  const text = textarea.value.trim();
+  if (!text) { toast('Paste at least one email first', true); return; }
+  try {
+    const r = await api('/admin/api/subscribers/add', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text}) });
+    const parts = [];
+    if (r.added) parts.push(r.added + ' added');
+    if (r.reactivated) parts.push(r.reactivated + ' reactivated');
+    if (r.alreadyActive) parts.push(r.alreadyActive + ' already active');
+    if (r.invalid) parts.push(r.invalid + ' invalid, skipped');
+    toast(parts.length ? parts.join(', ') : 'Nothing to add');
+    textarea.value = '';
+    loadSubs(); loadStats();
+  } catch (err) { toast('Add failed: ' + err.message, true); }
+}
 async function loadSubs() {
   try {
     allSubs = await api('/admin/api/subscribers');
@@ -947,6 +971,31 @@ async function apiListSubscribers(env) {
   await ensureSchema(env);
   const { results } = await env.DB.prepare("SELECT id, email, first_name, last_name, status, subscribed_at, unsubscribed_at FROM subscribers ORDER BY subscribed_at DESC").all();
   return json(results);
+}
+
+async function apiAddSubscribers(request, env) {
+  await ensureSchema(env);
+  const { text } = await request.json();
+  const raw = String(text || "").split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  let added = 0, reactivated = 0, alreadyActive = 0, invalid = 0;
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  for (const entry of raw) {
+    const email = entry.toLowerCase();
+    if (!emailRe.test(email)) { invalid++; continue; }
+    const existing = await env.DB.prepare("SELECT id, status FROM subscribers WHERE email = ?").bind(email).first();
+    if (existing) {
+      if (existing.status === "active") { alreadyActive++; continue; }
+      await env.DB.prepare("UPDATE subscribers SET status = 'active', unsubscribed_at = NULL WHERE id = ?").bind(existing.id).run();
+      reactivated++;
+    } else {
+      const token = crypto.randomUUID();
+      await env.DB.prepare(
+        `INSERT INTO subscribers (email, first_name, last_name, status, unsubscribe_token) VALUES (?, '', '', 'active', ?)`
+      ).bind(email, token).run();
+      added++;
+    }
+  }
+  return json({ ok: true, added, reactivated, alreadyActive, invalid, total: raw.length });
 }
 
 // Resend uses Svix-signed webhooks. Verify signature if RESEND_WEBHOOK_SECRET is set.
@@ -1457,6 +1506,7 @@ export default {
       if (path.startsWith("/admin/api/")) {
         if (!(await isAuthed(request, env))) return json({ error: "Not authenticated" }, 401);
         if (path === "/admin/api/subscribers" && method === "GET") return await apiListSubscribers(env);
+        if (path === "/admin/api/subscribers/add" && method === "POST") return await apiAddSubscribers(request, env);
         if (path === "/admin/api/issues" && method === "GET") return await apiListIssues(env);
         if (path === "/admin/api/issues/next-slug" && method === "GET") return await apiNextIssueSlug(env);
         if (path === "/admin/api/issues/save" && method === "POST") return await apiSaveIssue(request, env);
