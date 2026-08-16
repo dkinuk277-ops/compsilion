@@ -80,6 +80,28 @@ async function ensureSchema(env) {
   try {
     await env.DB.prepare("ALTER TABLE issues ADD COLUMN body_html TEXT").run();
   } catch (e) { /* column already exists — ignore */ }
+  // Map each Resend email ID back to which issue and which subscriber it belongs to.
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS email_sends (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      issue_id INTEGER NOT NULL,
+      subscriber_id INTEGER,
+      email TEXT NOT NULL,
+      resend_email_id TEXT UNIQUE,
+      sent_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`
+  ).run();
+  // Every Resend webhook event lands here (delivered, opened, clicked, bounced, complained).
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS email_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      resend_email_id TEXT,
+      event_type TEXT NOT NULL,
+      url TEXT,
+      recipient TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`
+  ).run();
 }
 
 // ========== email template ==========
@@ -89,22 +111,75 @@ async function ensureSchema(env) {
 function renderEmailHTML(issue, subscriber) {
   const unsubUrl = `https://compsilon.com/api/unsubscribe?token=${encodeURIComponent(subscriber.unsubscribe_token || "")}`;
   const greetingName = subscriber.first_name ? escapeHtml(subscriber.first_name) : "there";
-  const link = issue.link ? `https://compsilon.com/${escapeHtml(issue.link)}` : "https://compsilon.com/newsletter.html";
+  const webUrl = `https://compsilon.com/newsletter/${escapeHtml(issue.slug)}`;
+  const bodyHtml = issue.body_html || `<p>${escapeHtml(issue.teaser).replace(/\n/g, '<br>')}</p>`;
+  const dateLine = issue.issue_date ? escapeHtml(issue.issue_date) : "";
+
   return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body{margin:0;padding:0;background-color:#06060e;font-family:Arial,Helvetica,sans-serif;}
+  .article h2{font:700 20px Arial,Helvetica,sans-serif;color:#eeeef6;margin:32px 0 12px;letter-spacing:-.3px;}
+  .article h3{font:600 16px Arial,Helvetica,sans-serif;color:#eeeef6;margin:24px 0 8px;}
+  .article p{font:400 15px/1.75 Arial,Helvetica,sans-serif;color:#b9bce0;margin:0 0 14px;}
+  .article strong{color:#dcdef2;font-weight:600;}
+  .article a{color:#06d6a0;text-decoration:underline;}
+  .article ul{margin:0 0 18px;padding:0;list-style:none;}
+  .article ul li{font:400 14.5px/1.7 Arial,Helvetica,sans-serif;color:#b9bce0;padding:6px 0 6px 22px;position:relative;}
+  .article ul li:before{content:'▸';position:absolute;left:0;color:#EF9F27;}
+  .article ol{margin:0 0 18px;padding-left:22px;color:#b9bce0;}
+  .article ol li{font:400 14.5px/1.7 Arial,Helvetica,sans-serif;color:#b9bce0;padding:4px 0;}
+  .callout{background:#0d0d1a;border-left:3px solid #EF9F27;border-radius:0 8px 8px 0;padding:16px 20px;margin:22px 0;}
+  .callout p{font:400 14px/1.7 Arial,Helvetica,sans-serif;color:#c4c6e8;margin:0;}
+  .case{background:#0d0d1a;border:1px solid #2c2c5c;border-radius:10px;padding:18px;margin:20px 0;}
+  .case-tag{font:700 10px Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:1.2px;color:#EF9F27;margin-bottom:6px;display:block;}
+  .case h4{font:700 15px Arial,Helvetica,sans-serif;color:#eeeef6;margin:0 0 6px;}
+  .case p{font:400 13px/1.65 Arial,Helvetica,sans-serif;color:#8c90c4;margin:0 0 10px;}
+  .case .src{font:400 12px Arial,Helvetica,sans-serif;color:#8c90c4;border-top:1px solid #2c2c5c;padding-top:8px;}
+  .case .src a{color:#06d6a0;text-decoration:none;margin-right:10px;}
+  .checklist{background:#0d0d1a;border:1px solid #2c2c5c;border-radius:10px;padding:18px 20px;margin:22px 0;}
+  .checklist h4{font:700 11px Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:1.2px;color:#06d6a0;margin:0 0 10px;}
+  .checklist ul{margin:0;padding:0;list-style:none;}
+  .checklist li{font:400 13.5px/1.65 Arial,Helvetica,sans-serif;color:#b9bce0;padding:7px 0 7px 24px;border-bottom:1px solid #2c2c5c;position:relative;}
+  .checklist li:last-child{border-bottom:none;}
+  .checklist li:before{content:'☐';color:#EF9F27;position:absolute;left:0;}
+</style>
+</head>
 <body style="margin:0;padding:0;background-color:#06060e;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#06060e;">
 <tr><td align="center" style="padding:32px 16px;">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#12122a;border:1px solid #2c2c5c;border-radius:16px;overflow:hidden;">
-<tr><td style="padding:28px 32px 20px;"><span style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#eeeef6;letter-spacing:-0.5px;">COMP<span style="color:#06d6a0;">SILON</span></span></td></tr>
+<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background-color:#12122a;border:2px solid #EF9F27;border-radius:16px;overflow:hidden;">
+<tr><td style="padding:26px 32px 18px;">
+<span style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#eeeef6;letter-spacing:-0.5px;">COMP<span style="color:#EF9F27;">SILON</span></span>
+<span style="float:right;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#8c90c4;line-height:32px;"><a href="${webUrl}" style="color:#8c90c4;text-decoration:none;">View in browser</a></span>
+</td></tr>
 <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
-<tr><td style="padding:28px 32px 8px;"><span style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#06060e;background-color:#06d6a0;padding:5px 14px;border-radius:100px;">${escapeHtml(issue.tags || "Newsletter")}</span></td></tr>
-<tr><td style="padding:12px 32px 0;"><span style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:700;color:#eeeef6;line-height:1.3;">${escapeHtml(issue.title)}</span></td></tr>
-<tr><td style="padding:16px 32px 0;"><span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;color:#b9bce0;">Hi ${greetingName},<br><br>${escapeHtml(issue.teaser).replace(/\n/g,'<br>')}</span></td></tr>
-<tr><td style="padding:28px 32px 32px;"><a href="${link}" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:#06060e;background-color:#06d6a0;padding:13px 26px;border-radius:100px;text-decoration:none;">Read full issue &rarr;</a></td></tr>
-<tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
-<tr><td style="padding:20px 32px 28px;"><span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8c90c4;">Compsilon &middot; [Add your business mailing address here]<br>You're receiving this because you subscribed at compsilon.com.<br><a href="${unsubUrl}" style="color:#8c90c4;text-decoration:underline;">Unsubscribe</a></span></td></tr>
-</table></td></tr></table></body></html>`;
+<tr><td style="padding:24px 32px 8px;">
+<span style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#06060e;background-color:#EF9F27;padding:5px 14px;border-radius:100px;">${escapeHtml(issue.tags || "Newsletter")}</span>
+${dateLine ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#8c90c4;margin-left:10px;">${dateLine}</span>` : ""}
+</td></tr>
+<tr><td style="padding:12px 32px 0;">
+<h1 style="font-family:Arial,Helvetica,sans-serif;font-size:24px;font-weight:800;color:#eeeef6;line-height:1.25;margin:0 0 6px;letter-spacing:-0.5px;">${escapeHtml(issue.title)}</h1>
+</td></tr>
+<tr><td style="padding:14px 32px 0;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;color:#b9bce0;margin:0;">Hi ${greetingName},</p>
+</td></tr>
+<tr><td style="padding:14px 32px 8px;" class="article">
+${bodyHtml}
+</td></tr>
+<tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:24px 0 0;"></td></tr>
+<tr><td style="padding:18px 32px 26px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8c90c4;margin:0;">
+Compsilon &middot; [Add your business mailing address here]<br>
+You're receiving this because you subscribed at compsilon.com.<br>
+<a href="${unsubUrl}" style="color:#8c90c4;text-decoration:underline;">Unsubscribe</a> &middot; <a href="${webUrl}" style="color:#8c90c4;text-decoration:underline;">Read on the web</a>
+</p>
+</td></tr>
+</table></td></tr></table>
+</body></html>`;
 }
 
 function unsubscribePageHTML() {
@@ -464,7 +539,7 @@ function adminAppHTML() {
     </div>
   </div>
 
-  <div class="card"><h2>All issues</h2><div id="issues-table"><div class="empty">Loading&hellip;</div></div></div>
+  <div class="card"><h2>All newsletter publications</h2><div id="issues-table"><div class="empty">Loading&hellip;</div></div></div>
 </section>
 
 </main>
@@ -686,12 +761,51 @@ async function loadIssues() {
         '<td>' + (i.sent_at ? (i.recipient_count || 0) + ' &middot; ' + fmt(i.sent_at) : '—') + '</td>' +
         '<td class="actions">' +
           '<button class="secondary" onclick="preview(\\'' + i.slug + '\\')">Preview</button>' +
-          (i.sent_at ? '' :
-            '<button class="secondary" onclick="testSend(\\'' + i.slug + '\\')">Send test</button>' +
-            '<button class="primary" style="padding:8px 14px;font-size:12px;" onclick="sendReal(\\'' + i.slug + '\\')">Send to all</button>') +
+          (i.sent_at
+            ? '<button class="secondary" onclick="showInsights(\\'' + i.slug + '\\')">Insights</button>'
+            : '<button class="secondary" onclick="testSend(\\'' + i.slug + '\\')">Send test</button>' +
+              '<button class="primary" style="padding:8px 14px;font-size:12px;" onclick="sendReal(\\'' + i.slug + '\\')">Send to all</button>') +
         '</td>' +
       '</tr>').join('') + '</table>';
   } catch (e) { toast('Failed to load issues: ' + e.message, true); }
+}
+async function showInsights(slug) {
+  const issue = allIssues.find(i => i.slug === slug);
+  document.getElementById('preview-title').textContent = 'Insights — ' + (issue ? issue.title : slug);
+  const frame = document.getElementById('preview-frame');
+  frame.src = 'about:blank';
+  try {
+    const r = await api('/admin/api/issues/insights?slug=' + encodeURIComponent(slug));
+    const deliveredPct = r.sent ? Math.round((r.delivered / r.sent) * 100) : 0;
+    const openPct = r.delivered ? Math.round((r.unique_openers / r.delivered) * 100) : 0;
+    const clickPct = r.delivered ? Math.round((r.unique_clickers / r.delivered) * 100) : 0;
+    const clicksHtml = r.clicks.length
+      ? '<h3 style="margin-top:26px">Links clicked</h3><table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px;color:#dcdef2;">' +
+        r.clicks.map(c => '<tr><td style="padding:8px 6px;border-bottom:1px solid #2c2c5c;">' + escape(c.url) + '</td><td style="padding:8px 6px;border-bottom:1px solid #2c2c5c;text-align:right;color:#06d6a0;font-weight:700">' + c.c + '</td></tr>').join('') + '</table>'
+      : '<p style="color:#8c90c4;margin-top:20px;font-size:13px;">No clicks recorded yet. If you just sent this, events can take a few minutes to arrive, and click tracking only works once the Resend webhook is configured.</p>';
+    function stat(num, label, color) {
+      return '<div style="background:#12122a;border:1px solid #2c2c5c;border-radius:10px;padding:16px;">' +
+        '<div style="font-size:26px;font-weight:800;color:' + color + '">' + num + '</div>' +
+        '<div style="font-size:11px;color:#8c90c4;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-top:4px">' + label + '</div>' +
+        '</div>';
+    }
+    const html = '<!DOCTYPE html><html><body style="margin:0;padding:32px;background:#06060e;color:#dcdef2;font-family:Arial,sans-serif;">' +
+      '<h2 style="color:#eeeef6;margin:0 0 6px">Delivery and engagement</h2>' +
+      '<p style="color:#8c90c4;font-size:13px;margin:0 0 24px">Sent ' + r.sent + ' ' + (r.sent === 1 ? 'email' : 'emails') + ' &middot; live data from Resend webhooks.</p>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;">' +
+        stat(r.delivered, 'Delivered (' + deliveredPct + '%)', '#eeeef6') +
+        stat(r.unique_openers, 'Unique opens (' + openPct + '%)', '#06d6a0') +
+        stat(r.unique_clickers, 'Unique clickers (' + clickPct + '%)', '#06d6a0') +
+        stat(r.bounced, 'Bounced', '#f4a1a1') +
+        stat(r.complained, 'Spam reports', '#f4a1a1') +
+      '</div>' +
+      clicksHtml +
+      '</body></html>';
+    frame.srcdoc = html;
+    document.getElementById('preview-modal').classList.add('on');
+  } catch (err) {
+    toast('Insights failed: ' + err.message, true);
+  }
 }
 async function preview(slug) {
   const issue = allIssues.find(i => i.slug === slug);
@@ -700,8 +814,10 @@ async function preview(slug) {
   document.getElementById('preview-modal').classList.add('on');
 }
 function closePreview() {
+  const f = document.getElementById('preview-frame');
+  f.src = 'about:blank';
+  f.removeAttribute('srcdoc');
   document.getElementById('preview-modal').classList.remove('on');
-  document.getElementById('preview-frame').src = 'about:blank';
 }
 async function testSend(slug) {
   const email = prompt('Send a test copy to which email address?');
@@ -732,6 +848,113 @@ async function apiListSubscribers(env) {
   await ensureSchema(env);
   const { results } = await env.DB.prepare("SELECT id, email, first_name, last_name, status, subscribed_at, unsubscribed_at FROM subscribers ORDER BY subscribed_at DESC").all();
   return json(results);
+}
+
+// Resend uses Svix-signed webhooks. Verify signature if RESEND_WEBHOOK_SECRET is set.
+async function verifySvixSignature(request, rawBody, secret) {
+  if (!secret) return true; // no secret configured — accept but log a warning
+  const svixId = request.headers.get("svix-id");
+  const svixTs = request.headers.get("svix-timestamp");
+  const svixSig = request.headers.get("svix-signature");
+  if (!svixId || !svixTs || !svixSig) return false;
+  const rawSecret = secret.startsWith("whsec_") ? secret.slice(6) : secret;
+  let keyBytes;
+  try {
+    const b64 = rawSecret.replace(/-/g, "+").replace(/_/g, "/");
+    keyBytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  } catch (e) { return false; }
+  const key = await crypto.subtle.importKey(
+    "raw", keyBytes, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  const signed = `${svixId}.${svixTs}.${rawBody}`;
+  const sigBuf = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(signed));
+  const expectedB64 = btoa(String.fromCharCode(...new Uint8Array(sigBuf)));
+  return svixSig.split(" ").some(part => {
+    const [, val] = part.split(",");
+    return val === expectedB64;
+  });
+}
+
+async function handleResendWebhook(request, env) {
+  await ensureSchema(env);
+  const rawBody = await request.text();
+  const ok = await verifySvixSignature(request, rawBody, env.RESEND_WEBHOOK_SECRET);
+  if (!ok) return new Response("Invalid signature", { status: 401 });
+  let evt;
+  try { evt = JSON.parse(rawBody); } catch (e) { return new Response("Bad JSON", { status: 400 }); }
+  const type = evt.type || "";
+  const data = evt.data || {};
+  const emailId = data.email_id || data.id || null;
+  const recipient = Array.isArray(data.to) ? data.to[0] : (data.to || null);
+  const url = data.click && data.click.link ? data.click.link : (data.url || null);
+  const eventType = type.replace("email.", "");
+  try {
+    await env.DB.prepare(
+      "INSERT INTO email_events (resend_email_id, event_type, url, recipient) VALUES (?, ?, ?, ?)"
+    ).bind(emailId, eventType, url, recipient).run();
+    // If someone marks it spam or hard-bounces, flip their subscription off automatically.
+    if (recipient && (eventType === "complained" || eventType === "bounced")) {
+      await env.DB.prepare(
+        "UPDATE subscribers SET status = 'unsubscribed', unsubscribed_at = COALESCE(unsubscribed_at, datetime('now')) WHERE email = ? AND status = 'active'"
+      ).bind(String(recipient).toLowerCase()).run();
+    }
+  } catch (e) { /* ignore duplicates */ }
+  return json({ ok: true });
+}
+
+async function apiIssueInsights(env, url) {
+  await ensureSchema(env);
+  const slug = url.searchParams.get("slug");
+  if (!slug) return json({ error: "slug required" }, 400);
+  const issue = await env.DB.prepare("SELECT id, recipient_count, sent_at FROM issues WHERE slug = ?").bind(slug).first();
+  if (!issue) return json({ error: "Issue not found" }, 404);
+  if (!issue.sent_at) return json({ ok: true, sent: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, complained: 0, unique_openers: 0, unique_clickers: 0, clicks: [] });
+
+  const counts = await env.DB.prepare(
+    `SELECT ev.event_type AS t, COUNT(*) AS c
+     FROM email_events ev
+     INNER JOIN email_sends es ON es.resend_email_id = ev.resend_email_id
+     WHERE es.issue_id = ?
+     GROUP BY ev.event_type`
+  ).bind(issue.id).all();
+
+  const byType = {};
+  for (const row of counts.results || []) byType[row.t] = row.c;
+
+  const openersRow = await env.DB.prepare(
+    `SELECT COUNT(DISTINCT es.email) AS c
+     FROM email_events ev
+     INNER JOIN email_sends es ON es.resend_email_id = ev.resend_email_id
+     WHERE es.issue_id = ? AND ev.event_type = 'opened'`
+  ).bind(issue.id).first();
+  const clickersRow = await env.DB.prepare(
+    `SELECT COUNT(DISTINCT es.email) AS c
+     FROM email_events ev
+     INNER JOIN email_sends es ON es.resend_email_id = ev.resend_email_id
+     WHERE es.issue_id = ? AND ev.event_type = 'clicked'`
+  ).bind(issue.id).first();
+
+  const clickRows = await env.DB.prepare(
+    `SELECT ev.url AS url, COUNT(*) AS c
+     FROM email_events ev
+     INNER JOIN email_sends es ON es.resend_email_id = ev.resend_email_id
+     WHERE es.issue_id = ? AND ev.event_type = 'clicked' AND ev.url IS NOT NULL
+     GROUP BY ev.url
+     ORDER BY c DESC`
+  ).bind(issue.id).all();
+
+  return json({
+    ok: true,
+    sent: issue.recipient_count || 0,
+    delivered: byType.delivered || 0,
+    opened: byType.opened || 0,
+    clicked: byType.clicked || 0,
+    bounced: byType.bounced || 0,
+    complained: byType.complained || 0,
+    unique_openers: openersRow ? openersRow.c : 0,
+    unique_clickers: clickersRow ? clickersRow.c : 0,
+    clicks: clickRows.results || [],
+  });
 }
 
 async function apiListIssues(env) {
@@ -1002,7 +1225,6 @@ async function apiSendIssue(request, env) {
   if (!subs.length) return json({ error: "No active subscribers" }, 400);
 
   let sent = 0;
-  // Resend batch endpoint accepts up to 100 emails per call
   for (let i = 0; i < subs.length; i += 100) {
     const chunk = subs.slice(i, i + 100);
     const payload = chunk.map(sub => ({
@@ -1010,14 +1232,30 @@ async function apiSendIssue(request, env) {
       to: [sub.email],
       subject: issue.title,
       html: renderEmailHTML(issue, sub),
+      tags: [
+        { name: "issue_slug", value: String(issue.slug).replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 60) },
+        { name: "type", value: "newsletter" },
+      ],
     }));
     const resp = await fetch("https://api.resend.com/emails/batch", {
       method: "POST",
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    if (resp.ok) { sent += chunk.length; }
-    else { const t = await resp.text(); return json({ error: `Resend error: ${t}`, sentSoFar: sent }, 502); }
+    if (!resp.ok) { const t = await resp.text(); return json({ error: `Resend error: ${t}`, sentSoFar: sent }, 502); }
+    const respData = await resp.json();
+    const ids = (respData.data || []).map(d => d.id);
+    // Persist the mapping so incoming webhook events can be correlated back to subscribers.
+    for (let j = 0; j < chunk.length; j++) {
+      const sub = chunk[j];
+      const rid = ids[j] || null;
+      try {
+        await env.DB.prepare(
+          "INSERT INTO email_sends (issue_id, subscriber_id, email, resend_email_id) VALUES (?, ?, ?, ?)"
+        ).bind(issue.id, sub.id, sub.email, rid).run();
+      } catch (e) { /* duplicate resend id — ignore */ }
+    }
+    sent += chunk.length;
   }
 
   await env.DB.prepare("UPDATE issues SET sent_at = datetime('now'), recipient_count = ? WHERE id = ?").bind(sent, issue.id).run();
@@ -1040,6 +1278,7 @@ export default {
           bindings: Object.keys(env).sort(),
           hasAdminPassword: Boolean(env.ADMIN_PASSWORD),
           hasResendKey: Boolean(env.RESEND_API_KEY),
+          hasResendWebhookSecret: Boolean(env.RESEND_WEBHOOK_SECRET),
           hasAnthropicKey: Boolean(env.ANTHROPIC_API_KEY),
           hasDB: Boolean(env.DB),
         });
@@ -1067,7 +1306,11 @@ export default {
         if (path === "/admin/api/issues/test-send" && method === "POST") return await apiTestSend(request, env);
         if (path === "/admin/api/issues/send" && method === "POST") return await apiSendIssue(request, env);
         if (path === "/admin/api/generate" && method === "POST") return await apiGenerateIssue(request, env);
+        if (path === "/admin/api/issues/insights" && method === "GET") return await apiIssueInsights(env, url);
       }
+
+      // Resend webhook (public route with signature verification)
+      if (path === "/api/resend-webhook" && method === "POST") return await handleResendWebhook(request, env);
 
       // public full-issue pages served from DB (e.g. /newsletter/issue-03)
       if (path.startsWith("/newsletter/") && path.length > "/newsletter/".length) {
