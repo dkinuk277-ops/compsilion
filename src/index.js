@@ -330,7 +330,7 @@ function loginPageHTML(errorMsg) {
   body{background:#06060e;color:#dcdef2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
   .card{background:#12122a;border:1px solid #2c2c5c;border-radius:16px;padding:40px;max-width:400px;width:100%}
   .brand{font-size:22px;font-weight:800;color:#eeeef6;letter-spacing:-0.5px;text-align:center;margin-bottom:8px}
-  .brand span{color:#06d6a0}
+  .brand span{background:linear-gradient(135deg,#06d6a0,#EF9F27);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#06d6a0}
   .sub{text-align:center;color:#8c90c4;font-size:13px;margin-bottom:32px}
   label{display:block;font-size:12px;color:#8c90c4;margin-bottom:6px;font-weight:600;letter-spacing:0.3px}
   input{width:100%;padding:12px 14px;background:#06060e;border:1px solid #2c2c5c;color:#eeeef6;border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:16px}
@@ -404,7 +404,7 @@ function adminAppHTML() {
   body{background:#06060e;color:#dcdef2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;min-height:100vh}
   header{background:#0d0d1e;border-bottom:1px solid #2c2c5c;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
   .brand{font-size:18px;font-weight:800;color:#eeeef6;letter-spacing:-0.4px}
-  .brand span{color:#06d6a0}
+  .brand span{background:linear-gradient(135deg,#06d6a0,#EF9F27);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#06d6a0}
   nav{display:flex;gap:4px}
   .tab{background:none;border:none;color:#8c90c4;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
   .tab.on{background:#12122a;color:#eeeef6}
