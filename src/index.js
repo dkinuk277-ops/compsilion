@@ -316,13 +316,13 @@ function adminAppHTML() {
   .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .form-grid .full{grid-column:1/-1}
   .actions{display:flex;gap:8px;align-items:center}
-  .preview-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:50;align-items:center;justify-content:center;padding:20px}
+  .preview-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:50;align-items:center;justify-content:center;padding:12px}
   .preview-modal.on{display:flex}
-  .preview-inner{background:#0d0d1e;border-radius:12px;max-width:700px;width:100%;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
-  .preview-head{padding:16px 20px;border-bottom:1px solid #2c2c5c;display:flex;justify-content:space-between;align-items:center}
-  .preview-head h3{font-size:14px;color:#eeeef6}
-  .preview-body{flex:1;overflow:auto}
-  .preview-body iframe{width:100%;height:70vh;border:0;background:#06060e}
+  .preview-inner{background:#0d0d1e;border-radius:12px;max-width:1100px;width:96vw;height:92vh;overflow:hidden;display:flex;flex-direction:column}
+  .preview-head{padding:14px 18px;border-bottom:1px solid #2c2c5c;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+  .preview-head h3{font-size:13px;color:#eeeef6;font-weight:500}
+  .preview-body{flex:1;overflow:hidden}
+  .preview-body iframe{width:100%;height:100%;border:0;background:#06060e;display:block}
   a.link{color:#06d6a0;text-decoration:none}
   a.link:hover{text-decoration:underline}
   .topics-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px 14px;background:#06060e;border:1px solid #2c2c5c;border-radius:8px;padding:14px}
@@ -450,20 +450,6 @@ function adminAppHTML() {
     </div>
   </div>
 
-  <div class="card">
-    <h2>New draft (manual)</h2>
-    <form id="draft-form">
-      <div class="form-grid">
-        <div><label>Slug (unique)</label><input name="slug" placeholder="issue-03" required></div>
-        <div><label>Display date</label><input name="issue_date" placeholder="17 Aug 2026"></div>
-        <div class="full"><label>Title</label><input name="title" placeholder="What building AI governance does to the rest of your compliance function" required></div>
-        <div class="full"><label>Teaser paragraph</label><textarea name="teaser" placeholder="Short intro paragraph subscribers will read in the email &mdash; a hook before they click through." required></textarea></div>
-        <div><label>Tag</label><input name="tags" placeholder="Governance"></div>
-        <div><label>Full-issue link path</label><input name="link" placeholder="newsletter/issue-03 (leave blank to auto-generate)"></div>
-      </div>
-      <button type="submit" class="primary">Save draft</button>
-    </form>
-  </div>
   <div class="card"><h2>All issues</h2><div id="issues-table"><div class="empty">Loading&hellip;</div></div></div>
 </section>
 
@@ -583,7 +569,11 @@ document.getElementById('ai-form').addEventListener('submit', async e => {
     document.getElementById('g-body').value = g.body_html || '';
     document.getElementById('g-tag').value = data.tag || '';
     document.getElementById('g-date').value = data.publish_date || '';
-    const suggestedSlug = (g.title || 'issue').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0, 60);
+    let suggestedSlug = 'issue-01';
+    try {
+      const ns = await api('/admin/api/issues/next-slug');
+      suggestedSlug = ns.slug || suggestedSlug;
+    } catch (_) { /* fall back to issue-01 */ }
     document.getElementById('g-slug').value = suggestedSlug;
     document.getElementById('g-link').value = 'newsletter/' + suggestedSlug;
     document.getElementById('gen-result').style.display = 'block';
@@ -624,13 +614,14 @@ function discardGenerated() {
 }
 
 // ---- newsletters ----
+let allIssues = [];
 async function loadIssues() {
   try {
-    const issues = await api('/admin/api/issues');
+    allIssues = await api('/admin/api/issues');
     const el = document.getElementById('issues-table');
-    if (!issues.length) { el.innerHTML = '<div class="empty">No drafts yet. Create one above.</div>'; return; }
+    if (!allIssues.length) { el.innerHTML = '<div class="empty">No drafts yet. Create one above.</div>'; return; }
     el.innerHTML = '<table><tr><th>Title</th><th>Slug</th><th>Status</th><th>Recipients</th><th>Actions</th></tr>' +
-      issues.map(i => '<tr>' +
+      allIssues.map(i => '<tr>' +
         '<td>' + escape(i.title) + '</td>' +
         '<td style="color:#8c90c4;font-size:12px;">' + escape(i.slug) + '</td>' +
         '<td>' + (i.sent_at ? '<span class="badge sent">Sent</span>' : '<span class="badge draft">Draft</span>') + '</td>' +
@@ -644,19 +635,10 @@ async function loadIssues() {
       '</tr>').join('') + '</table>';
   } catch (e) { toast('Failed to load issues: ' + e.message, true); }
 }
-document.getElementById('draft-form').addEventListener('submit', async e => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.target).entries());
-  try {
-    await api('/admin/api/issues/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
-    toast('Draft saved.');
-    e.target.reset();
-    loadIssues(); loadStats();
-  } catch (err) { toast('Save failed: ' + err.message, true); }
-});
 async function preview(slug) {
-  document.getElementById('preview-title').textContent = 'Preview — ' + slug;
-  document.getElementById('preview-frame').src = '/admin/api/issues/preview?slug=' + encodeURIComponent(slug);
+  const issue = allIssues.find(i => i.slug === slug);
+  document.getElementById('preview-title').textContent = issue ? issue.title : slug;
+  document.getElementById('preview-frame').src = '/newsletter/' + encodeURIComponent(slug);
   document.getElementById('preview-modal').classList.add('on');
 }
 function closePreview() {
@@ -698,6 +680,18 @@ async function apiListIssues(env) {
   await ensureSchema(env);
   const { results } = await env.DB.prepare("SELECT id, slug, title, teaser, tags, issue_date, link, created_at, sent_at, recipient_count FROM issues ORDER BY created_at DESC").all();
   return json(results);
+}
+
+async function apiNextIssueSlug(env) {
+  await ensureSchema(env);
+  const { results } = await env.DB.prepare("SELECT slug FROM issues WHERE slug LIKE 'issue-%'").all();
+  let maxN = 0;
+  for (const r of results) {
+    const m = r.slug.match(/^issue-(\d+)$/);
+    if (m) { const n = parseInt(m[1], 10); if (n > maxN) maxN = n; }
+  }
+  const next = String(maxN + 1).padStart(2, "0");
+  return json({ slug: `issue-${next}` });
 }
 
 async function apiSaveIssue(request, env) {
@@ -1009,6 +1003,7 @@ export default {
         if (!(await isAuthed(request, env))) return json({ error: "Not authenticated" }, 401);
         if (path === "/admin/api/subscribers" && method === "GET") return await apiListSubscribers(env);
         if (path === "/admin/api/issues" && method === "GET") return await apiListIssues(env);
+        if (path === "/admin/api/issues/next-slug" && method === "GET") return await apiNextIssueSlug(env);
         if (path === "/admin/api/issues/save" && method === "POST") return await apiSaveIssue(request, env);
         if (path === "/admin/api/issues/preview" && method === "GET") return await apiPreviewIssue(env, url);
         if (path === "/admin/api/issues/test-send" && method === "POST") return await apiTestSend(request, env);
