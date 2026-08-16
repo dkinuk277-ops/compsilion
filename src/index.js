@@ -329,6 +329,12 @@ function adminAppHTML() {
   .tpk{display:flex;align-items:center;gap:8px;font-size:13px;color:#dcdef2;cursor:pointer;padding:4px 0}
   .tpk input{width:auto;margin:0;accent-color:#06d6a0}
   input[type="date"]{color-scheme:dark}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:800px){.two-col{grid-template-columns:1fr}}
+  .filters{display:flex;gap:6px;margin-bottom:16px}
+  .filter-btn{background:#12122a;border:1px solid #2c2c5c;color:#8c90c4;padding:7px 14px;border-radius:100px;font:600 12px inherit;cursor:pointer}
+  .filter-btn.on{background:#06d6a020;border-color:#06d6a0;color:#06d6a0}
+  .filter-btn .n{opacity:0.7;margin-left:6px}
 </style></head>
 <body>
 <header>
@@ -351,12 +357,20 @@ function adminAppHTML() {
     <div class="stat"><div class="stat-num" id="s-drafts">–</div><div class="stat-label">Drafts</div></div>
     <div class="stat"><div class="stat-num" id="s-sent">–</div><div class="stat-label">Sent issues</div></div>
   </div>
-  <div class="card"><h2>Recent activity</h2><div id="activity"><div class="empty">Loading…</div></div></div>
+  <div class="two-col">
+    <div class="card"><h2>Latest subscribers</h2><div id="latest-subs"><div class="empty">Loading&hellip;</div></div></div>
+    <div class="card"><h2>Recent unsubscribes</h2><div id="latest-unsubs"><div class="empty">Loading&hellip;</div></div></div>
+  </div>
 </section>
 
 <section id="subscribers" class="panel">
   <h1>Subscribers</h1>
   <p class="sub">Everyone who has signed up via the compsilon.com forms.</p>
+  <div class="filters" id="sub-filters">
+    <button class="filter-btn on" data-f="all">All <span class="n" id="f-n-all">0</span></button>
+    <button class="filter-btn" data-f="active">Active <span class="n" id="f-n-active">0</span></button>
+    <button class="filter-btn" data-f="unsubscribed">Unsubscribed <span class="n" id="f-n-unsub">0</span></button>
+  </div>
   <div class="search"><input id="sub-search" placeholder="Search by email or name…"></div>
   <div class="card"><div id="sub-table"><div class="empty">Loading…</div></div></div>
 </section>
@@ -488,36 +502,78 @@ async function api(url, opts) {
   return j;
 }
 function escape(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function fmt(dt) { if (!dt) return '—'; return dt.replace('T',' ').replace(/\\..*/,''); }
+function fmt(dt) {
+  if (!dt) return '—';
+  // D1 stores datetime('now') as 'YYYY-MM-DD HH:MM:SS' in UTC without a timezone marker.
+  // Append Z so the browser treats it as UTC, then format in the viewer's local time.
+  const d = new Date(String(dt).replace(' ', 'T') + 'Z');
+  if (isNaN(d)) return dt;
+  return d.toLocaleString(undefined, { year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+}
 
 // ---- dashboard ----
 async function loadStats() {
   try {
     const [subs, issues] = await Promise.all([api('/admin/api/subscribers'), api('/admin/api/issues')]);
-    const active = subs.filter(s => s.status === 'active').length;
-    const unsub = subs.filter(s => s.status === 'unsubscribed').length;
+    const active = subs.filter(s => s.status === 'active');
+    const unsub = subs.filter(s => s.status === 'unsubscribed');
     const drafts = issues.filter(i => !i.sent_at).length;
     const sent = issues.filter(i => i.sent_at).length;
-    document.getElementById('s-active').textContent = active;
-    document.getElementById('s-unsub').textContent = unsub;
+    document.getElementById('s-active').textContent = active.length;
+    document.getElementById('s-unsub').textContent = unsub.length;
     document.getElementById('s-drafts').textContent = drafts;
     document.getElementById('s-sent').textContent = sent;
 
-    const recent = subs.slice(0, 5);
-    const act = document.getElementById('activity');
-    if (!recent.length) { act.innerHTML = '<div class="empty">No subscribers yet.</div>'; return; }
-    act.innerHTML = '<table><tr><th>Latest subscribers</th><th>Joined</th></tr>' +
-      recent.map(s => '<tr><td>' + escape(s.email) + '</td><td>' + fmt(s.subscribed_at) + '</td></tr>').join('') + '</table>';
+    // Latest subscribers table
+    const latestSubs = active.slice(0, 5);
+    const ls = document.getElementById('latest-subs');
+    ls.innerHTML = latestSubs.length
+      ? '<table><tr><th>Email</th><th>Joined</th></tr>' +
+        latestSubs.map(s => '<tr><td>' + escape(s.email) + '</td><td>' + fmt(s.subscribed_at) + '</td></tr>').join('') + '</table>'
+      : '<div class="empty">No active subscribers yet.</div>';
+
+    // Recent unsubscribes table
+    const latestUnsub = unsub
+      .slice()
+      .sort((a, b) => (b.unsubscribed_at || '').localeCompare(a.unsubscribed_at || ''))
+      .slice(0, 5);
+    const lu = document.getElementById('latest-unsubs');
+    lu.innerHTML = latestUnsub.length
+      ? '<table><tr><th>Email</th><th>Unsubscribed</th></tr>' +
+        latestUnsub.map(s => '<tr><td>' + escape(s.email) + '</td><td>' + fmt(s.unsubscribed_at) + '</td></tr>').join('') + '</table>'
+      : '<div class="empty">No unsubscribes yet.</div>';
   } catch (e) { toast('Failed to load stats: ' + e.message, true); }
 }
 
 // ---- subscribers ----
 let allSubs = [];
+let subFilter = 'all';
+let subQuery = '';
 async function loadSubs() {
   try {
     allSubs = await api('/admin/api/subscribers');
-    renderSubs(allSubs);
+    document.getElementById('f-n-all').textContent = allSubs.length;
+    document.getElementById('f-n-active').textContent = allSubs.filter(s => s.status === 'active').length;
+    document.getElementById('f-n-unsub').textContent = allSubs.filter(s => s.status === 'unsubscribed').length;
+    applySubFilter();
   } catch (e) { toast('Failed to load subscribers: ' + e.message, true); }
+}
+function applySubFilter() {
+  let list = allSubs;
+  if (subFilter !== 'all') list = list.filter(s => s.status === subFilter);
+  if (subQuery) {
+    const q = subQuery.toLowerCase();
+    list = list.filter(s =>
+      (s.email && s.email.toLowerCase().includes(q)) ||
+      (s.first_name && s.first_name.toLowerCase().includes(q)) ||
+      (s.last_name && s.last_name.toLowerCase().includes(q))
+    );
+  }
+  // Sort unsubscribed view by unsubscribe date desc so it reads like a log
+  if (subFilter === 'unsubscribed') {
+    list = list.slice().sort((a, b) => (b.unsubscribed_at || '').localeCompare(a.unsubscribed_at || ''));
+  }
+  renderSubs(list);
 }
 function renderSubs(list) {
   const el = document.getElementById('sub-table');
@@ -533,13 +589,15 @@ function renderSubs(list) {
     '</tr>').join('') + '</table>';
 }
 document.getElementById('sub-search').addEventListener('input', e => {
-  const q = e.target.value.toLowerCase();
-  renderSubs(allSubs.filter(s =>
-    (s.email && s.email.toLowerCase().includes(q)) ||
-    (s.first_name && s.first_name.toLowerCase().includes(q)) ||
-    (s.last_name && s.last_name.toLowerCase().includes(q))
-  ));
+  subQuery = e.target.value;
+  applySubFilter();
 });
+document.querySelectorAll('#sub-filters .filter-btn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#sub-filters .filter-btn').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  subFilter = b.dataset.f;
+  applySubFilter();
+}));
 
 // ---- AI generate ----
 let genCurrent = null;
