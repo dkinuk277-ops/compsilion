@@ -103,6 +103,19 @@ async function ensureSchema(env) {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`
   ).run();
+  // Tracks every welcome-email attempt so failures are visible and retryable,
+  // rather than silently swallowed.
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS welcome_sends (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      subscriber_id INTEGER,
+      email TEXT NOT NULL,
+      status TEXT NOT NULL,
+      resend_email_id TEXT,
+      error TEXT,
+      attempted_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`
+  ).run();
 }
 
 // ========== email template ==========
@@ -251,9 +264,20 @@ You're receiving this because you subscribed at compsilon.com.<br>
 }
 
 async function sendWelcomeEmail(env, subscriber) {
-  if (!env.RESEND_API_KEY) return;
+  await ensureSchema(env);
+  const subscriberId = subscriber.id || null;
+
+  if (!env.RESEND_API_KEY) {
+    try {
+      await env.DB.prepare(
+        "INSERT INTO welcome_sends (subscriber_id, email, status, error) VALUES (?, ?, 'failed', ?)"
+      ).bind(subscriberId, subscriber.email, "RESEND_API_KEY is not configured").run();
+    } catch (e) { /* logging failure is non-fatal */ }
+    return;
+  }
+
   try {
-    await fetch("https://api.resend.com/emails", {
+    const resp = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${env.RESEND_API_KEY}`,
@@ -266,7 +290,24 @@ async function sendWelcomeEmail(env, subscriber) {
         html: welcomeEmailHTML(subscriber),
       }),
     });
-  } catch (err) { /* non-fatal */ }
+    if (resp.ok) {
+      const data = await resp.json().catch(() => ({}));
+      await env.DB.prepare(
+        "INSERT INTO welcome_sends (subscriber_id, email, status, resend_email_id) VALUES (?, ?, 'sent', ?)"
+      ).bind(subscriberId, subscriber.email, data.id || null).run();
+    } else {
+      const errText = await resp.text().catch(() => "unknown error");
+      await env.DB.prepare(
+        "INSERT INTO welcome_sends (subscriber_id, email, status, error) VALUES (?, ?, 'failed', ?)"
+      ).bind(subscriberId, subscriber.email, errText.slice(0, 500)).run();
+    }
+  } catch (err) {
+    try {
+      await env.DB.prepare(
+        "INSERT INTO welcome_sends (subscriber_id, email, status, error) VALUES (?, ?, 'failed', ?)"
+      ).bind(subscriberId, subscriber.email, String(err).slice(0, 500)).run();
+    } catch (e) { /* logging failure is non-fatal */ }
+  }
 }
 
 // ========== public routes ==========
@@ -301,10 +342,11 @@ async function handleSubscribe(request, env, ctx) {
     }
   } else {
     const token = crypto.randomUUID();
-    await env.DB.prepare(
+    const insertResult = await env.DB.prepare(
       `INSERT INTO subscribers (email, first_name, last_name, status, unsubscribe_token) VALUES (?, ?, ?, 'active', ?)`
     ).bind(email, firstName, lastName, token).run();
-    ctx.waitUntil(sendWelcomeEmail(env, { email, first_name: firstName, unsubscribe_token: token }));
+    const newId = insertResult.meta ? insertResult.meta.last_row_id : null;
+    ctx.waitUntil(sendWelcomeEmail(env, { id: newId, email, first_name: firstName, unsubscribe_token: token }));
   }
 
   return new Response(
@@ -573,6 +615,13 @@ function adminAppHTML() {
     <div style="display:flex;gap:10px">
       <button class="secondary" onclick="previewWelcome()">Preview</button>
       <button class="secondary" onclick="testWelcome()">Send test to me</button>
+    </div>
+    <div id="welcome-failures-wrap" style="margin-top:18px;display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:12px;color:#f4a1a1;font-weight:700">Welcome emails that failed to send</div>
+        <button class="secondary" onclick="retryAllWelcomeFailures()">Retry all</button>
+      </div>
+      <div id="welcome-failures-list"></div>
     </div>
   </div>
 
@@ -1070,6 +1119,37 @@ async function testWelcome() {
   } catch (err) { toast('Send failed: ' + err.message, true); }
 }
 
+async function loadWelcomeFailures() {
+  try {
+    const failures = await api('/admin/api/welcome/failures');
+    const wrap = document.getElementById('welcome-failures-wrap');
+    const list = document.getElementById('welcome-failures-list');
+    if (!failures.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    list.innerHTML = '<table><tr><th>Email</th><th>Reason</th><th>Attempted</th><th></th></tr>' +
+      failures.map(f => '<tr>' +
+        '<td>' + escape(f.email) + '</td>' +
+        '<td style="color:#8c90c4;font-size:12px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escape(f.error || 'Unknown error') + '</td>' +
+        '<td style="color:#8c90c4;font-size:12px;">' + fmt(f.attempted_at) + '</td>' +
+        '<td><button class="secondary" onclick="retryOneWelcome(' + jsStr(f.email) + ')">Retry</button></td>' +
+      '</tr>').join('') + '</table>';
+  } catch (e) { /* non-fatal on dashboard load */ }
+}
+async function retryOneWelcome(email) {
+  try {
+    await api('/admin/api/welcome/retry', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+    toast('Retried welcome email for ' + email);
+    loadWelcomeFailures();
+  } catch (err) { toast('Retry failed: ' + err.message, true); }
+}
+async function retryAllWelcomeFailures() {
+  try {
+    const r = await api('/admin/api/welcome/retry', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({retryAll: true}) });
+    toast('Retried ' + r.retried + ' welcome email(s).');
+    loadWelcomeFailures();
+  } catch (err) { toast('Retry failed: ' + err.message, true); }
+}
+
 async function showInsights(slug) {
   const issue = allIssues.find(i => i.slug === slug);
   document.getElementById('preview-title').textContent = 'Insights — ' + (issue ? issue.title : slug);
@@ -1138,7 +1218,7 @@ async function sendReal(slug) {
 }
 
 // initial load
-loadStats(); loadSubs(); loadIssues();
+loadStats(); loadSubs(); loadIssues(); loadWelcomeFailures();
 </script>
 </body></html>`;
 }
@@ -1382,6 +1462,48 @@ async function apiNextIssueSlug(env) {
   }
   const next = String(maxN + 1).padStart(2, "0");
   return json({ slug: `issue-${next}` });
+}
+
+async function apiWelcomeFailures(env) {
+  await ensureSchema(env);
+  // Latest attempt per email; only show it if that latest attempt is still 'failed'
+  // (a later successful retry clears it from this list automatically).
+  const { results } = await env.DB.prepare(
+    `SELECT ws.email, ws.error, ws.attempted_at, ws.subscriber_id
+     FROM welcome_sends ws
+     INNER JOIN (
+       SELECT email, MAX(attempted_at) AS max_at FROM welcome_sends GROUP BY email
+     ) latest ON latest.email = ws.email AND latest.max_at = ws.attempted_at
+     WHERE ws.status = 'failed'
+     ORDER BY ws.attempted_at DESC`
+  ).all();
+  return json(results || []);
+}
+
+async function apiWelcomeRetry(request, env) {
+  await ensureSchema(env);
+  const body = await request.json().catch(() => ({}));
+  let targets = [];
+  if (body.retryAll) {
+    const failures = await apiWelcomeFailures(env);
+    const data = await failures.json();
+    targets = data.map(f => ({ email: f.email, subscriber_id: f.subscriber_id }));
+  } else if (body.email) {
+    const sub = await env.DB.prepare("SELECT id, email, first_name, unsubscribe_token FROM subscribers WHERE email = ?").bind(body.email.toLowerCase()).first();
+    if (!sub) return json({ error: "Subscriber not found" }, 404);
+    targets = [{ email: sub.email, subscriber_id: sub.id }];
+  } else {
+    return json({ error: "Provide email or retryAll" }, 400);
+  }
+
+  let retried = 0;
+  for (const t of targets) {
+    const sub = await env.DB.prepare("SELECT id, email, first_name, unsubscribe_token FROM subscribers WHERE email = ?").bind(t.email).first();
+    if (!sub) continue;
+    await sendWelcomeEmail(env, { id: sub.id, email: sub.email, first_name: sub.first_name, unsubscribe_token: sub.unsubscribe_token });
+    retried++;
+  }
+  return json({ ok: true, retried });
 }
 
 async function apiWelcomePreview() {
@@ -1779,6 +1901,8 @@ export default {
         if (path === "/admin/api/issues/insights" && method === "GET") return await apiIssueInsights(env, url);
         if (path === "/admin/api/welcome/preview" && method === "GET") return await apiWelcomePreview();
         if (path === "/admin/api/welcome/test-send" && method === "POST") return await apiWelcomeTestSend(request, env);
+        if (path === "/admin/api/welcome/failures" && method === "GET") return await apiWelcomeFailures(env);
+        if (path === "/admin/api/welcome/retry" && method === "POST") return await apiWelcomeRetry(request, env);
       }
 
       // Resend webhook (public route with signature verification)
