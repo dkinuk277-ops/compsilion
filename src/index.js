@@ -277,6 +277,15 @@ async function handleSubscribe(request, env, ctx) {
   if (ct.includes("application/json")) data = await request.json();
   else { const form = await request.formData(); data = Object.fromEntries(form.entries()); }
 
+  // Honeypot: real users never see or fill this field. Bots that auto-fill every
+  // input do. Pretend success without actually subscribing them.
+  if (String(data.website || "").trim() !== "") {
+    return new Response(
+      "<!DOCTYPE html><html><body style='font-family:sans-serif;background:#06060e;color:#dcdef2;padding:24px;'>Thanks for subscribing.</body></html>",
+      { headers: { "Content-Type": "text/html" } }
+    );
+  }
+
   const email = String(data.EMAIL || data.email || "").trim().toLowerCase();
   const firstName = String(data.FNAME || data.firstName || "").trim();
   const lastName = String(data.LNAME || data.lastName || "").trim();
@@ -539,6 +548,7 @@ function adminAppHTML() {
   </div>
   <div class="search" style="display:flex;gap:10px;align-items:center;">
     <input id="sub-search" placeholder="Search by email or name…" style="flex:1;margin-bottom:0;">
+    <button class="secondary" onclick="exportSubscribersCsv()">Export CSV</button>
     <button class="danger" id="delete-selected-btn" onclick="deleteSelected()" disabled>Delete selected (<span id="sel-count">0</span>)</button>
   </div>
   <div class="card"><div id="sub-table"><div class="empty">Loading…</div></div></div>
@@ -738,6 +748,9 @@ let selectedIds = new Set();
 let expandedId = null;
 let activityCache = {};
 
+function exportSubscribersCsv() {
+  window.location.href = '/admin/api/subscribers/export';
+}
 async function addOneSubscriber() {
   const email = document.getElementById('one-email').value.trim();
   const firstName = document.getElementById('one-first').value.trim();
@@ -1146,6 +1159,28 @@ async function apiSubscriberActivity(env, url) {
      ORDER BY es.sent_at DESC`
   ).bind(email).all();
   return json(results || []);
+}
+
+async function apiExportSubscribersCsv(env) {
+  await ensureSchema(env);
+  const { results } = await env.DB.prepare(
+    "SELECT email, first_name, last_name, status, subscribed_at, unsubscribed_at FROM subscribers ORDER BY subscribed_at DESC"
+  ).all();
+  const escapeCsv = (v) => {
+    const s = String(v == null ? "" : v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const header = "email,first_name,last_name,status,subscribed_at,unsubscribed_at";
+  const rows = (results || []).map(r =>
+    [r.email, r.first_name, r.last_name, r.status, r.subscribed_at, r.unsubscribed_at].map(escapeCsv).join(",")
+  );
+  const csv = [header, ...rows].join("\n");
+  return new Response(csv, {
+    headers: {
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": `attachment; filename="compsilon-subscribers-${new Date().toISOString().slice(0,10)}.csv"`,
+    },
+  });
 }
 
 async function apiListSubscribers(env) {
@@ -1688,6 +1723,7 @@ export default {
       if (path.startsWith("/admin/api/")) {
         if (!(await isAuthed(request, env))) return json({ error: "Not authenticated" }, 401);
         if (path === "/admin/api/subscribers" && method === "GET") return await apiListSubscribers(env);
+        if (path === "/admin/api/subscribers/export" && method === "GET") return await apiExportSubscribersCsv(env);
         if (path === "/admin/api/subscribers/add" && method === "POST") return await apiAddSubscribers(request, env);
         if (path === "/admin/api/subscribers/add-one" && method === "POST") return await apiAddOneSubscriber(request, env);
         if (path === "/admin/api/subscribers/delete" && method === "POST") return await apiDeleteSubscribers(request, env);
