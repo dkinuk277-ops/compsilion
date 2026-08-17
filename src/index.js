@@ -116,6 +116,15 @@ async function ensureSchema(env) {
       attempted_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`
   ).run();
+  // Tracks admin login attempts per IP so repeated failures can be locked out.
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS login_attempts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ip TEXT NOT NULL,
+      success INTEGER NOT NULL,
+      attempted_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`
+  ).run();
 }
 
 // ========== email template ==========
@@ -416,13 +425,44 @@ async function handleLoginGet(request, env) {
 }
 
 async function handleLoginPost(request, env) {
+  await ensureSchema(env);
   const form = await request.formData();
   const username = String(form.get("username") || "").trim();
   const password = String(form.get("password") || "");
   if (!env.ADMIN_PASSWORD) return new Response(loginPageHTML("Admin password not configured on the server."), { status: 500, headers: { "Content-Type": "text/html" } });
-  if (username !== "admin" || password !== env.ADMIN_PASSWORD) {
+
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const MAX_ATTEMPTS = 5;
+  const WINDOW_MINUTES = 15;
+
+  // Best-effort cleanup so this table doesn't grow forever.
+  try {
+    await env.DB.prepare("DELETE FROM login_attempts WHERE attempted_at < datetime('now', '-1 day')").run();
+  } catch (e) { /* non-fatal */ }
+
+  const recentFails = await env.DB.prepare(
+    `SELECT COUNT(*) AS c FROM login_attempts WHERE ip = ? AND success = 0 AND attempted_at > datetime('now', '-${WINDOW_MINUTES} minutes')`
+  ).bind(ip).first();
+  if (recentFails && recentFails.c >= MAX_ATTEMPTS) {
+    return new Response(
+      loginPageHTML(`Too many failed attempts. Try again in a few minutes.`),
+      { status: 429, headers: { "Content-Type": "text/html" } }
+    );
+  }
+
+  const ok = username === "admin" && password === env.ADMIN_PASSWORD;
+  await env.DB.prepare("INSERT INTO login_attempts (ip, success) VALUES (?, ?)").bind(ip, ok ? 1 : 0).run();
+
+  if (!ok) {
     return new Response(loginPageHTML("Incorrect username or password."), { status: 401, headers: { "Content-Type": "text/html" } });
   }
+
+  // Successful login clears this IP's recent failure count so a legitimate
+  // user isn't left partway toward a lockout after typos.
+  try {
+    await env.DB.prepare("DELETE FROM login_attempts WHERE ip = ? AND success = 0").bind(ip).run();
+  } catch (e) { /* non-fatal */ }
+
   const cookie = await createSessionCookie(env);
   const origin = new URL(request.url).origin;
   return new Response(null, {
