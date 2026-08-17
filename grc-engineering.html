@@ -175,15 +175,15 @@ footer a{color:var(--teal)}
 .menu-toggle.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
 
 @media(max-width:900px){
-  nav ul{display:none}
-  .nav-inner{padding:0 16px}
+  .nav-inner{padding:12px 16px;flex-wrap:wrap;height:auto;row-gap:10px}
   .logo{font-size:18px}
   .logo-ping{width:26px !important;height:26px !important;margin-right:4px !important;}
   .nav-sub{padding:7px 14px;font-size:12px}
-  .menu-toggle{display:flex}
-  nav ul.mobile-open{display:flex;position:absolute;top:64px;left:0;right:0;flex-direction:column;gap:0;background:var(--bg);border-bottom:1px solid var(--border);padding:8px 16px 16px;z-index:99}
-  nav ul.mobile-open li{width:100%}
-  nav ul.mobile-open a.lnk{display:block;padding:12px 8px;border-radius:8px;width:100%;box-sizing:border-box}
+  nav ul{display:flex !important;order:3;flex-basis:100%;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;justify-content:flex-start;gap:6px;padding-bottom:2px;scrollbar-width:none;}
+  nav ul::-webkit-scrollbar{display:none}
+  nav ul li{flex-shrink:0}
+  nav a.lnk{padding:7px 12px;font-size:12px}
+  .menu-toggle{display:none !important}
   .content{padding:40px 20px}
   .shift,.auto-grid,.cap-grid,.reality,.mat,.step-detail{grid-template-columns:1fr}
   .step{padding:26px 22px 26px 22px}
