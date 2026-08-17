@@ -135,6 +135,7 @@
       font-size: 1.15rem; font-weight: 800; letter-spacing: -0.5px;
       color: var(--ink); margin-bottom: 0.3rem;
     }
+    @keyframes logoPingF{0%{transform:scale(0.5);opacity:0.9}100%{transform:scale(2);opacity:0}}
     .foot-logo span { background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent; }
     .foot-tag {
       font-family: 'JetBrains Mono', monospace;
@@ -231,7 +232,7 @@
   </div>
 
   <footer>
-    <div class="foot-logo">COMP<span>SILON</span></div>
+    <div class="foot-logo"><svg viewBox="0 0 40 40" width="22" height="22" style="vertical-align:-5px;margin-right:6px;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPingF 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPingF 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg>COMP<span>SILON</span></div>
     <div class="foot-tag">AI Governance, Risk &amp; Compliance Intelligence</div>
     <div class="foot-links">
       <a href="index.html">Home</a>
