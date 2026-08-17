@@ -344,7 +344,7 @@ function loginPageHTML(errorMsg) {
   .back a:hover{color:#06d6a0}
 </style></head>
 <body><div class="card">
-<div class="brand">COMP<span>SILON</span></div>
+<div class="brand"><svg viewBox="0 0 40 40" width="46" height="46" style="vertical-align:-14px;margin-right:6px;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPingL 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPingL 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg>COMP<span>SILON</span></div>
 <div class="sub">Admin sign in</div>
 ${errorMsg ? `<div class="err">${escapeHtml(errorMsg)}</div>` : ""}
 <form method="POST" action="/admin/login">
@@ -475,7 +475,7 @@ function adminAppHTML() {
 </style></head>
 <body>
 <header>
-  <div class="brand">COMP<span>SILON</span> &middot; <span style="color:#8c90c4;font-weight:400;font-size:14px;">admin</span></div>
+  <div class="brand"><svg viewBox="0 0 40 40" width="46" height="46" style="vertical-align:-14px;margin-right:6px;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPingA 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPingA 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg>COMP<span>SILON</span> &middot; <span style="color:#8c90c4;font-weight:400;font-size:14px;">admin</span></div>
   <nav>
     <button class="tab on" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="subscribers">Subscribers</button>
@@ -1290,7 +1290,8 @@ a{color:inherit;text-decoration:none}
 .grid-bg{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:80px 80px;opacity:.15;pointer-events:none;z-index:0}
 nav{position:sticky;top:0;z-index:100;background:#06060edd;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
 .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px}
-.logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px}
+.logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px;display:inline-flex;align-items:center}
+@keyframes logoPingP{0%{transform:scale(0.5);opacity:0.9}100%{transform:scale(2);opacity:0}}
 .logo span{background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .issue-hero{position:relative;z-index:1;padding:56px 32px 40px;border-bottom:1px solid var(--border);max-width:820px;margin:0 auto}
 .hero-glow{position:absolute;top:-60px;left:20%;width:380px;height:240px;background:radial-gradient(ellipse,var(--teal-glow),transparent 70%);pointer-events:none}
@@ -1338,7 +1339,7 @@ footer a{color:var(--teal)}
 </style></head>
 <body>
 <div class="grid-bg"></div>
-<nav><div class="nav-inner"><a href="/" class="logo">COMP<span>SILON</span></a></div></nav>
+<nav><div class="nav-inner"><a href="/" class="logo"><svg viewBox="0 0 40 40" width="46" height="46" style="margin-right:2px;flex-shrink:0;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPingP 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPingP 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg>COMP<span>SILON</span></a></div></nav>
 <div class="issue-hero">
   <div class="hero-glow"></div>
   <div class="breadcrumb"><a href="/newsletter.html">Newsletter</a> &rsaquo; ${escapeHtml(issue.slug)}</div>
