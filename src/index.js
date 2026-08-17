@@ -549,9 +549,6 @@ function adminAppHTML() {
   <h1>Newsletters</h1>
   <p class="sub">Generate with AI, or write by hand. Preview, test-send, and send weekly issues.</p>
 
-  <div style="display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start;">
-
-  <div style="display:flex;flex-direction:column;gap:20px;min-width:0;">
   <div class="card">
     <h2>Welcome email</h2>
     <p class="sub" style="margin-bottom:14px">Sent automatically the first time someone subscribes. Edit the content in the code if you want to change it.</p>
@@ -645,11 +642,8 @@ function adminAppHTML() {
       </div>
     </div>
   </div>
-  </div>
 
-  <div class="card" style="min-width:0;"><h2>All newsletter publications</h2><div id="issues-table"><div class="empty">Loading&hellip;</div></div></div>
-
-  </div>
+  <div class="card"><h2>All newsletter publications</h2><div id="issues-table"><div class="empty">Loading&hellip;</div></div></div>
 </section>
 
 </main>
