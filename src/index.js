@@ -173,7 +173,7 @@ ${bodyHtml}
 <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:24px 0 0;"></td></tr>
 <tr><td style="padding:18px 32px 26px;">
 <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8c90c4;margin:0;">
-Compsilon &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a><br>
+<img src="https://compsilon.com/compsilon-ping.png?v=1" width="16" height="16" alt="" style="vertical-align:-3px;margin-right:6px;border:0;">Compsilon &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a><br>
 You're receiving this because you subscribed at compsilon.com.<br>
 <a href="${unsubUrl}" style="color:#8c90c4;text-decoration:underline;">Unsubscribe</a> &middot; <a href="${webUrl}" style="color:#8c90c4;text-decoration:underline;">Read on the web</a>
 </p>
@@ -239,7 +239,7 @@ function welcomeEmailHTML(subscriber) {
 <tr><td style="padding:20px 28px 0;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
 <tr><td style="padding:16px 28px 22px;">
 <p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.7;color:#8c90c4;margin:0;">
-Compsilon &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a><br>
+<img src="https://compsilon.com/compsilon-ping.png?v=1" width="16" height="16" alt="" style="vertical-align:-3px;margin-right:6px;border:0;">Compsilon &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a><br>
 You're receiving this because you subscribed at compsilon.com.<br>
 <a href="${unsubUrl}" style="color:#8c90c4;text-decoration:underline;">Unsubscribe</a>
 </p>
@@ -340,6 +340,7 @@ function loginPageHTML(errorMsg) {
   .err{background:#3a1a1a;border:1px solid #7c2828;color:#f4a1a1;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px}
   .back{text-align:center;margin-top:24px;font-size:12px}
   .back a{color:#8c90c4;text-decoration:none}
+  @keyframes logoPingL{0%{transform:scale(0.5);opacity:0.9}100%{transform:scale(2);opacity:0}}
   .back a:hover{color:#06d6a0}
 </style></head>
 <body><div class="card">
@@ -353,7 +354,7 @@ ${errorMsg ? `<div class="err">${escapeHtml(errorMsg)}</div>` : ""}
 <input id="p" name="password" type="password" autocomplete="current-password" required>
 <button type="submit">Sign in</button>
 </form>
-<div class="back"><a href="/">&larr; Back to compsilon.com</a></div>
+<div class="back"><svg viewBox="0 0 40 40" width="16" height="16" style="vertical-align:-3px;margin-right:5px;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPingL 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPingL 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg><a href="/">&larr; Back to compsilon.com</a></div>
 </div></body></html>`;
 }
 
@@ -464,6 +465,7 @@ function adminAppHTML() {
   .tpk{display:flex;align-items:center;gap:8px;font-size:13px;color:#dcdef2;cursor:pointer;padding:4px 0}
   .tpk input{width:auto;margin:0;accent-color:#06d6a0}
   input[type="date"]{color-scheme:dark}
+  @keyframes logoPingA{0%{transform:scale(0.5);opacity:0.9}100%{transform:scale(2);opacity:0}}
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   @media (max-width:800px){.two-col{grid-template-columns:1fr}}
   .filters{display:flex;gap:6px;margin-bottom:16px}
@@ -620,6 +622,11 @@ function adminAppHTML() {
 </section>
 
 </main>
+
+<footer style="border-top:1px solid #2c2c5c;padding:20px 32px;text-align:center;font:400 12px -apple-system,sans-serif;color:#8c90c4;">
+<svg viewBox="0 0 40 40" width="18" height="18" style="vertical-align:-4px;margin-right:6px;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPingA 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPingA 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg>
+&copy; 2026 Compsilon &middot; <a href="/" style="color:#06d6a0;">compsilon.com</a>
+</footer>
 
 <div class="preview-modal" id="preview-modal">
   <div class="preview-inner">
