@@ -27,6 +27,13 @@ a{color:inherit;text-decoration:none}
 
 /* Nav */
 nav{position:sticky;top:0;z-index:100;background:var(--bg)dd;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.ticker-wrap{position:sticky;top:64px;z-index:99;background:#0d0d1a;border-bottom:1px solid var(--border);overflow:hidden;padding:6px 0}
+.ticker-track{display:flex;white-space:nowrap;width:max-content;animation:tickerScroll 20s linear infinite}
+.ticker-item{display:inline-block;font:700 12px var(--sans);padding:0;background:linear-gradient(90deg,var(--teal),var(--amber));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.ticker-dot{color:#4a4a6a;font-size:9px;margin:0 10px;flex-shrink:0}
+@keyframes tickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.ticker-track{animation:none}}
+@media(max-width:900px){.ticker-wrap{top:auto;position:relative}}
 .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px}
 .logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px;display:inline-flex;align-items:center}
 @keyframes logoPing{0%{transform:scale(0.5);opacity:0.9}100%{transform:scale(2);opacity:0}}
@@ -232,6 +239,19 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
   </div>
 </div>
 </nav>
+
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item">AI GRC Newsletters</span><span class="ticker-dot">&#9670;</span>
+    <span class="ticker-item">AI Governance</span><span class="ticker-dot">&#9670;</span>
+    <span class="ticker-item">Risk Program Enablement Discovery Tool</span><span class="ticker-dot">&#9670;</span>
+    <span class="ticker-item">Great Insights on GRC Programs</span><span class="ticker-dot">&#9670;</span>
+    <span class="ticker-item">AI GRC Newsletters</span><span class="ticker-dot">&#9670;</span>
+    <span class="ticker-item">AI Governance</span><span class="ticker-dot">&#9670;</span>
+    <span class="ticker-item">Risk Program Enablement Discovery Tool</span><span class="ticker-dot">&#9670;</span>
+    <span class="ticker-item">Great Insights on GRC Programs</span><span class="ticker-dot">&#9670;</span>
+  </div>
+</div>
 
 <script>
 (function(){
