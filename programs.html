@@ -24,7 +24,9 @@ a{color:inherit;text-decoration:none}
 
 nav{position:sticky;top:0;z-index:100;background:#06060edd;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
 .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 32px}
-.logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px}
+.logo{font:800 22px var(--sans);color:var(--white);letter-spacing:-.5px;display:inline-flex;align-items:center}
+@keyframes logoPing{0%{transform:scale(0.5);opacity:0.9}100%{transform:scale(2);opacity:0}}
+
 .logo span{background:linear-gradient(135deg,var(--teal),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 nav ul{display:flex;gap:4px;list-style:none;align-items:center}
 nav a.lnk{font:600 12.5px var(--sans);color:var(--body);padding:7px 12px;border-radius:100px;white-space:nowrap;transition:color .2s,background .2s,box-shadow .2s}
@@ -170,7 +172,7 @@ footer a{color:var(--teal)}
 </head>
 <body>
 <div class="grid-bg"></div>
-<nav><div class="nav-inner"><a href="index.html" class="logo">COMP<span>SILON</span></a><ul><li><a href="index.html" class="lnk">AI GRC</a></li><li><a href="grc-engineering.html" class="lnk">AI GRC Engineering</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="programs.html" class="lnk active">Programs Enablement</a></li><li><a href="newsletter.html" class="lnk">Newsletter</a></li><li><a href="index.html#about" class="lnk">About</a></li></ul><a href="index.html#subscribe" class="nav-sub">Subscribe</a></div></nav>
+<nav><div class="nav-inner"><a href="index.html" class="logo"><svg class="logo-ping" viewBox="0 0 40 40" width="16" height="16" style="margin-right:2px;flex-shrink:0;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPing 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPing 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg>COMP<span>SILON</span></a><ul><li><a href="index.html" class="lnk">AI GRC</a></li><li><a href="grc-engineering.html" class="lnk">AI GRC Engineering</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="programs.html" class="lnk active">Programs Enablement</a></li><li><a href="newsletter.html" class="lnk">Newsletter</a></li><li><a href="index.html#about" class="lnk">About</a></li></ul><a href="index.html#subscribe" class="nav-sub">Subscribe</a></div></nav>
 
 <div class="page-hero">
 <div class="hero-glow"></div>
