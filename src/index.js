@@ -1,4 +1,5 @@
 // ========== helpers ==========
+// redeploy-marker-2: force fresh deployment after GitHub API outages today
 
 function escapeHtml(str) {
   return String(str || "").replace(/[&<>"']/g, (c) => ({
