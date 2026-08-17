@@ -459,6 +459,13 @@ function adminAppHTML() {
   table{width:100%;border-collapse:collapse}
   th{text-align:left;padding:12px 10px;font-size:11px;color:#8c90c4;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;border-bottom:1px solid #2c2c5c}
   td{padding:14px 10px;font-size:13px;border-bottom:1px solid #1e1e3a;color:#dcdef2;vertical-align:middle}
+  table.compact td{padding:9px 10px;font-size:12.5px}
+  table.compact th{padding:8px 10px}
+  .pagebar{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:10px;font-size:12px;color:#8c90c4}
+  .pagebar select{width:auto;margin:0;padding:6px 10px;font-size:12px}
+  .pagebar button{background:#2c2c5c;color:#eeeef6;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
+  .pagebar button:disabled{opacity:0.35;cursor:not-allowed}
+  tr.sub-data-row{cursor:pointer}
   tr:last-child td{border-bottom:none}
   .badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase}
   .badge.active{background:#0d3b2c;color:#06d6a0}
@@ -748,6 +755,8 @@ let subQuery = '';
 let selectedIds = new Set();
 let expandedId = null;
 let activityCache = {};
+let subPageSize = 20;
+let subPage = 1;
 
 function exportSubscribersCsv() {
   window.location.href = '/admin/api/subscribers/export';
@@ -809,7 +818,22 @@ function applySubFilter() {
   if (subFilter === 'unsubscribed') {
     list = list.slice().sort((a, b) => (b.unsubscribed_at || '').localeCompare(a.unsubscribed_at || ''));
   }
-  renderSubs(list);
+  const total = list.length;
+  const totalPages = Math.max(1, Math.ceil(total / subPageSize));
+  if (subPage > totalPages) subPage = totalPages;
+  if (subPage < 1) subPage = 1;
+  const start = total === 0 ? 0 : (subPage - 1) * subPageSize;
+  const pageList = list.slice(start, start + subPageSize);
+  renderSubs(pageList, total, start);
+}
+function changeSubPage(delta) {
+  subPage += delta;
+  applySubFilter();
+}
+function changeSubPageSize(val) {
+  subPageSize = parseInt(val, 10) || 20;
+  subPage = 1;
+  applySubFilter();
 }
 function updateSelectionUI() {
   const btn = document.getElementById('delete-selected-btn');
@@ -864,19 +888,33 @@ function activityRowHtml(email) {
       '<td>' + (row.bounced_at ? '<span class="stamp-no" style="color:#f4a1a1">' + fmt(row.bounced_at) + '</span>' : '<span class="stamp-no">—</span>') + '</td>' +
     '</tr>').join('') + '</table>';
 }
-function renderSubs(list) {
+function renderSubs(list, total, start) {
   const el = document.getElementById('sub-table');
-  if (!list.length) { el.innerHTML = '<div class="empty">No subscribers match.</div>'; updateSelectionUI(); return; }
+  const pageSizeOptions = [10, 20, 50, 100].map(n =>
+    '<option value="' + n + '"' + (subPageSize === n ? ' selected' : '') + '>' + n + ' / page</option>'
+  ).join('');
+  const totalPages = Math.max(1, Math.ceil((total || 0) / subPageSize));
+  const rangeStart = total === 0 ? 0 : start + 1;
+  const rangeEnd = Math.min(start + subPageSize, total || 0);
+  const pagebar = '<div class="pagebar">' +
+    '<span>' + rangeStart + '&ndash;' + rangeEnd + ' of ' + (total || 0) + '</span>' +
+    '<select onchange="changeSubPageSize(this.value)">' + pageSizeOptions + '</select>' +
+    '<button ' + (subPage <= 1 ? 'disabled' : '') + ' onclick="changeSubPage(-1)">&lsaquo; Prev</button>' +
+    '<span>Page ' + subPage + ' of ' + totalPages + '</span>' +
+    '<button ' + (subPage >= totalPages ? 'disabled' : '') + ' onclick="changeSubPage(1)">Next &rsaquo;</button>' +
+  '</div>';
+
+  if (!list.length) { el.innerHTML = pagebar + '<div class="empty">No subscribers match.</div>'; updateSelectionUI(); return; }
   const visibleIds = list.map(s => s.id);
   const allChecked = visibleIds.length > 0 && visibleIds.every(id => selectedIds.has(id));
-  let rows = '<table><tr>' +
-    '<th style="width:32px"><input type="checkbox" id="select-all-box" ' + (allChecked ? 'checked' : '') + ' onchange="toggleSelectAll(this.checked, ' + JSON.stringify(visibleIds).replace(/"/g, '&quot;') + ')"></th>' +
+  let rows = pagebar + '<table class="compact"><tr>' +
+    '<th style="width:32px"><input type="checkbox" id="select-all-box" ' + (allChecked ? 'checked' : '') + ' onclick="event.stopPropagation()" onchange="toggleSelectAll(this.checked, ' + JSON.stringify(visibleIds).replace(/"/g, '&quot;') + ')"></th>' +
     '<th></th><th>Email</th><th>First name</th><th>Last name</th><th>Status</th><th>Subscribed</th><th>Unsubscribed</th></tr>';
   list.forEach(s => {
     const isOpen = expandedId === s.id;
-    rows += '<tr>' +
-      '<td><input type="checkbox" ' + (selectedIds.has(s.id) ? 'checked' : '') + ' onchange="toggleSelectOne(' + s.id + ', this.checked)"></td>' +
-      '<td><span class="chev' + (isOpen ? ' open' : '') + '" onclick="toggleExpand(' + s.id + ', ' + jsStr(s.email) + ')">&#9656;</span></td>' +
+    rows += '<tr class="sub-data-row" onclick="toggleExpand(' + s.id + ', ' + jsStr(s.email) + ')">' +
+      '<td><input type="checkbox" ' + (selectedIds.has(s.id) ? 'checked' : '') + ' onclick="event.stopPropagation()" onchange="toggleSelectOne(' + s.id + ', this.checked)"></td>' +
+      '<td><span class="chev' + (isOpen ? ' open' : '') + '">&#9656;</span></td>' +
       '<td>' + escape(s.email) + '</td>' +
       '<td>' + escape(s.first_name || '—') + '</td>' +
       '<td>' + escape(s.last_name || '—') + '</td>' +
@@ -894,12 +932,14 @@ function renderSubs(list) {
 }
 document.getElementById('sub-search').addEventListener('input', e => {
   subQuery = e.target.value;
+  subPage = 1;
   applySubFilter();
 });
 document.querySelectorAll('#sub-filters .filter-btn').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('#sub-filters .filter-btn').forEach(x => x.classList.remove('on'));
   b.classList.add('on');
   subFilter = b.dataset.f;
+  subPage = 1;
   applySubFilter();
 }));
 
