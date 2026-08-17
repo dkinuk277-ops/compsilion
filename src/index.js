@@ -430,6 +430,17 @@ function adminAppHTML() {
   input:focus,textarea:focus{outline:none;border-color:#06d6a0}
   textarea{resize:vertical;min-height:100px;font-family:inherit}
   button.primary{background:#06d6a0;color:#06060e;border:none;padding:11px 20px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+  button.danger{background:#3a1a1a;color:#f4a1a1;border:1px solid #7c2828;padding:9px 16px;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
+  button.danger:disabled{opacity:0.4;cursor:not-allowed}
+  .sub-row{background:#0d0d1e}
+  .sub-row td{padding:14px 10px 18px;border-bottom:1px solid #1e1e3a;}
+  .activity-table{width:100%;border-collapse:collapse;margin-top:6px}
+  .activity-table th{font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:#8c90c4;text-align:left;padding:6px 8px;border-bottom:1px solid #2c2c5c}
+  .activity-table td{font-size:12px;padding:6px 8px;border-bottom:1px solid #1e1e3a}
+  .stamp-yes{color:#06d6a0}
+  .stamp-no{color:#4a4a6a}
+  .chev{display:inline-block;transition:transform 0.15s;cursor:pointer;color:#8c90c4;margin-right:8px;}
+  .chev.open{transform:rotate(90deg)}
   button.primary:hover{background:#05c091}
   button.secondary{background:#2c2c5c;color:#eeeef6;border:none;padding:8px 14px;border-radius:6px;font-weight:600;font-size:12px;cursor:pointer;font-family:inherit;margin-right:6px}
   button.secondary:hover{background:#3d3d7a}
@@ -505,7 +516,17 @@ function adminAppHTML() {
   <p class="sub">Everyone who has signed up via the compsilon.com forms.</p>
 
   <div class="card">
-    <h2>Add subscribers manually</h2>
+    <h2>Add subscriber</h2>
+    <div class="form-grid">
+      <div><label>First name</label><input id="one-first" placeholder="Jane"></div>
+      <div><label>Last name</label><input id="one-last" placeholder="Doe"></div>
+      <div><label>Email</label><input id="one-email" type="email" placeholder="jane@example.com"></div>
+    </div>
+    <button class="primary" onclick="addOneSubscriber()">Add subscriber</button>
+  </div>
+
+  <div class="card">
+    <h2>Add subscribers manually (bulk)</h2>
     <p class="sub" style="margin-bottom:12px">Paste emails one per line or comma-separated &mdash; useful for migrating a list from another tool.</p>
     <textarea id="bulk-add-emails" rows="4" placeholder="jane@example.com&#10;john@example.com"></textarea>
     <button class="primary" onclick="bulkAddSubscribers()">Add subscribers</button>
@@ -516,8 +537,12 @@ function adminAppHTML() {
     <button class="filter-btn" data-f="active">Active <span class="n" id="f-n-active">0</span></button>
     <button class="filter-btn" data-f="unsubscribed">Unsubscribed <span class="n" id="f-n-unsub">0</span></button>
   </div>
-  <div class="search"><input id="sub-search" placeholder="Search by email or name…"></div>
+  <div class="search" style="display:flex;gap:10px;align-items:center;">
+    <input id="sub-search" placeholder="Search by email or name…" style="flex:1;margin-bottom:0;">
+    <button class="danger" id="delete-selected-btn" onclick="deleteSelected()" disabled>Delete selected (<span id="sel-count">0</span>)</button>
+  </div>
   <div class="card"><div id="sub-table"><div class="empty">Loading…</div></div></div>
+</section>
 </section>
 
 <section id="newsletters" class="panel">
@@ -661,6 +686,7 @@ async function api(url, opts) {
   return j;
 }
 function escape(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function jsStr(s) { return "'" + String(s || '').replace(/\\\\/g, '\\\\\\\\').replace(/'/g, "\\\\'") + "'"; }
 function fmt(dt) {
   if (!dt) return '—';
   // D1 stores datetime('now') as 'YYYY-MM-DD HH:MM:SS' in UTC without a timezone marker.
@@ -708,6 +734,25 @@ async function loadStats() {
 let allSubs = [];
 let subFilter = 'all';
 let subQuery = '';
+let selectedIds = new Set();
+let expandedId = null;
+let activityCache = {};
+
+async function addOneSubscriber() {
+  const email = document.getElementById('one-email').value.trim();
+  const firstName = document.getElementById('one-first').value.trim();
+  const lastName = document.getElementById('one-last').value.trim();
+  if (!email) { toast('Enter an email address', true); return; }
+  try {
+    const r = await api('/admin/api/subscribers/add-one', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, firstName, lastName}) });
+    toast(r.added ? 'Subscriber added.' : (r.reactivated ? 'Subscriber reactivated.' : 'Subscriber updated.'));
+    document.getElementById('one-email').value = '';
+    document.getElementById('one-first').value = '';
+    document.getElementById('one-last').value = '';
+    loadSubs(); loadStats();
+  } catch (err) { toast('Add failed: ' + err.message, true); }
+}
+
 async function bulkAddSubscribers() {
   const textarea = document.getElementById('bulk-add-emails');
   const text = textarea.value.trim();
@@ -724,12 +769,15 @@ async function bulkAddSubscribers() {
     loadSubs(); loadStats();
   } catch (err) { toast('Add failed: ' + err.message, true); }
 }
+
 async function loadSubs() {
   try {
     allSubs = await api('/admin/api/subscribers');
     document.getElementById('f-n-all').textContent = allSubs.length;
     document.getElementById('f-n-active').textContent = allSubs.filter(s => s.status === 'active').length;
     document.getElementById('f-n-unsub').textContent = allSubs.filter(s => s.status === 'unsubscribed').length;
+    const validIds = new Set(allSubs.map(s => s.id));
+    selectedIds.forEach(id => { if (!validIds.has(id)) selectedIds.delete(id); });
     applySubFilter();
   } catch (e) { toast('Failed to load subscribers: ' + e.message, true); }
 }
@@ -744,24 +792,91 @@ function applySubFilter() {
       (s.last_name && s.last_name.toLowerCase().includes(q))
     );
   }
-  // Sort unsubscribed view by unsubscribe date desc so it reads like a log
   if (subFilter === 'unsubscribed') {
     list = list.slice().sort((a, b) => (b.unsubscribed_at || '').localeCompare(a.unsubscribed_at || ''));
   }
   renderSubs(list);
 }
+function updateSelectionUI() {
+  const btn = document.getElementById('delete-selected-btn');
+  document.getElementById('sel-count').textContent = selectedIds.size;
+  btn.disabled = selectedIds.size === 0;
+}
+function toggleSelectAll(checked, visibleIds) {
+  if (checked) visibleIds.forEach(id => selectedIds.add(id));
+  else visibleIds.forEach(id => selectedIds.delete(id));
+  applySubFilter();
+}
+function toggleSelectOne(id, checked) {
+  if (checked) selectedIds.add(id); else selectedIds.delete(id);
+  updateSelectionUI();
+  const box = document.getElementById('select-all-box');
+  if (box) box.checked = false;
+}
+async function deleteSelected() {
+  if (!selectedIds.size) return;
+  if (!confirm('Delete ' + selectedIds.size + ' subscriber(s)? This cannot be undone.')) return;
+  try {
+    const r = await api('/admin/api/subscribers/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ids: Array.from(selectedIds)}) });
+    toast('Deleted ' + r.deleted + ' subscriber(s).');
+    selectedIds.clear();
+    loadSubs(); loadStats();
+  } catch (err) { toast('Delete failed: ' + err.message, true); }
+}
+async function toggleExpand(id, email) {
+  expandedId = expandedId === id ? null : id;
+  if (expandedId && !activityCache[email]) {
+    try {
+      activityCache[email] = await api('/admin/api/subscribers/activity?email=' + encodeURIComponent(email));
+    } catch (e) {
+      activityCache[email] = { error: e.message };
+    }
+  }
+  applySubFilter();
+}
+function activityRowHtml(email) {
+  const data = activityCache[email];
+  if (!data) return '<div class="empty">Loading…</div>';
+  if (data.error) return '<div class="empty">Failed to load: ' + escape(data.error) + '</div>';
+  if (!data.length) return '<div class="empty">No newsletters sent to this subscriber yet.</div>';
+  const stamp = (v) => v ? '<span class="stamp-yes">' + fmt(v) + '</span>' : '<span class="stamp-no">—</span>';
+  return '<table class="activity-table"><tr><th>Issue</th><th>Sent</th><th>Delivered</th><th>Opened</th><th>Clicked</th><th>Bounced</th></tr>' +
+    data.map(row => '<tr>' +
+      '<td>' + escape(row.title) + '</td>' +
+      '<td>' + fmt(row.sent_at) + '</td>' +
+      '<td>' + stamp(row.delivered_at) + '</td>' +
+      '<td>' + stamp(row.opened_at) + '</td>' +
+      '<td>' + stamp(row.clicked_at) + '</td>' +
+      '<td>' + (row.bounced_at ? '<span class="stamp-no" style="color:#f4a1a1">' + fmt(row.bounced_at) + '</span>' : '<span class="stamp-no">—</span>') + '</td>' +
+    '</tr>').join('') + '</table>';
+}
 function renderSubs(list) {
   const el = document.getElementById('sub-table');
-  if (!list.length) { el.innerHTML = '<div class="empty">No subscribers match.</div>'; return; }
-  el.innerHTML = '<table><tr><th>Email</th><th>First name</th><th>Last name</th><th>Status</th><th>Subscribed</th><th>Unsubscribed</th></tr>' +
-    list.map(s => '<tr>' +
+  if (!list.length) { el.innerHTML = '<div class="empty">No subscribers match.</div>'; updateSelectionUI(); return; }
+  const visibleIds = list.map(s => s.id);
+  const allChecked = visibleIds.length > 0 && visibleIds.every(id => selectedIds.has(id));
+  let rows = '<table><tr>' +
+    '<th style="width:32px"><input type="checkbox" id="select-all-box" ' + (allChecked ? 'checked' : '') + ' onchange="toggleSelectAll(this.checked, ' + JSON.stringify(visibleIds).replace(/"/g, '&quot;') + ')"></th>' +
+    '<th></th><th>Email</th><th>First name</th><th>Last name</th><th>Status</th><th>Subscribed</th><th>Unsubscribed</th></tr>';
+  list.forEach(s => {
+    const isOpen = expandedId === s.id;
+    rows += '<tr>' +
+      '<td><input type="checkbox" ' + (selectedIds.has(s.id) ? 'checked' : '') + ' onchange="toggleSelectOne(' + s.id + ', this.checked)"></td>' +
+      '<td><span class="chev' + (isOpen ? ' open' : '') + '" onclick="toggleExpand(' + s.id + ', ' + jsStr(s.email) + ')">&#9656;</span></td>' +
       '<td>' + escape(s.email) + '</td>' +
       '<td>' + escape(s.first_name || '—') + '</td>' +
       '<td>' + escape(s.last_name || '—') + '</td>' +
       '<td><span class="badge ' + (s.status === 'active' ? 'active' : 'unsub') + '">' + s.status + '</span></td>' +
       '<td>' + fmt(s.subscribed_at) + '</td>' +
       '<td>' + fmt(s.unsubscribed_at) + '</td>' +
-    '</tr>').join('') + '</table>';
+    '</tr>';
+    if (isOpen) {
+      rows += '<tr class="sub-row"><td></td><td colspan="7">' + activityRowHtml(s.email) + '</td></tr>';
+    }
+  });
+  rows += '</table>';
+  el.innerHTML = rows;
+  updateSelectionUI();
 }
 document.getElementById('sub-search').addEventListener('input', e => {
   subQuery = e.target.value;
@@ -973,6 +1088,63 @@ loadStats(); loadSubs(); loadIssues();
 }
 
 // ========== admin API ==========
+
+async function apiAddOneSubscriber(request, env) {
+  await ensureSchema(env);
+  const data = await request.json();
+  const email = String(data.email || "").trim().toLowerCase();
+  const firstName = String(data.firstName || "").trim();
+  const lastName = String(data.lastName || "").trim();
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRe.test(email)) return json({ error: "Enter a valid email address" }, 400);
+
+  const existing = await env.DB.prepare("SELECT id, status FROM subscribers WHERE email = ?").bind(email).first();
+  if (existing) {
+    await env.DB.prepare(
+      "UPDATE subscribers SET status = 'active', unsubscribed_at = NULL, first_name = COALESCE(NULLIF(?, ''), first_name), last_name = COALESCE(NULLIF(?, ''), last_name) WHERE id = ?"
+    ).bind(firstName, lastName, existing.id).run();
+    return json({ ok: true, reactivated: existing.status !== "active" });
+  }
+  const token = crypto.randomUUID();
+  await env.DB.prepare(
+    `INSERT INTO subscribers (email, first_name, last_name, status, unsubscribe_token) VALUES (?, ?, ?, 'active', ?)`
+  ).bind(email, firstName, lastName, token).run();
+  return json({ ok: true, added: true });
+}
+
+async function apiDeleteSubscribers(request, env) {
+  await ensureSchema(env);
+  const { ids } = await request.json();
+  const list = Array.isArray(ids) ? ids.map(Number).filter(n => Number.isInteger(n) && n > 0) : [];
+  if (!list.length) return json({ error: "No valid subscriber ids provided" }, 400);
+  let deleted = 0;
+  for (const id of list) {
+    const res = await env.DB.prepare("DELETE FROM subscribers WHERE id = ?").bind(id).run();
+    if (res.meta && res.meta.changes) deleted += res.meta.changes;
+  }
+  return json({ ok: true, deleted });
+}
+
+async function apiSubscriberActivity(env, url) {
+  await ensureSchema(env);
+  const email = String(url.searchParams.get("email") || "").trim().toLowerCase();
+  if (!email) return json({ error: "email required" }, 400);
+  const { results } = await env.DB.prepare(
+    `SELECT i.title AS title, i.slug AS slug, es.sent_at AS sent_at,
+       MAX(CASE WHEN ev.event_type = 'delivered' THEN ev.created_at END) AS delivered_at,
+       MAX(CASE WHEN ev.event_type = 'opened' THEN ev.created_at END) AS opened_at,
+       MAX(CASE WHEN ev.event_type = 'clicked' THEN ev.created_at END) AS clicked_at,
+       MAX(CASE WHEN ev.event_type = 'bounced' THEN ev.created_at END) AS bounced_at,
+       MAX(CASE WHEN ev.event_type = 'complained' THEN ev.created_at END) AS complained_at
+     FROM email_sends es
+     JOIN issues i ON i.id = es.issue_id
+     LEFT JOIN email_events ev ON ev.resend_email_id = es.resend_email_id
+     WHERE es.email = ?
+     GROUP BY es.id
+     ORDER BY es.sent_at DESC`
+  ).bind(email).all();
+  return json(results || []);
+}
 
 async function apiListSubscribers(env) {
   await ensureSchema(env);
@@ -1515,6 +1687,9 @@ export default {
         if (!(await isAuthed(request, env))) return json({ error: "Not authenticated" }, 401);
         if (path === "/admin/api/subscribers" && method === "GET") return await apiListSubscribers(env);
         if (path === "/admin/api/subscribers/add" && method === "POST") return await apiAddSubscribers(request, env);
+        if (path === "/admin/api/subscribers/add-one" && method === "POST") return await apiAddOneSubscriber(request, env);
+        if (path === "/admin/api/subscribers/delete" && method === "POST") return await apiDeleteSubscribers(request, env);
+        if (path === "/admin/api/subscribers/activity" && method === "GET") return await apiSubscriberActivity(env, url);
         if (path === "/admin/api/issues" && method === "GET") return await apiListIssues(env);
         if (path === "/admin/api/issues/next-slug" && method === "GET") return await apiNextIssueSlug(env);
         if (path === "/admin/api/issues/save" && method === "POST") return await apiSaveIssue(request, env);
