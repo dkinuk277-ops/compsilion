@@ -173,7 +173,7 @@ ${bodyHtml}
 <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:24px 0 0;"></td></tr>
 <tr><td style="padding:18px 32px 26px;">
 <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8c90c4;margin:0;">
-<img src="https://compsilon.com/compsilon-ping.png?v=1" width="16" height="16" alt="" style="vertical-align:-3px;margin-right:6px;border:0;">Compsilon &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a><br>
+<img src="https://compsilon.com/compsilon-ping.png?v=1" width="16" height="16" alt="" style="vertical-align:-3px;margin-right:5px;border:0;"><img src="https://compsilon.com/compsilon-logo.png?v=6" alt="Compsilon" width="81" height="15" style="vertical-align:-3px;margin-right:6px;border:0;"> &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a><br>
 You're receiving this because you subscribed at compsilon.com.<br>
 <a href="${unsubUrl}" style="color:#8c90c4;text-decoration:underline;">Unsubscribe</a> &middot; <a href="${webUrl}" style="color:#8c90c4;text-decoration:underline;">Read on the web</a>
 </p>
@@ -239,7 +239,7 @@ function welcomeEmailHTML(subscriber) {
 <tr><td style="padding:20px 28px 0;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
 <tr><td style="padding:16px 28px 22px;">
 <p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.7;color:#8c90c4;margin:0;">
-<img src="https://compsilon.com/compsilon-ping.png?v=1" width="16" height="16" alt="" style="vertical-align:-3px;margin-right:6px;border:0;">Compsilon &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a><br>
+<img src="https://compsilon.com/compsilon-ping.png?v=1" width="16" height="16" alt="" style="vertical-align:-3px;margin-right:5px;border:0;"><img src="https://compsilon.com/compsilon-logo.png?v=6" alt="Compsilon" width="81" height="15" style="vertical-align:-3px;margin-right:6px;border:0;"> &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a><br>
 You're receiving this because you subscribed at compsilon.com.<br>
 <a href="${unsubUrl}" style="color:#8c90c4;text-decoration:underline;">Unsubscribe</a>
 </p>
