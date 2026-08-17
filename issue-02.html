@@ -94,8 +94,22 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
 @keyframes logoPingF2{0%{transform:scale(0.5);opacity:0.9}100%{transform:scale(2);opacity:0}}
 footer a{color:var(--teal)}
 
+.menu-toggle{display:none;background:none;border:none;cursor:pointer;padding:6px;flex-shrink:0;margin-left:8px;}
+.menu-toggle span{display:block;width:20px;height:2px;background:var(--white);margin:4px 0;border-radius:2px;transition:transform .2s,opacity .2s}
+.menu-toggle.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.menu-toggle.open span:nth-child(2){opacity:0}
+.menu-toggle.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+
 @media(max-width:900px){
   nav ul{display:none}
+  .nav-inner{padding:0 16px}
+  .logo{font-size:18px}
+  .logo-ping{width:26px !important;height:26px !important;margin-right:4px !important;}
+  .nav-sub{padding:7px 14px;font-size:12px}
+  .menu-toggle{display:flex}
+  nav ul.mobile-open{display:flex;position:absolute;top:64px;left:0;right:0;flex-direction:column;gap:0;background:var(--bg);border-bottom:1px solid var(--border);padding:8px 16px 16px;z-index:99}
+  nav ul.mobile-open li{width:100%}
+  nav ul.mobile-open a.lnk{display:block;padding:12px 8px;border-radius:8px;width:100%;box-sizing:border-box}
   .issue-hero{padding:36px 20px 28px}
   .issue-hero h1{font-size:28px}
   .article{padding:32px 20px}
@@ -105,7 +119,27 @@ footer a{color:var(--teal)}
 </head>
 <body>
 <div class="grid-bg"></div>
-<nav><div class="nav-inner"><a href="index.html" class="logo"><svg class="logo-ping" viewBox="0 0 40 40" width="46" height="46" style="margin-right:2px;flex-shrink:0;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPing 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPing 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg>COMP<span>SILON</span></a><ul><li><a href="grc-engineering.html" class="lnk">GRC Engineering</a></li><li><a href="index.html#grc" class="lnk">AI GRC</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="threats.html" class="lnk">Threat Intel</a></li><li><a href="newsletter.html" class="lnk active">Newsletter</a></li><li><a href="grc-engineering.html#about" class="lnk">About</a></li></ul><a href="index.html#subscribe" class="nav-sub">Subscribe</a></div></nav>
+<nav><div class="nav-inner"><a href="index.html" class="logo"><svg class="logo-ping" viewBox="0 0 40 40" width="46" height="46" style="margin-right:2px;flex-shrink:0;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPing 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPing 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg>COMP<span>SILON</span></a><ul id="navLinks"><li><a href="grc-engineering.html" class="lnk">GRC Engineering</a></li><li><a href="index.html#grc" class="lnk">AI GRC</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="threats.html" class="lnk">Threat Intel</a></li><li><a href="newsletter.html" class="lnk active">Newsletter</a></li><li><a href="grc-engineering.html#about" class="lnk">About</a></li></ul><div style="display:flex;align-items:center;"><a href="index.html#subscribe" class="nav-sub">Subscribe</a><button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button></div></div></nav>
+<script>
+(function(){
+  var btn = document.getElementById('menuToggle');
+  var links = document.getElementById('navLinks');
+  if (!btn || !links) return;
+  btn.addEventListener('click', function(){
+    var isOpen = links.classList.toggle('mobile-open');
+    btn.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+  links.addEventListener('click', function(e){
+    if (e.target.classList.contains('lnk')) {
+      links.classList.remove('mobile-open');
+      btn.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+</script>
+
 
 <div class="issue-hero">
 <div class="hero-glow"></div>
