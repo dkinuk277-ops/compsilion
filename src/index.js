@@ -412,7 +412,7 @@ function adminAppHTML() {
   .tab:hover:not(.on){color:#eeeef6}
   .logout{background:none;border:1px solid #2c2c5c;color:#8c90c4;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:none}
   .logout:hover{border-color:#7c2828;color:#f4a1a1}
-  main{max-width:1100px;margin:0 auto;padding:32px}
+  main{max-width:1500px;margin:0 auto;padding:32px}
   .panel{display:none}
   .panel.on{display:block}
   h1{font-size:22px;color:#eeeef6;margin-bottom:6px;font-weight:700}
@@ -549,6 +549,9 @@ function adminAppHTML() {
   <h1>Newsletters</h1>
   <p class="sub">Generate with AI, or write by hand. Preview, test-send, and send weekly issues.</p>
 
+  <div style="display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start;">
+
+  <div style="display:flex;flex-direction:column;gap:20px;min-width:0;">
   <div class="card">
     <h2>Welcome email</h2>
     <p class="sub" style="margin-bottom:14px">Sent automatically the first time someone subscribes. Edit the content in the code if you want to change it.</p>
@@ -642,8 +645,11 @@ function adminAppHTML() {
       </div>
     </div>
   </div>
+  </div>
 
-  <div class="card"><h2>All newsletter publications</h2><div id="issues-table"><div class="empty">Loading&hellip;</div></div></div>
+  <div class="card" style="min-width:0;"><h2>All newsletter publications</h2><div id="issues-table"><div class="empty">Loading&hellip;</div></div></div>
+
+  </div>
 </section>
 
 </main>
@@ -968,7 +974,7 @@ async function loadIssues() {
     allIssues = await api('/admin/api/issues');
     const el = document.getElementById('issues-table');
     if (!allIssues.length) { el.innerHTML = '<div class="empty">No drafts yet. Create one above.</div>'; return; }
-    el.innerHTML = '<table><tr><th>Title</th><th>Slug</th><th>Status</th><th>Recipients</th><th>Actions</th></tr>' +
+    el.innerHTML = '<table><tr><th>Title</th><th>Slug</th><th>Status</th><th>Recipients</th><th>Sent at</th><th>Actions</th></tr>' +
       allIssues.map(i => {
         const inProgress = !i.sent_at && (i.sends_so_far || 0) > 0;
         const statusBadge = i.sent_at
@@ -977,16 +983,18 @@ async function loadIssues() {
             ? '<span class="badge draft" style="background:#3a2a0d;color:#EF9F27;">In progress</span>'
             : '<span class="badge draft">Draft</span>';
         const recipientsCell = i.sent_at
-          ? (i.recipient_count || 0) + ' &middot; ' + fmt(i.sent_at)
+          ? (i.recipient_count || 0)
           : inProgress
-            ? i.sends_so_far + ' sent so far'
+            ? i.sends_so_far + ' so far'
             : '—';
+        const sentAtCell = i.sent_at ? fmt(i.sent_at) : '—';
         const sendBtnLabel = inProgress ? 'Resume send' : 'Send to all';
         return '<tr>' +
           '<td>' + escape(i.title) + '</td>' +
           '<td style="color:#8c90c4;font-size:12px;">' + escape(i.slug) + '</td>' +
           '<td>' + statusBadge + '</td>' +
           '<td>' + recipientsCell + '</td>' +
+          '<td style="color:#8c90c4;font-size:12px;">' + sentAtCell + '</td>' +
           '<td class="actions">' +
             '<button class="secondary" onclick="preview(\\'' + i.slug + '\\')">Preview</button>' +
             (i.sent_at
