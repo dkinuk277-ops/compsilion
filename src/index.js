@@ -1138,6 +1138,7 @@ async function loadIssues() {
               ? '<button class="secondary" onclick="showInsights(\\'' + i.slug + '\\')">Insights</button>'
               : '<button class="secondary" onclick="testSend(\\'' + i.slug + '\\')">Send test</button>' +
                 '<button class="primary" style="padding:8px 14px;font-size:12px;" onclick="sendReal(\\'' + i.slug + '\\')">' + sendBtnLabel + '</button>') +
+            '<button class="danger" style="padding:8px 12px;font-size:12px;" onclick="deleteIssue(\\'' + i.slug + '\\')">Remove</button>' +
           '</td>' +
         '</tr>';
       }).join('') + '</table>';
@@ -1255,6 +1256,18 @@ async function sendReal(slug) {
     toast('Sent to ' + r.sent + ' subscribers.');
     loadIssues(); loadStats();
   } catch (err) { toast('Send failed: ' + err.message, true); }
+}
+async function deleteIssue(slug) {
+  const issue = allIssues.find(i => i.slug === slug);
+  const warning = issue && issue.sent_at
+    ? 'This issue has already been sent, and removing it also deletes its delivery and engagement history (Insights). Remove "' + slug + '"? This cannot be undone.'
+    : 'Remove draft "' + slug + '"? This cannot be undone.';
+  if (!confirm(warning)) return;
+  try {
+    await api('/admin/api/issues/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({slug}) });
+    toast('Removed.');
+    loadIssues(); loadStats();
+  } catch (err) { toast('Remove failed: ' + err.message, true); }
 }
 
 // initial load
@@ -1579,6 +1592,17 @@ async function apiSaveIssue(request, env) {
     `INSERT INTO issues (slug, title, teaser, tags, issue_date, link, body_html) VALUES (?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(slug) DO UPDATE SET title=excluded.title, teaser=excluded.teaser, tags=excluded.tags, issue_date=excluded.issue_date, link=excluded.link, body_html=COALESCE(excluded.body_html, issues.body_html)`
   ).bind(slug, title, teaser, tags || "", issue_date || "", linkFinal, body_html || null).run();
+  return json({ ok: true });
+}
+
+async function apiDeleteIssue(request, env) {
+  await ensureSchema(env);
+  const { slug } = await request.json();
+  if (!slug) return json({ error: "slug is required" }, 400);
+  const issue = await env.DB.prepare("SELECT id FROM issues WHERE slug = ?").bind(slug).first();
+  if (!issue) return json({ error: "Issue not found" }, 404);
+  await env.DB.prepare("DELETE FROM email_sends WHERE issue_id = ?").bind(issue.id).run();
+  await env.DB.prepare("DELETE FROM issues WHERE id = ?").bind(issue.id).run();
   return json({ ok: true });
 }
 
@@ -1937,6 +1961,7 @@ export default {
         if (path === "/admin/api/issues" && method === "GET") return await apiListIssues(env);
         if (path === "/admin/api/issues/next-slug" && method === "GET") return await apiNextIssueSlug(env);
         if (path === "/admin/api/issues/save" && method === "POST") return await apiSaveIssue(request, env);
+        if (path === "/admin/api/issues/delete" && method === "POST") return await apiDeleteIssue(request, env);
         if (path === "/admin/api/issues/preview" && method === "GET") return await apiPreviewIssue(env, url);
         if (path === "/admin/api/issues/test-send" && method === "POST") return await apiTestSend(request, env);
         if (path === "/admin/api/issues/send" && method === "POST") return await apiSendIssue(request, env);
