@@ -1,5 +1,5 @@
 // ========== helpers ==========
-// redeploy-marker-2: force fresh deployment after GitHub API outages today
+// redeploy-marker-3: force fresh deployment - newsletter.html still showing stale content
 
 function escapeHtml(str) {
   return String(str || "").replace(/[&<>"']/g, (c) => ({
