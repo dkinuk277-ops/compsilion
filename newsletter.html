@@ -155,57 +155,38 @@ footer a{color:var(--purple)}
 
 <div class="content">
 
-<div class="latest">
-<span class="latest-badge">Latest Issue</span>
-<h2>AI Governance Is Quietly Fixing Compliance Functions That Were Already Broken</h2>
-<p>The most valuable outcome of an AI governance programme is often not the AI governance. It is that building one forces an organisation to fix foundations it had been working around for years — inventory, ownership, evidence, third-party rigour.</p>
-<div class="latest-meta"><em>Issue #2</em> · 10 August 2026 · 7 min read</div>
-<a href="issue-02.html" class="read-link">Read full issue →</a>
-</div>
+<h2 class="archive-head">Published Issues</h2>
 
-<h2 class="archive-head">Previous Issues</h2>
-
-<ul class="issue-list">
-<li class="issue">
-<div class="issue-date">3 Aug</div>
-<div class="issue-body">
-  <h3><a href="issue-01.html">The AI Act Just Became Enforceable. Most Organisations Misread Which Part.</a></h3>
-  <p>Article 50 transparency obligations became applicable and enforceable on 2 August. The Digital Omnibus moved the high-risk deadlines and left transparency untouched — reading the second as cancelling the first is an expensive mistake.</p>
-  <div class="issue-tags"><span class="tag act">EU AI Act</span><span class="tag fca">Issue #1</span></div>
-  <a href="issue-01.html" class="read-link" style="margin-top:8px">Read full issue →</a>
-</div>
-</li>
+<ul class="issue-list" id="published-list">
+<li class="issue"><div class="issue-body"><p style="color:var(--muted)">Loading&hellip;</p></div></li>
 </ul>
 
-<h2 class="archive-head" style="margin-top:44px">Coming Up</h2>
-<p style="font:400 14px/1.7 var(--sans);color:var(--muted);margin-bottom:22px;max-width:560px">Planned topics for the next few weeks. Subscribers get each issue on the Monday it publishes.</p>
-
-<ul class="issue-list upcoming">
-<li class="issue">
-<div class="issue-date">31 Aug</div>
-<div class="issue-body">
-  <h3>Building Your First Compliance Agent</h3>
-  <p>A practical walkthrough: choosing a narrow process, wrapping deterministic tools, gating the writes, and evaluating output before you trust it.</p>
-  <div class="issue-tags"><span class="tag nist">AI GRC Engineering</span></div>
-</div>
-</li>
-<li class="issue">
-<div class="issue-date">7 Sep</div>
-<div class="issue-body">
-  <h3>Third-Party AI Risk: Inheriting Someone Else's Model</h3>
-  <p>When a vendor's model sits inside your regulated process, their governance gap becomes your finding. Contract terms, diligence, and continuous monitoring that work.</p>
-  <div class="issue-tags"><span class="tag safety">Vendor Risk</span></div>
-</div>
-</li>
-<li class="issue">
-<div class="issue-date">14 Sep</div>
-<div class="issue-body">
-  <h3>Evidence Automation: Killing the Pre-Audit Scramble</h3>
-  <p>Moving from evidence as a project to evidence as a query — API pulls, immutable storage, and one control test mapped to many frameworks.</p>
-  <div class="issue-tags"><span class="tag nist">AI GRC Engineering</span></div>
-</div>
-</li>
-</ul>
+<script>
+(function(){
+  var list = document.getElementById('published-list');
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  fetch('/api/newsletter-list').then(function(r){return r.json();}).then(function(items){
+    if(!items || !items.length){ list.innerHTML = '<li class="issue"><div class="issue-body"><p style="color:var(--muted)">No issues published yet.</p></div></li>'; return; }
+    list.innerHTML = items.map(function(it){
+      var d = new Date(String(it.sent_at||'').replace(' ','T')+'Z');
+      var dateStr = isNaN(d) ? '' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+      var href = it.link ? ('/' + it.link) : ('/newsletter/' + it.slug);
+      var tagHtml = it.tags ? '<div class="issue-tags"><span class="tag act">' + escapeHtml(it.tags) + '</span></div>' : '';
+      return '<li class="issue">' +
+        '<div class="issue-date">' + dateStr + '</div>' +
+        '<div class="issue-body">' +
+          '<h3><a href="' + href + '">' + escapeHtml(it.title) + '</a></h3>' +
+          (it.teaser ? '<p>' + escapeHtml(it.teaser) + '</p>' : '') +
+          tagHtml +
+          '<a href="' + href + '" class="read-link" style="margin-top:8px">Read full issue &rarr;</a>' +
+        '</div>' +
+      '</li>';
+    }).join('');
+  }).catch(function(){
+    list.innerHTML = '<li class="issue"><div class="issue-body"><p style="color:var(--muted)">Could not load issues right now.</p></div></li>';
+  });
+})();
+</script>
 
 <div class="sub-box">
 <h2>Never Miss an Issue</h2>
