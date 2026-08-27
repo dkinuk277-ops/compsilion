@@ -1597,11 +1597,14 @@ Editorial voice — match this exactly:
 - No em-dashes in generated text — use commas, colons, or periods.
 
 Output requirements:
-- Return ONE valid JSON object, no markdown fences, no commentary before or after.
-- Schema: {"title": string, "teaser": string, "body_html": string}
-- title: 6-14 words, no clickbait, no colon-subtitle formula
-- teaser: 2-3 sentences (~40-70 words) — the hook that lands in the email inbox
-- body_html: rich HTML for the full issue page. 700-1200 words. Use these classes exactly:
+- Respond with EXACTLY three sections, each wrapped in its own tags, and nothing else before, between, or after them:
+<TITLE>...</TITLE>
+<TEASER>...</TEASER>
+<BODY_HTML>...</BODY_HTML>
+- Do not use JSON. Do not use markdown fences. Do not add commentary, preamble, or explanation outside the three tags.
+- TITLE: 6-14 words, no clickbait, no colon-subtitle formula
+- TEASER: 2-3 sentences (~40-70 words) — the hook that lands in the email inbox
+- BODY_HTML: rich HTML for the full issue page. 700-1200 words. Use these classes exactly:
   * <h2> for major section headings
   * <h3> for sub-sections
   * <p> for paragraphs
@@ -1614,6 +1617,7 @@ Output requirements:
 - Use ONLY the source URLs the user provided. Never invent or hallucinate URLs, statistics, quotes, dates, or organisations.
 - If the user provided no sources, do not use the .case tile — write from principles instead.
 - Do not fabricate specific numbers, percentages, or regulatory dates. If unsure, speak in ranges or omit.
+- Never use the literal strings "</TITLE>", "</TEASER>", or "</BODY_HTML>" inside your content.
 
 Rules for body_html:
 - No inline styles. Use only the classes above.
@@ -1629,13 +1633,14 @@ function generationUserPrompt(input) {
   if (input.sources) parts.push(`Sources (only these — do not invent others):\n${input.sources}`);
   if (input.notes) parts.push(`Additional angle or notes:\n${input.notes}`);
   parts.push(`Length: ${input.length || "standard (~900 words)"}`);
-  parts.push(`\nReturn exactly one JSON object as specified.`);
+  parts.push(`\nRespond with exactly the three tagged sections as specified. Nothing else.`);
   return parts.join("\n\n");
 }
 
-function stripJsonFences(s) {
-  if (!s) return s;
-  return s.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+function extractTag(text, tag) {
+  const re = new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, "i");
+  const m = text.match(re);
+  return m ? m[1].trim() : null;
 }
 
 async function apiGenerateIssue(request, env) {
@@ -1652,7 +1657,7 @@ async function apiGenerateIssue(request, env) {
     },
     body: JSON.stringify({
       model: "claude-sonnet-5",
-      max_tokens: 4096,
+      max_tokens: 8192,
       system: generationSystemPrompt(),
       messages: [{ role: "user", content: generationUserPrompt(input) }],
     }),
@@ -1664,17 +1669,15 @@ async function apiGenerateIssue(request, env) {
   }
   const data = await resp.json();
   const rawText = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
-  const cleaned = stripJsonFences(rawText);
-  let parsed;
-  try {
-    parsed = JSON.parse(cleaned);
-  } catch (e) {
-    return json({ error: "Model returned invalid JSON. Try again.", raw: rawText.slice(0, 500) }, 502);
+
+  const title = extractTag(rawText, "TITLE");
+  const teaser = extractTag(rawText, "TEASER");
+  const body_html = extractTag(rawText, "BODY_HTML");
+
+  if (!title || !teaser || !body_html) {
+    return json({ error: "Model output was missing one of the required sections. Try again.", raw: rawText.slice(0, 500) }, 502);
   }
-  if (!parsed.title || !parsed.teaser || !parsed.body_html) {
-    return json({ error: "Model output missing required fields.", raw: cleaned.slice(0, 500) }, 502);
-  }
-  return json({ ok: true, generated: parsed });
+  return json({ ok: true, generated: { title, teaser, body_html } });
 }
 
 // ---------- public: full-issue page ----------
