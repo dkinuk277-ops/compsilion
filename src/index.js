@@ -1798,6 +1798,24 @@ ${issue.body_html || "<p><em>No full content yet — this issue has only the ema
 </body></html>`;
 }
 
+async function apiPublishedIssues(env) {
+  await ensureSchema(env);
+  // One issue per calendar day — the latest-sent issue if multiple went out
+  // the same day — within the last 90 days, newest first.
+  const { results } = await env.DB.prepare(
+    `SELECT i.slug, i.title, i.teaser, i.link, i.tags, i.sent_at
+     FROM issues i
+     INNER JOIN (
+       SELECT date(sent_at) AS d, MAX(sent_at) AS max_sent
+       FROM issues
+       WHERE sent_at IS NOT NULL AND sent_at > datetime('now', '-90 days')
+       GROUP BY d
+     ) latest ON date(i.sent_at) = latest.d AND i.sent_at = latest.max_sent
+     ORDER BY i.sent_at DESC`
+  ).all();
+  return json(results || []);
+}
+
 async function servePublicIssue(env, slug) {
   await ensureSchema(env);
   const issue = await env.DB.prepare("SELECT * FROM issues WHERE slug = ?").bind(slug).first();
@@ -1927,6 +1945,7 @@ export default {
     try {
       // public API
       if (path === "/api/db-check") return await dbCheck(env);
+      if (path === "/api/newsletter-list") return await apiPublishedIssues(env);
       if (path === "/api/env-check") {
         return json({
           bindings: Object.keys(env).sort(),
