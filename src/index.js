@@ -1,5 +1,5 @@
 // ========== helpers ==========
-// redeploy-marker-3: force fresh deployment - newsletter.html still showing stale content
+// redeploy-marker-4: force fresh deployment after reconnecting Git integration to the correct repo
 
 function escapeHtml(str) {
   return String(str || "").replace(/[&<>"']/g, (c) => ({
