@@ -218,6 +218,15 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
   .sub-form{flex-direction:column}
   .ft-row{flex-direction:column}
 }
+[data-theme="light"]{
+  --bg:#f7f8fb;--surface:#ffffff;--card:#ffffff;--card2:#f1f2f8;
+  --border:#e2e4ee;--muted:#6a6e8a;--body:#3c3f57;--light:#1c1e2e;--white:#101223;
+}
+[data-theme="light"] body{background:var(--bg);}
+[data-theme="light"] nav{background:var(--bg)ee;}
+[data-theme="light"] .glass,[data-theme="light"] .bento-card,[data-theme="light"] .orb,[data-theme="light"] .fwtile{box-shadow:0 2px 12px rgba(20,20,40,.06);}
+.theme-toggle{background:transparent;border:1px solid var(--border);color:var(--white);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;display:inline-flex;align-items:center;justify-content:center;margin-right:10px;transition:border-color .2s;flex-shrink:0;}
+.theme-toggle:hover{border-color:var(--teal);}
 </style>
 </head>
 <body>
@@ -234,7 +243,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
     <li><a href="newsletter.html" class="lnk">Newsletter</a></li><li><a href="#about" class="lnk">About</a></li>
   </ul>
   <div style="display:flex;align-items:center;">
-    <a href="#subscribe" class="nav-sub">Subscribe</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark mode" onclick="toggleTheme()">🌙</button><a href="#subscribe" class="nav-sub">Subscribe</a>
     <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </div>
@@ -556,6 +565,17 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ setTimeout(jump, 0); });
   window.addEventListener('hashchange', function(){ setTimeout(jump, 0); });
 })();
+</script>
+<script>
+(function(){try{var t=localStorage.getItem('csn-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();
+function toggleTheme(){
+  var html=document.documentElement;
+  var btn=document.getElementById('themeToggle');
+  var isLight=html.getAttribute('data-theme')==='light';
+  if(isLight){html.removeAttribute('data-theme');try{localStorage.setItem('csn-theme','dark');}catch(e){}if(btn)btn.textContent='🌙';}
+  else{html.setAttribute('data-theme','light');try{localStorage.setItem('csn-theme','light');}catch(e){}if(btn)btn.textContent='☀️';}
+}
+document.addEventListener('DOMContentLoaded',function(){var btn=document.getElementById('themeToggle');if(btn){btn.textContent=document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';}});
 </script>
 </body>
 </html>
