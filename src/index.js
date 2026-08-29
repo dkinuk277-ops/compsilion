@@ -319,10 +319,34 @@ async function sendWelcomeEmail(env, subscriber) {
   }
 }
 
-// ========== public routes ==========
+async function sendAdminNotification(env, subscriber) {
+  if (!env.RESEND_API_KEY) return; // silently skip if not configured
+  const notifyTo = env.ADMIN_NOTIFY_EMAIL || "hellocompsilon@gmail.com";
+  const name = [subscriber.first_name, subscriber.last_name].filter(Boolean).join(" ") || "(no name given)";
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Compsilon <newsletter@compsilon.com>",
+        to: [notifyTo],
+        subject: `New subscriber: ${subscriber.email}`,
+        html: `<div style="font-family:sans-serif;padding:16px;">
+          <h2 style="margin:0 0 8px;">New Compsilon subscriber</h2>
+          <p style="margin:0 0 4px;"><strong>Email:</strong> ${escapeHtml(subscriber.email)}</p>
+          <p style="margin:0 0 4px;"><strong>Name:</strong> ${escapeHtml(name)}</p>
+          <p style="margin:16px 0 0;color:#888;font-size:12px;">Sent automatically from compsilon.com when a new subscriber signs up.</p>
+        </div>`,
+      }),
+    });
+    // Best-effort notification — failures here should never block the subscribe flow.
+  } catch (err) { /* non-fatal */ }
+}
 
-async function handleSubscribe(request, env, ctx) {
-  await ensureSchema(env);
+
   const ct = request.headers.get("content-type") || "";
   let data;
   if (ct.includes("application/json")) data = await request.json();
@@ -356,6 +380,7 @@ async function handleSubscribe(request, env, ctx) {
     ).bind(email, firstName, lastName, token).run();
     const newId = insertResult.meta ? insertResult.meta.last_row_id : null;
     ctx.waitUntil(sendWelcomeEmail(env, { id: newId, email, first_name: firstName, unsubscribe_token: token }));
+    ctx.waitUntil(sendAdminNotification(env, { email, first_name: firstName, last_name: lastName }));
   }
 
   return new Response(
