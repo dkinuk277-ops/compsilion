@@ -345,8 +345,10 @@ async function sendAdminNotification(env, subscriber) {
     // Best-effort notification — failures here should never block the subscribe flow.
   } catch (err) { /* non-fatal */ }
 }
+// ========== public routes ==========
 
-
+async function handleSubscribe(request, env, ctx) {
+  await ensureSchema(env);
   const ct = request.headers.get("content-type") || "";
   let data;
   if (ct.includes("application/json")) data = await request.json();
