@@ -191,11 +191,20 @@ footer a{color:var(--teal)}
   .concl{padding:32px 24px}
   .page-hero h1{font-size:32px}
 }
+[data-theme="light"]{
+  --bg:#f7f8fb;--surface:#ffffff;--card:#ffffff;--card2:#f1f2f8;
+  --border:#e2e4ee;--muted:#6a6e8a;--body:#3c3f57;--light:#1c1e2e;--white:#101223;
+}
+[data-theme="light"] body{background:var(--bg);}
+[data-theme="light"] nav{background:var(--bg)ee;}
+[data-theme="light"] .glass,[data-theme="light"] .bento-card,[data-theme="light"] .orb,[data-theme="light"] .fwtile{box-shadow:0 2px 12px rgba(20,20,40,.06);}
+.theme-toggle{background:transparent;border:1px solid var(--border);color:var(--white);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;display:inline-flex;align-items:center;justify-content:center;margin-right:10px;transition:border-color .2s;flex-shrink:0;}
+.theme-toggle:hover{border-color:var(--teal);}
 </style>
 </head>
 <body>
 <div class="grid-bg"></div>
-<nav><div class="nav-inner"><a href="index.html" class="logo"><svg class="logo-ping" viewBox="0 0 40 40" width="46" height="46" style="margin-right:2px;flex-shrink:0;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPing 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPing 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg>COMP<span>SILON</span></a><ul id="navLinks"><li><a href="index.html" class="lnk">AI GRC</a></li><li><a href="grc-engineering.html" class="lnk active">AI GRC Engineering</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="programs.html" class="lnk">Programs Enablement</a></li><li><a href="newsletter.html" class="lnk">Newsletter</a></li><li><a href="index.html#about" class="lnk">About</a></li></ul><div style="display:flex;align-items:center;"><a href="index.html#subscribe" class="nav-sub">Subscribe</a><button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button></div></div></nav>
+<nav><div class="nav-inner"><a href="index.html" class="logo"><svg class="logo-ping" viewBox="0 0 40 40" width="46" height="46" style="margin-right:2px;flex-shrink:0;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPing 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2" style="transform-origin:20px 20px;animation:logoPing 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg>COMP<span>SILON</span></a><ul id="navLinks"><li><a href="index.html" class="lnk">AI GRC</a></li><li><a href="grc-engineering.html" class="lnk active">AI GRC Engineering</a></li><li><a href="frameworks.html" class="lnk">Frameworks</a></li><li><a href="programs.html" class="lnk">Programs Enablement</a></li><li><a href="newsletter.html" class="lnk">Newsletter</a></li><li><a href="index.html#about" class="lnk">About</a></li></ul><div style="display:flex;align-items:center;"><button class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark mode" onclick="toggleTheme()">🌙</button><a href="index.html#subscribe" class="nav-sub">Subscribe</a><button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button></div></div></nav>
 <script>
 (function(){
   var btn = document.getElementById('menuToggle');
@@ -598,5 +607,16 @@ footer a{color:var(--teal)}
 
 </div>
 <footer><svg viewBox="0 0 40 40" width="14" height="14" style="vertical-align:-2px;margin-right:4px;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2.5" style="transform-origin:20px 20px;animation:logoPingF2 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2.5" style="transform-origin:20px 20px;animation:logoPingF2 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg>© 2026 Compsilon · <a href="index.html">compsilon.com</a> · <a href="privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a> · <a href="terms-of-use.html" target="_blank" rel="noopener">Terms of Use</a></footer>
+<script>
+(function(){try{var t=localStorage.getItem('csn-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();
+function toggleTheme(){
+  var html=document.documentElement;
+  var btn=document.getElementById('themeToggle');
+  var isLight=html.getAttribute('data-theme')==='light';
+  if(isLight){html.removeAttribute('data-theme');try{localStorage.setItem('csn-theme','dark');}catch(e){}if(btn)btn.textContent='🌙';}
+  else{html.setAttribute('data-theme','light');try{localStorage.setItem('csn-theme','light');}catch(e){}if(btn)btn.textContent='☀️';}
+}
+document.addEventListener('DOMContentLoaded',function(){var btn=document.getElementById('themeToggle');if(btn){btn.textContent=document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';}});
+</script>
 </body>
 </html>
