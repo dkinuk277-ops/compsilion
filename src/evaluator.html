@@ -154,6 +154,20 @@ details.more summary .l{flex:1}
 .stars{color:var(--amber-ink);letter-spacing:1px}
 .note{font-size:.83rem;color:var(--muted);margin:10px 0 0}
 ol.steps-list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.dlcard{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 20px;align-items:center;border-top:3px solid var(--teal)}
+@media (max-width:640px){.dlcard{grid-template-columns:minmax(0,1fr)}}
+.gen{min-height:340px}
+.genbar{height:8px;background:var(--c0);border-radius:4px;overflow:hidden;margin:6px 0 4px}
+.genbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--amber));transition:width 1.1s ease}
+.gensteps{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:.95rem;color:var(--muted)}
+.gensteps li{display:flex;align-items:center;gap:10px}
+.gensteps .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);flex:0 0 auto}
+.gensteps li.now{color:var(--ink)}
+.gensteps li.now .dot{border-color:var(--teal);border-top-color:transparent;animation:spin .8s linear infinite}
+.gensteps li.done{color:var(--ink)}
+.gensteps li.done .dot{background:var(--teal);border-color:var(--teal)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.genbar i{transition:none}.gensteps li.now .dot{animation:none;background:var(--teal-soft)}}
 .pdfstatus{background:var(--teal-soft);border:1px solid var(--teal-ink);border-radius:8px;padding:12px 14px;font-size:.92rem}
 .pdfstatus.err{background:var(--c1);border-color:var(--warn)}
 .toast{font-size:.88rem;color:var(--good);min-height:1.2em}
@@ -548,7 +562,35 @@ function renderReview(st){
     <div class="qfoot"><button class="btn" type="button" id="backBtn">Back</button><button class="btn primary" type="button" id="submitBtn" ${miss?"disabled":""}>Submit and see evaluation</button></div></section>`;
   st.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(+b.dataset.go));
   $("backBtn").onclick=()=>go(state.step-1);
-  $("submitBtn").onclick=()=>{state.submitted=true;save();show()};
+  $("submitBtn").onclick=generate;
+}
+const GEN_STEPS=[
+  ()=>`Reading the client's ${TOTAL} answers and building the needs profile`,
+  ()=>`Scoring ${VENDORS.length} platforms on capability, hosting fit and deployment effort`,
+  ()=>"Checking integrations, data hosting and vendor fit",
+  ()=>"Working out 12-month risk reduction for the top tools",
+  ()=>"Drawing charts and preparing the recommendation"
+];
+let generating=false;
+function generate(){
+  if(generating)return;generating=true;
+  const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const per=reduce?400:1250;
+  document.querySelector(".nav").hidden=true;
+  $("stage").innerHTML=`<section class="qcard gen" aria-live="polite" aria-busy="true">
+    <div class="tag">Generating report</div>
+    <h2>Building the evaluation for this client</h2>
+    <div class="genbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="genFill"></i></div>
+    <ul class="gensteps">${GEN_STEPS.map((f,i)=>`<li id="gs${i}"><span class="dot"></span>${esc(f())}</li>`).join("")}</ul>
+  </section>`;
+  window.scrollTo({top:0});
+  let i=0;
+  const tick=()=>{
+    if(i>0)$("gs"+(i-1)).className="done";
+    if(i<GEN_STEPS.length){$("gs"+i).className="now";const pct=Math.round((i+1)/GEN_STEPS.length*100);$("genFill").style.width=pct+"%";document.querySelector(".genbar").setAttribute("aria-valuenow",pct);i++;setTimeout(tick,per);return}
+    setTimeout(()=>{generating=false;document.querySelector(".nav").hidden=false;state.submitted=true;save();show()},reduce?300:900);
+  };
+  tick();
 }
 function go(i){state.step=Math.max(0,Math.min(TOTAL,i));save();renderNav();renderStage();window.scrollTo({top:0})}
 
@@ -765,7 +807,7 @@ function renderResults(){
       <span class="tag">Evaluation results · ${date}</span>
       <span class="actions">
         <button class="btn" type="button" id="editBtn">Edit answers</button>
-        <button class="btn primary" type="button" id="pdfBtn">Download PDF report</button>
+        <button class="btn primary" type="button" id="pdfBtn" data-status="pdfStatus">Download PDF report</button>
       </span>
     </div>
     <div class="toast" id="toast" role="status"></div>
@@ -889,7 +931,18 @@ function renderResults(){
       </ol>
       <p class="note">Method: capability scores (0–3) come from public vendor documentation and independent coverage as of October 2026. Timelines are estimates. Ratings come from ${GPI} and Trustpilot; most enterprise AI security vendors have no Trustpilot profile, and the profiles that exist are company-wide, not product-specific.</p>
     </section>
+
+    <section class="card dlcard">
+      <div>
+        <h2>Download the report</h2>
+        <p class="note" style="margin:4px 0 0">A branded A4 PDF of this evaluation: recommendation, KPIs, top-5 charts, full ranking, 12-month outlook, tool detail and sources.</p>
+      </div>
+      <div class="actions"><button class="btn" type="button" id="editBtn2">Edit answers</button><button class="btn primary" type="button" id="pdfBtn2" data-status="pdfStatus2">Download PDF report</button></div>
+      <div class="pdfstatus" id="pdfStatus2" role="status" hidden style="grid-column:1/-1"></div>
+    </section>
   </div>`;
+  $("editBtn2").onclick=()=>{state.step=TOTAL;state.submitted=false;save();show()};
+  $("pdfBtn2").onclick=exportPDF;
   $("editBtn").onclick=()=>{state.step=TOTAL;state.submitted=false;save();show()};
   $("pdfBtn").onclick=exportPDF;
 }
@@ -1051,8 +1104,9 @@ function buildPDF(){
   return doc;
 }
 async function getCap(name){try{if(window.claude&&window.claude.use)return await window.claude.use(name)}catch(e){}return null}
-async function exportPDF(){
-  const btn=$("pdfBtn"),box=$("pdfStatus");box.hidden=true;box.innerHTML="";
+let statusBox=null;
+async function exportPDF(ev){
+  const btn=(ev&&ev.currentTarget)||$("pdfBtn"),box=$(btn.dataset.status||"pdfStatus");statusBox=box;box.hidden=true;box.innerHTML="";
   if(!window.jspdf||!window.jspdf.jsPDF||!window.jspdf.jsPDF.API.autoTable){showStatus("The PDF engine didn't load (the network may have blocked cdn.jsdelivr.net). Reload the page and try again.",true);return}
   btn.disabled=true;btn.textContent="Preparing PDF…";
   let blob,filename;
@@ -1080,7 +1134,7 @@ async function exportPDF(){
   resetBtn();
   function resetBtn(){btn.disabled=false;btn.textContent="Download PDF report"}
 }
-function showStatus(html,err){const box=$("pdfStatus");box.innerHTML=html;box.hidden=false;box.classList.toggle("err",!!err)}
+function showStatus(html,err){const box=statusBox||$("pdfStatus");box.innerHTML=html;box.hidden=false;box.classList.toggle("err",!!err)}
 function toast(m){const el=$("toast");if(!el)return;el.textContent=m;clearTimeout(toast.t);toast.t=setTimeout(()=>{el.textContent=""},4000)}
 
 function show(){
