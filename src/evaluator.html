@@ -154,6 +154,12 @@ details.more summary .l{flex:1}
 .stars{color:var(--amber-ink);letter-spacing:1px}
 .note{font-size:.83rem;color:var(--muted);margin:10px 0 0}
 ol.steps-list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.revtop{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
+.step.reviewstep{background:var(--teal-soft);border-color:var(--teal);color:var(--ink);font-weight:600}
+.floattop{position:fixed;right:20px;bottom:20px;z-index:20;background:var(--teal);color:#06060e;border:0;border-radius:100px;padding:10px 16px;font:700 13px var(--font-ui);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.45);opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s}
+.floattop.on{opacity:1;pointer-events:auto;transform:none}
+.floattop:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.floattop{transition:none}}
 .dlcard{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 20px;align-items:center;border-top:3px solid var(--teal)}
 @media (max-width:640px){.dlcard{grid-template-columns:minmax(0,1fr)}}
 .gen{min-height:340px}
@@ -200,6 +206,7 @@ footer.site b{font-family:var(--font-display);color:var(--ink);letter-spacing:.0
     <div id="stage" style="margin-top:16px"></div>
   </div>
   <div id="results" hidden></div>
+  <button class="floattop" id="floatTop" type="button" aria-label="Back to top">↑ Top</button>
 </div>
 
 </div>
@@ -496,7 +503,7 @@ function renderNav(){
   for(let i=0;i<=TOTAL;i++){
     const b=document.createElement("button");b.type="button";
     const isReview=i===TOTAL;
-    b.className="step"+(!isReview&&answered(Q[i])?" done":"")+(state.step===i?" current":"");
+    b.className="step"+(isReview?" reviewstep":"")+(!isReview&&answered(Q[i])?" done":"")+(state.step===i?" current":"");
     b.textContent=isReview?"Review & submit":i+1;
     b.setAttribute("aria-label",isReview?"Review and submit":`Question ${i+1}: ${Q[i].title}${answered(Q[i])?" (answered)":" (not answered)"}`);
     if(state.step===i)b.setAttribute("aria-current","step");
@@ -553,8 +560,11 @@ function answerText(q){
 function renderReview(st){
   const miss=TOTAL-doneCount();
   st.innerHTML=`<section class="qcard">
-    <div class="tag">Review</div>
-    <h2>Check the answers, then submit</h2>
+    <div class="revtop">
+      <div><div class="tag">Review</div><h2>Check the answers, then submit</h2></div>
+      <button class="btn primary" type="button" id="submitTop" ${miss?"disabled":""}>Submit and see evaluation</button>
+    </div>
+    ${miss?`<div class="pdfstatus err">${miss} question${miss>1?"s":""} still to answer: ${Q.map((q,i)=>answered(q)?"":`<button class="btn link" type="button" data-go="${i}">Q${i+1}</button>`).filter(Boolean).join(" · ")}. Answer ${miss>1?"them":"it"} to unlock Submit.</div>`:""}
     <div class="review-list">
       ${Q.map((q,i)=>`<div class="rv ${answered(q)?"":"miss"}"><span class="n">Q${i+1}</span><div><div>${esc(q.title)}</div><div class="a">${esc(answerText(q))}</div></div><button class="btn link" type="button" data-go="${i}">Edit</button></div>`).join("")}
     </div>
@@ -563,6 +573,7 @@ function renderReview(st){
   st.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(+b.dataset.go));
   $("backBtn").onclick=()=>go(state.step-1);
   $("submitBtn").onclick=generate;
+  $("submitTop").onclick=generate;
 }
 const GEN_STEPS=[
   ()=>`Reading the client's ${TOTAL} answers and building the needs profile`,
@@ -574,6 +585,7 @@ const GEN_STEPS=[
 let generating=false;
 function generate(){
   if(generating)return;generating=true;
+  ["sampleBtn","resetBtn"].forEach(id=>{const b=$(id);if(b)b.disabled=true});
   const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
   const per=reduce?400:1250;
   document.querySelector(".nav").hidden=true;
@@ -588,10 +600,13 @@ function generate(){
   const tick=()=>{
     if(i>0)$("gs"+(i-1)).className="done";
     if(i<GEN_STEPS.length){$("gs"+i).className="now";const pct=Math.round((i+1)/GEN_STEPS.length*100);$("genFill").style.width=pct+"%";document.querySelector(".genbar").setAttribute("aria-valuenow",pct);i++;setTimeout(tick,per);return}
-    setTimeout(()=>{generating=false;document.querySelector(".nav").hidden=false;state.submitted=true;save();show()},reduce?300:900);
+    setTimeout(()=>{generating=false;["sampleBtn","resetBtn"].forEach(id=>{const b=$(id);if(b)b.disabled=false});document.querySelector(".nav").hidden=false;state.submitted=true;save();show()},reduce?300:900);
   };
   tick();
 }
+function toTop(){const r=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;window.scrollTo({top:0,behavior:r?"auto":"smooth"})}
+function floatTop(){const b=$("floatTop");if(b)b.classList.toggle("on",!$("results").hidden&&window.scrollY>700)}
+window.addEventListener("scroll",floatTop,{passive:true});
 function go(i){state.step=Math.max(0,Math.min(TOTAL,i));save();renderNav();renderStage();window.scrollTo({top:0})}
 
 /* ---------- scoring ---------- */
@@ -937,12 +952,13 @@ function renderResults(){
         <h2>Download the report</h2>
         <p class="note" style="margin:4px 0 0">A branded A4 PDF of this evaluation: recommendation, KPIs, top-5 charts, full ranking, 12-month outlook, tool detail and sources.</p>
       </div>
-      <div class="actions"><button class="btn" type="button" id="editBtn2">Edit answers</button><button class="btn primary" type="button" id="pdfBtn2" data-status="pdfStatus2">Download PDF report</button></div>
+      <div class="actions"><button class="btn" type="button" id="topBtn2">↑ Back to top</button><button class="btn" type="button" id="editBtn2">Edit answers</button><button class="btn primary" type="button" id="pdfBtn2" data-status="pdfStatus2">Download PDF report</button></div>
       <div class="pdfstatus" id="pdfStatus2" role="status" hidden style="grid-column:1/-1"></div>
     </section>
   </div>`;
   $("editBtn2").onclick=()=>{state.step=TOTAL;state.submitted=false;save();show()};
   $("pdfBtn2").onclick=exportPDF;
+  $("topBtn2").onclick=toTop;
   $("editBtn").onclick=()=>{state.step=TOTAL;state.submitted=false;save();show()};
   $("pdfBtn").onclick=exportPDF;
 }
@@ -1141,8 +1157,9 @@ function show(){
   const res=state.submitted&&doneCount()===TOTAL;
   $("survey").hidden=res;$("results").hidden=!res;$("wrap").classList.toggle("wide",res);
   if(res)renderResults();else{renderNav();renderStage()}
-  window.scrollTo({top:0});
+  window.scrollTo({top:0});floatTop();
 }
+$("floatTop").onclick=toTop;
 $("resetBtn").onclick=()=>{state={step:0};save();show()};
 $("sampleBtn").onclick=()=>{state={...JSON.parse(JSON.stringify(SAMPLE)),step:TOTAL,submitted:false};save();show()};
 window.__fit={buildPDF:()=>buildPDF()};
