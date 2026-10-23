@@ -1,3 +1,4 @@
+import evaluatorHTML from "./evaluator.html";
 // ========== helpers ==========
 // redeploy-marker-4: force fresh deployment after reconnecting Git integration to the correct repo
 
@@ -617,6 +618,7 @@ function adminAppHTML() {
     <button class="tab on" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="subscribers">Subscribers</button>
     <button class="tab" data-tab="newsletters">Newsletters</button>
+    <button class="tab" data-tab="evaluator" title="AI Security &amp; Governance Platform Evaluator">Platform Evaluator</button>
   </nav>
   <a class="logout" href="/admin/logout">Logout</a>
 </header>
@@ -780,6 +782,9 @@ function adminAppHTML() {
   <div class="card"><h2>All newsletter publications</h2><div id="issues-table"><div class="empty">Loading&hellip;</div></div></div>
 </section>
 
+<section id="evaluator" class="panel">
+  <iframe id="evaluator-frame" title="AI Security &amp; Governance Platform Evaluator" style="width:100%;height:calc(100vh - 150px);min-height:640px;border:1px solid #2c2c5c;border-radius:12px;background:#06060e;display:block"></iframe>
+</section>
 </main>
 
 <footer style="border-top:1px solid #2c2c5c;padding:20px 32px;text-align:center;font:400 12px -apple-system,sans-serif;color:#8c90c4;">
@@ -803,6 +808,10 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
   document.querySelectorAll('.panel').forEach(x => x.classList.remove('on'));
   t.classList.add('on');
   document.getElementById(t.dataset.tab).classList.add('on');
+  if (t.dataset.tab === 'evaluator') {
+    const f = document.getElementById('evaluator-frame');
+    if (!f.getAttribute('src')) f.setAttribute('src', '/admin/evaluator');
+  }
 }));
 
 // ---- helpers ----
@@ -1995,6 +2004,15 @@ export default {
       if (path === "/admin" || path === "/admin/") {
         if (!(await isAuthed(request, env))) return Response.redirect(url.origin + "/admin/login", 302);
         return new Response(adminAppHTML(), { headers: { "Content-Type": "text/html" } });
+      }
+      if (path === "/admin/evaluator") {
+        if (!(await isAuthed(request, env))) return Response.redirect(url.origin + "/admin/login", 302);
+        return new Response(evaluatorHTML, { headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Robots-Tag": "noindex, nofollow",
+          "X-Frame-Options": "SAMEORIGIN"
+        } });
       }
       if (path.startsWith("/admin/api/")) {
         if (!(await isAuthed(request, env))) return json({ error: "Not authenticated" }, 401);

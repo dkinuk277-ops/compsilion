@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Platform Evaluator — Compsilon admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Compsilon admin · Platform Evaluator (served at /admin/evaluator inside the admin tab). Layout: survey wizard (navy band header, one question per screen) then a long evaluation report with KPI charts for the top 5 and full detail below */
+:root{
+  --bg:#06060e; --panel:#12122a; --ink:#eeeef6; --muted:#8c90c4; --line:#2c2c5c;
+  --navy:#0d0d1e; --navy2:#16163a; --on-navy:#eeeef6; --on-navy-muted:#b9bce0;
+  --teal:#06d6a0; --teal-ink:#06d6a0; --teal-soft:#0d3b2c;
+  --amber:#EF9F27; --amber-ink:#f5b85c; --blue:#7aa5ff;
+  --good:#06d6a0; --warn:#f0b04f; --bad:#f4a1a1;
+  --c0:#1c1c3a; --c1:#4c3a1a; --c2:#145a4a; --c3:#06d6a0; --c3ink:#06060e;
+  --font-display:"Sora",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --font-data:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.55;margin:0;padding-block:0 48px}
+.evhead{max-width:1180px;margin:0 auto 18px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px}
+.evhead h1{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--ink);margin:0 0 6px}
+.evhead p{margin:0;color:var(--muted);font-size:13px;max-width:70ch}
+.band{background:linear-gradient(120deg,var(--navy) 0%,var(--navy2) 100%);color:var(--on-navy);border-bottom:3px solid var(--teal);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:22px 20px}
+.band-in{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px}
+.brand{font-family:var(--font-data);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+h1{font-family:var(--font-display);font-size:1.75rem;line-height:1.15;margin:4px 0 0;letter-spacing:-.01em;text-wrap:balance;color:var(--on-navy)}
+.band p{margin:6px 0 0;color:var(--on-navy-muted);max-width:62ch;font-size:.95rem}
+.band .btn{background:transparent;color:var(--on-navy);border-color:#3a4c80}
+.band .btn:hover{border-color:var(--teal)}
+.main{padding:24px 32px 0}
+@media (max-width:700px){.main{padding:16px}}
+.wrap{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.wrap.wide{max-width:1180px}
+h2{font-family:var(--font-display);font-size:1.3rem;margin:0;text-wrap:balance}
+h3{font-family:var(--font-display);font-size:1.08rem;margin:0;text-wrap:balance}
+h4{margin:14px 0 6px;font-size:.72rem;font-family:var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tag{font-family:var(--font-data);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+a{color:var(--teal-ink)}
+.btn{font:inherit;font-size:.92rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:9px 16px;cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--teal-ink)}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:#06060e;font-weight:700}
+.btn.primary:hover:not(:disabled){background:#05c091}
+.btn.navy{background:var(--navy2);border-color:var(--navy2);color:var(--on-navy);font-weight:600}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.link{border:0;background:none;color:var(--teal-ink);padding:0;font-weight:600}
+:focus-visible{outline:2px solid var(--teal-ink);outline-offset:2px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+.nav{position:sticky;top:0;z-index:5;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--line)}
+.nav-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.85rem;margin-bottom:8px}
+.nav-top b{font-family:var(--font-data);font-variant-numeric:tabular-nums}
+.steps{display:flex;flex-wrap:wrap;gap:6px;padding:2px}
+.step{flex:0 0 auto;min-width:38px;height:34px;padding:0 10px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-family:var(--font-data);font-size:.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.step.done{background:var(--teal-soft);border-color:var(--teal-ink);color:var(--ink)}
+.step.current{outline:2px solid var(--teal-ink);outline-offset:1px;color:var(--ink);font-weight:600}
+.meter{height:4px;background:var(--c0);border-radius:2px;margin-top:8px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--teal)}
+.qcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px;display:flex;flex-direction:column;gap:14px}
+.qcard h2{font-size:1.4rem}
+.hint{color:var(--muted);margin:-6px 0 0;font-size:.92rem}
+.options{display:flex;flex-direction:column;gap:8px}
+label.opt{display:flex;align-items:flex-start;gap:12px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:12px 14px;cursor:pointer}
+label.opt input{accent-color:var(--teal-ink);margin:3px 0 0;width:18px;height:18px;flex:0 0 auto}
+label.opt .lt{font-weight:600}
+label.opt .ld{display:block;color:var(--muted);font-size:.86rem}
+label.opt:has(input:checked){border-color:var(--teal-ink);background:var(--teal-soft)}
+.otherwrap{display:flex;flex-direction:column;gap:6px;font-size:.92rem;font-weight:600}
+.otherwrap input{font:inherit;font-weight:400;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px;width:100%}
+label.opt:focus-within{outline:2px solid var(--teal-ink);outline-offset:1px}
+.qfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+.msg{font-size:.86rem;color:var(--bad);min-height:1.2em}
+.review-list{display:flex;flex-direction:column}
+.rv{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;padding:10px 0;border-top:1px solid var(--line);align-items:start}
+.rv:first-child{border-top:0}
+.rv .n{font-family:var(--font-data);color:var(--teal-ink);font-size:.85rem;padding-top:1px}
+.rv .a{color:var(--muted);font-size:.9rem}
+.rv.miss .a{color:var(--bad)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;min-width:0}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;background:linear-gradient(120deg,#0d0d1e 0%,#1a1a44 100%);color:var(--on-navy);border:1px solid var(--line);border-left:6px solid var(--teal)}
+.hero .tag{color:var(--teal)}
+.hero .name{font-family:var(--font-display);font-size:2rem;font-weight:700;line-height:1.1;margin:4px 0 8px;color:var(--on-navy)}
+.hero p{color:var(--on-navy-muted)}
+.hero .note{color:var(--on-navy-muted)}
+.hero b{color:var(--on-navy)}
+.hero .pill{border-color:#3a4c80;color:var(--on-navy-muted)}
+.hero .pill.short{border-color:var(--teal);color:var(--teal)}
+.hero .big{color:var(--teal)}
+@media (max-width:640px){.hero{grid-template-columns:minmax(0,1fr)}.hero .scorebox{text-align:left!important}}
+.score{font-family:var(--font-data);font-variant-numeric:tabular-nums}
+.big{font-family:var(--font-data);font-size:3rem;font-weight:600;color:var(--teal-ink);line-height:1}
+.pill{display:inline-block;font-family:var(--font-data);font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:2px 8px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.short{border-color:var(--teal-ink);color:var(--teal-ink)}
+.pill.low{border-color:var(--warn);color:var(--warn)}
+.pill.ex{border-color:var(--bad);color:var(--bad)}
+.pill.easy{border-color:var(--good);color:var(--good)}
+.pill.moderate{border-color:var(--warn);color:var(--warn)}
+.pill.complex{border-color:var(--bad);color:var(--bad)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.82rem;border-radius:6px;padding:4px 9px;background:var(--c0)}
+.chip b{font-family:var(--font-data);font-size:.72rem;margin-left:4px;color:var(--teal-ink)}
+ul.tight{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.92rem}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.scroll{overflow-x:auto}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--teal);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi span{font-family:var(--font-data);font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.kpi b{font-family:var(--font-data);font-size:1.55rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi em{font-style:normal;font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}
+.charts{display:flex;flex-direction:column;gap:26px}
+.chart{border-top:1px solid var(--line);padding-top:16px}
+.chart:first-child{border-top:0;padding-top:0}
+.chart svg{width:100%;height:auto;display:block}
+.chart .cap{font-size:.82rem;color:var(--muted);margin:8px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;color:var(--muted);margin:8px 0 4px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:14px;height:14px;border-radius:3px;display:inline-block}
+table.t{border-collapse:collapse;width:100%;font-size:.86rem}
+.t th{text-align:left;font-size:.7rem;font-family:var(--font-data);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line);vertical-align:bottom}
+.t td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.t td.num{font-family:var(--font-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.t tr.topr td{background:var(--teal-soft)}
+.t.wide{min-width:900px}
+table.matrix{border-collapse:separate;border-spacing:3px;font-size:.82rem;min-width:980px;width:100%}
+.matrix th{font-weight:600;text-align:center;vertical-align:bottom;padding:4px;font-size:.74rem;line-height:1.25}
+.matrix th.rowh,.matrix td.rowh{text-align:left;white-space:nowrap;padding-right:10px;font-family:var(--font-ui)}
+.matrix td{text-align:center;padding:6px 4px;border-radius:4px;font-family:var(--font-data);font-variant-numeric:tabular-nums}
+.s0{background:var(--c0);color:var(--muted)} .s1{background:var(--c1);color:var(--ink)} .s2{background:var(--c2);color:var(--ink)} .s3{background:var(--c3);color:var(--c3ink);font-weight:600}
+.matrix tr.fitrow td{font-weight:600;background:var(--teal-soft);color:var(--ink)}
+.matrix td.gap{box-shadow:inset 0 0 0 2px var(--bad)}
+.lvl{display:inline-block;border-radius:4px;padding:2px 7px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.prio{font-family:var(--font-data);font-size:.68rem;color:var(--muted);margin-left:6px}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:14px}
+.vbox{background:var(--bg);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.vbox h4{margin:0}
+details.more{border-top:1px solid var(--line);padding:12px 0}
+details.more summary{cursor:pointer;display:flex;justify-content:space-between;gap:10px;font-weight:600;list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"+";font-family:var(--font-data);color:var(--teal-ink);margin-right:8px}
+details.more[open] summary::before{content:"−"}
+details.more summary .l{flex:1}
+.vdetail{border:1px solid var(--line);border-left:5px solid var(--teal);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--panel)}
+.vdetail .vh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.vdetail .vh h3{font-size:1.2rem}
+.stars{color:var(--amber-ink);letter-spacing:1px}
+.note{font-size:.83rem;color:var(--muted);margin:10px 0 0}
+ol.steps-list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.pdfstatus{background:var(--teal-soft);border:1px solid var(--teal-ink);border-radius:8px;padding:12px 14px;font-size:.92rem}
+.pdfstatus.err{background:var(--c1);border-color:var(--warn)}
+.toast{font-size:.88rem;color:var(--good);min-height:1.2em}
+.exportbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+textarea#copyFallback{width:100%;height:220px;font-family:var(--font-data);font-size:.8rem;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px}
+footer.site{max-width:1180px;margin:28px auto 0;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:.84rem;color:var(--muted)}
+footer.site b{font-family:var(--font-display);color:var(--ink);letter-spacing:.06em}
+</style>
+</head><body>
+
+<div class="main">
+<div class="evhead">
+  <div>
+    <h1>AI Security &amp; Governance Platform Evaluator</h1>
+    <p>Answer the client's questions, submit, and get an independent ranking of AI agent security and governance platforms for their environment.</p>
+  </div>
+  <div class="actions">
+    <button class="btn" id="sampleBtn" type="button">Load example client</button>
+    <button class="btn" id="resetBtn" type="button">Start over</button>
+  </div>
+</div>
+
+<div class="wrap" id="wrap">
+  <div id="survey">
+    <nav class="nav" aria-label="Questions">
+      <div class="nav-top"><span id="navLabel"></span><span><b id="navDone"></b> answered · <b id="navLeft"></b> remaining</span></div>
+      <div class="steps" id="steps"></div>
+      <div class="meter"><i id="meter"></i></div>
+    </nav>
+    <div id="stage" style="margin-top:16px"></div>
+  </div>
+  <div id="results" hidden></div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+<script>
+(function(){
+const DIMS={
+  workforce:"Employee AI use & shadow AI", saas:"SaaS & low-code agents", homegrown:"Custom agents & LLM apps",
+  coding:"Coding agents on laptops", models:"AI model supply chain", injection:"Prompt attack defence",
+  dlp:"Data leak prevention", runtime:"Block actions & human approval", identity:"Agent identity & least privilege",
+  redteam:"Red-team testing", governance:"Compliance evidence",
+  behaviour:"User & agent behaviour analytics", mcp:"MCP & tool connection security", wiz:"Wiz integration", ticketing:"Jira auto-ticketing", siem:"SIEM / SOAR integration"
+};
+const CATS=[
+  ["Monitor",["workforce","saas","homegrown","coding","models","mcp"]],
+  ["Detect",["injection","behaviour"]],
+  ["Prevent",["runtime","dlp","identity"]],
+  ["Test",["redteam"]],
+  ["Govern",["governance"]],
+  ["Integrate",["wiz","ticketing","siem"]]
+];
+const LEVEL=["None","Partial","Good","Strong"];
+const CLOUDN={aws:"AWS",azure:"Azure",gcp:"Google Cloud"};
+const GPI="Gartner Peer Insights";
+
+/* cap: 0 none · 1 partial/preview/not confirmed · 2 good · 3 strong (public evidence, Oct 2026)
+   clouds: fit per cloud 0–3 · ease/poc/deploy: estimates unless 'claim' says otherwise */
+const VENDORS=[
+ {id:"zenity",name:"Zenity",kind:"Independent",short:true,startup:true,selfhost:0,conf:"med",
+  size:"mid",cost:2,
+  cap:{mcp:2,workforce:1,saas:3,homegrown:2,coding:2,models:0,injection:2,dlp:2,runtime:3,identity:1,redteam:0,governance:1,behaviour:2,wiz:1,ticketing:2,siem:3},
+  clouds:{aws:2,azure:3,gcp:2},ease:"Moderate",poc:[10,14],deploy:[30,45],claim:"",
+  fit:"Strongest where agents are built in Copilot Studio, Agentforce or ChatGPT Enterprise. Connects to those platforms directly, with inline prevention for Copilot Studio and hooks for Cursor, Claude Code and Codex.",
+  guard:"Inline prevention for Copilot Studio agents, a kill switch, and hook-based controls on coding agents.",
+  int:"SIEM via CrowdStrike Falcon Next-Gen SIEM and Cribl Stream; ServiceNow listed; Jira and Wiz not listed in its integration docs.",
+  hostTxt:"SaaS; inline, hooks, MCP gateway.",
+  watch:"No red-teaming product; EU AI Act and ISO 42001 mapping not stated.",
+  rev:{g:{r:4.5,n:2,url:"https://www.gartner.com/reviews/product/zenity-platform",t:"Reviewer praises visibility and control over AI and low-code app development by citizen developers."},tp:null}},
+ {id:"geordie",name:"Geordie AI",kind:"Independent",short:true,startup:true,selfhost:0,conf:"low",
+  size:"startup",cost:1,
+  cap:{mcp:2,workforce:1,saas:2,homegrown:2,coding:2,models:0,injection:2,dlp:2,runtime:2,identity:2,redteam:0,governance:3,behaviour:2,wiz:1,ticketing:3,siem:2},
+  clouds:{aws:2,azure:2,gcp:1},ease:"Easy",poc:[7,14],deploy:[21,30],claim:"Vendor claims first agent visibility in about 10 minutes.",
+  fit:"London-based, agent-native discovery and governance: maps which agents exist, what data they reach and how they behave. Its Beam engine corrects agent behaviour at runtime using context rather than a proxy.",
+  guard:"Beam steers agent decisions at the planning stage with context-aware guidance rather than hard blocks.",
+  int:"Findings flow to Jira, Splunk and Microsoft Teams; Wiz not mentioned. Behavioural telemetry covers agents; per-user analysis not described.",
+  hostTxt:"SaaS; monitors code repos, cloud APIs and employee endpoints. SOC 2 and GDPR compliant.",
+  watch:"Founded 2025; capability detail mostly from company material. No red-teaming stated; prove depth in a PoC.",
+  rev:{g:null,gnote:"No reviews found",tp:null}},
+ {id:"onyx",name:"Onyx Security",kind:"Independent",short:true,startup:true,selfhost:3,conf:"low",
+  size:"mid",cost:2,
+  cap:{mcp:2,workforce:2,saas:2,homegrown:3,coding:1,models:0,injection:2,dlp:2,runtime:3,identity:2,redteam:0,governance:2,behaviour:3,wiz:2,ticketing:1,siem:3},
+  clouds:{aws:3,azure:2,gcp:2},ease:"Easy",poc:[7,14],deploy:[21,30],claim:"Vendor says deployment takes hours.",
+  fit:"A control plane that supervises each step of an agent's reasoning with its own Guardian Agent, and can block an action, cut permissions or require human approval. Covers third-party and in-house agents.",
+  guard:"Guardian Agent blocks risky actions before they run, limits tool access, prevents PII sharing and can require human approval.",
+  int:"SIEM/SOAR integration and 100+ pre-built connectors, with CNAPP among discovery sources; Wiz and Jira not named. Behavioural baselining and adoption tracking down to individuals.",
+  hostTxt:"Cloud, hybrid or self-hosted, including on-prem; AWS VPC and Bedrock gateway options.",
+  watch:"Founded 2024; red-team and model scanning not stated publicly; confirm Wiz and Jira connectors.",
+  rev:{g:{r:5.0,n:6,url:"https://www.gartner.com/reviews/product/onyx-security-342700959",t:"Reviewers cite easy deployment, deep visibility into AI and MCP use, blocking personal AI tools and redacting sensitive data. Small sample."},tp:null}},
+ {id:"pillar",name:"Pillar Security",kind:"Independent",short:false,startup:true,selfhost:3,conf:"med",
+  size:"startup",cost:2,
+  cap:{mcp:3,workforce:1,saas:2,homegrown:3,coding:3,models:2,injection:3,dlp:3,runtime:3,identity:1,redteam:3,governance:3,behaviour:1,wiz:3,ticketing:3,siem:3},
+  clouds:{aws:3,azure:3,gcp:3},ease:"Moderate",poc:[14,21],deploy:[30,45],claim:"",
+  fit:"Full lifecycle in one product: discovery, posture, red teaming, runtime guardrails at the client's existing AI gateway, and blocking on coding agents. Red-team findings tune runtime rules.",
+  guard:"Runtime guardrails in LiteLLM, Kong and other gateways block injection and mask PII and secrets; pre-tool hooks block risky coding-agent actions.",
+  int:"Wiz Integration Network partner (AI discovery to attack-surface mapping); findings tracked in ticketing; events streamed to SIEM.",
+  hostTxt:"Managed cloud, self-hosted or hybrid.",
+  watch:"Much public evidence comes from Pillar's own comparison. Pair with a SASE tool for employee browser use.",
+  rev:{g:null,gnote:"Listed, no reviews yet",gurl:"https://www.gartner.com/reviews/product/pillar-security-1043988558",tp:null}},
+ {id:"noma",name:"Noma Security",kind:"Independent",short:false,startup:true,selfhost:1,conf:"med",
+  size:"mid",cost:2,
+  cap:{mcp:2,workforce:1,saas:2,homegrown:3,coding:2,models:2,injection:2,dlp:2,runtime:3,identity:2,redteam:3,governance:2,behaviour:1,wiz:1,ticketing:2,siem:2},
+  clouds:{aws:2,azure:2,gcp:2},ease:"Moderate",poc:[14,21],deploy:[30,45],claim:"",
+  fit:"Standalone AI security posture, red teaming and runtime enforcement through hooks, gateways and SDKs, packaged by agent type.",
+  guard:"Runtime enforcement through agent hooks, MCP and AI gateways, and SDKs.",
+  int:"Integration list not confirmed for Wiz or Jira; ask for named connectors.",
+  hostTxt:"SaaS; hooks, gateways, SDK.",
+  watch:"Coding-agent endpoint coverage announced September 2026; whether red-team results feed runtime rules is not stated.",
+  rev:{g:null,gnote:"Listed, no reviews yet",gurl:"https://www.gartner.com/reviews/product/noma-security-1489737774",tp:null}},
+ {id:"prisma",name:"Palo Alto Prisma AIRS",kind:"Suite",short:false,startup:false,selfhost:1,conf:"med",stack:"paloalto",
+  size:"large",cost:3,
+  cap:{mcp:2,workforce:2,saas:2,homegrown:3,coding:2,models:3,injection:3,dlp:3,runtime:3,identity:3,redteam:3,governance:2,behaviour:2,wiz:1,ticketing:3,siem:3},
+  clouds:{aws:3,azure:3,gcp:3},ease:"Complex",poc:[21,30],deploy:[60,90],claim:"",
+  fit:"Broadest suite: agent inventory, posture, model scanning, red teaming and runtime security, with identity from CyberArk.",
+  guard:"AI runtime security through API or network intercept; model scanning from Protect AI; agent gateway in preview.",
+  int:"Cortex XSIAM/XSOAR cover SIEM, playbooks and Jira ticketing; Prisma Cloud competes with Wiz, so expect no native Wiz integration.",
+  hostTxt:"SaaS, network and API intercept, hybrid.",
+  watch:"Coding agents need a separate Cortex subscription; several modules and licences to buy.",
+  rev:{g:{r:4.4,n:38,url:"https://www.gartner.com/reviews/product/prisma-airs-1030401510",t:"Reviewers like automatic AI discovery and shadow-AI visibility; some find features early-stage and alerts needing tuning."},
+       tp:{s:2.4,n:7,url:"https://www.trustpilot.com/review/paloaltonetworks.com",note:"Company-wide, unclaimed profile; not about Prisma AIRS"}}},
+ {id:"zscaler",name:"Zscaler AI Guard + SPLX",kind:"Suite",short:false,startup:false,selfhost:0,conf:"med",stack:"zscaler",
+  size:"large",cost:3,
+  cap:{mcp:1,workforce:3,saas:2,homegrown:2,coding:1,models:1,injection:3,dlp:3,runtime:3,identity:1,redteam:3,governance:3,behaviour:2,wiz:1,ticketing:2,siem:3},
+  clouds:{aws:2,azure:2,gcp:2},ease:"Moderate",poc:[14,21],deploy:[30,60],claim:"",
+  fit:"Strongest on employee AI use and data leaving the business, inline in the Zero Trust Exchange. Red-team findings generate guardrail policy automatically.",
+  guard:"AI Guard inspects prompts and responses inline; Policy Generator turns SPLX red-team findings into guardrails.",
+  int:"Log streaming to major SIEMs; user risk scoring; Wiz and Jira for AI findings not confirmed.",
+  hostTxt:"Inline through Zscaler, plus API.",
+  watch:"Inline controls only see traffic routed through Zscaler; coding-agent coverage only announced.",
+  rev:{g:null,gnote:"No product-level rating for AI Guard",
+       tp:{s:2.0,n:15,url:"https://www.trustpilot.com/review/zscaler.com",note:"Company-wide, unclaimed profile; complaints about over-blocking and latency"}}},
+ {id:"s1",name:"SentinelOne Prompt Security",kind:"Suite",short:false,startup:false,selfhost:0,conf:"med",stack:"sentinelone",
+  size:"large",cost:2,
+  cap:{mcp:3,workforce:3,saas:1,homegrown:2,coding:2,models:1,injection:3,dlp:3,runtime:3,identity:1,redteam:2,governance:2,behaviour:2,wiz:1,ticketing:2,siem:3},
+  clouds:{aws:2,azure:2,gcp:2},ease:"Easy",poc:[7,14],deploy:[21,30],claim:"",
+  fit:"Governs what employees and developers put into AI tools across browsers, IDEs and terminals, with redaction, blocking and an MCP gateway.",
+  guard:"Redacts or blocks sensitive data in prompts; MCP gateway allows, blocks or redacts tool calls.",
+  int:"Singularity data lake and SIEM; per-user AI usage visibility; Wiz and Jira for AI findings not confirmed.",
+  hostTxt:"SaaS.",
+  watch:"Agent posture was in preview in 2026; weaker on SaaS-built agents.",
+  rev:{g:{r:4.3,n:35,url:"https://www.gartner.com/reviews/product/prompt-security-1757796311",t:"Reviewers praise semantic data-leak detection that catches reworded content; criticisms include slow sales and trial support and awkward rule management."},
+       tp:{s:2.7,n:7,url:"https://www.trustpilot.com/review/sentinelone.com",note:"Company-wide, unclaimed profile; mostly endpoint-agent complaints"}}},
+ {id:"microsoft",regions:["us","eu","uk","apac"],name:"Microsoft Agent 365 + Purview",kind:"Native",short:false,startup:false,selfhost:0,conf:"med",eco:"microsoft",
+  size:"large",cost:2,
+  cap:{mcp:1,workforce:2,saas:3,homegrown:2,coding:1,models:1,injection:2,dlp:3,runtime:2,identity:3,redteam:1,governance:3,behaviour:3,wiz:1,ticketing:2,siem:3},
+  clouds:{aws:1,azure:3,gcp:1},ease:"Moderate",poc:[14,30],deploy:[60,90],claim:"",
+  fit:"Agent registry, Entra Agent ID, Purview DLP and audit for Copilot, Copilot Studio and Foundry agents. Compliance Manager has EU AI Act, NIST and ISO 42001 templates.",
+  guard:"Purview DLP for prompts, Conditional Access on agent identities, and Foundry guardrails on tool calls.",
+  int:"Sentinel SIEM with UEBA and Purview Insider Risk for user behaviour; Jira via Sentinel playbooks; Wiz findings only via a Sentinel connector.",
+  hostTxt:"Microsoft cloud; often partly licensed already.",
+  watch:"Many agent features are preview; licences span Agent 365, E5/E7, Defender and Purview; thin outside Microsoft.",
+  rev:{g:{r:4.4,n:11,url:"https://www.gartner.com/reviews/product/microsoft-purview-1861237758",t:"Rating is for Microsoft Purview. Reviewers like Microsoft 365 integration and built-in templates; dislike complex setup and slow scans at scale."},tp:null}},
+ {id:"checkpoint",name:"Check Point AI Defense (Lakera)",kind:"Suite",short:false,startup:false,selfhost:2,conf:"med",stack:"checkpoint",
+  size:"large",cost:2,
+  cap:{mcp:1,workforce:2,saas:1,homegrown:2,coding:0,models:0,injection:3,dlp:2,runtime:3,identity:2,redteam:1,governance:2,behaviour:1,wiz:1,ticketing:2,siem:2},
+  clouds:{aws:2,azure:2,gcp:2},ease:"Easy",poc:[7,14],deploy:[21,30],claim:"",
+  fit:"Best-known prompt-injection defence (Lakera) for AI apps and workforce use, with agent identity from Cyata.",
+  guard:"Lakera Guard screens prompts, responses, and tool and privilege abuse through an API.",
+  int:"Integrates through API; Wiz and Jira for AI findings not confirmed.",
+  hostTxt:"SaaS or self-hosted container.",
+  watch:"Red teaming in limited release; coding agents not stated.",
+  rev:{g:null,gnote:"No rating found for Lakera",
+       tp:{s:3.4,n:4,url:"https://www.trustpilot.com/review/www.checkpoint.com",note:"Company-wide profile; only 4 reviews"}}},
+ {id:"enkrypt",name:"Enkrypt AI",kind:"Independent",short:false,startup:true,selfhost:3,conf:"med",
+  size:"startup",cost:1,
+  cap:{mcp:3,workforce:1,saas:1,homegrown:2,coding:1,models:1,injection:3,dlp:2,runtime:2,identity:1,redteam:3,governance:3,behaviour:1,wiz:1,ticketing:2,siem:2},
+  clouds:{aws:3,azure:2,gcp:2},ease:"Easy",poc:[7,14],deploy:[21,30],claim:"ChatGPT Enterprise scanning needs only a read-scoped API key.",
+  fit:"Compliance-led AI security platform: agent red teaming, inline guardrails that block or redact prompt attacks and PII, an agent policy engine, MCP gateway and scanner, and AI asset scanner. Scans ChatGPT Enterprise logs and maps findings to the EU AI Act, ISO 42001, NIST AI RMF, OWASP and MITRE ATLAS.",
+  guard:"Inline detect API blocks or redacts in real time; agent guardrails and policy engine for agents.",
+  int:"SIEM, ticketing and identity integrations on Scale (add-on) and Enterprise plans. Wiz, Jira and named SIEMs not listed publicly.",
+  hostTxt:"SaaS with published credit-based plans; VPC and on-prem on Enterprise. SOC 2 Type II and ISO 27001.",
+  watch:"ChatGPT Enterprise scanning is read-only and retrospective (every 7 or 14 days), so it flags rather than blocks.",
+  rev:{g:{r:5.0,n:1,url:"https://www.gartner.com/reviews/product/enkrypt-ai-security-platform",t:"Single review; praises policy mapping, inline PII redaction and pre-production attack testing. One review is not a reliable signal."},tp:null}},
+ {id:"protectai",name:"Protect AI AWS Toolkit",kind:"Toolkit",toolkit:true,short:false,startup:false,selfhost:2,conf:"med",stack:"paloalto",
+  size:"large",cost:2,
+  cap:{mcp:0,workforce:0,saas:0,homegrown:1,coding:0,models:3,injection:2,dlp:1,runtime:1,identity:0,redteam:3,governance:1,behaviour:0,wiz:0,ticketing:0,siem:0},
+  clouds:{aws:3,azure:0,gcp:0},ease:"Moderate",poc:[7,14],deploy:[14,30],claim:"",
+  fit:"Reference toolkit for AI models on Amazon Bedrock. Guardian scans models for vulnerabilities before import; Recon red-teams the LLM, then generates and tests Bedrock Guardrails from the findings.",
+  guard:"Generates Amazon Bedrock Guardrails from Recon red-team findings.",
+  int:"Amazon Bedrock, S3 and IAM only. No SIEM, Jira or Wiz integration mentioned.",
+  hostTxt:"Jupyter notebooks against the client's AWS account; Guardian and Recon need commercial licences (now part of Palo Alto Prisma AIRS). AGPL-3.0 code.",
+  watch:"Covers models and pre-release testing on Bedrock only. A starting point for a Bedrock PoC, not a platform.",
+  rev:{g:null,gnote:"Page could not be retrieved",tp:null}},
+ {id:"dropzone",regions:["eu"],name:"Dropzone AI",kind:"AI SOC",soc:true,short:false,startup:true,selfhost:0,conf:"med",
+  size:"startup",cost:2,
+  cap:{mcp:0,workforce:0,saas:0,homegrown:0,coding:0,models:0,injection:0,dlp:0,runtime:0,identity:0,redteam:0,governance:0,behaviour:1,wiz:2,ticketing:2,siem:3},
+  clouds:{aws:2,azure:2,gcp:2},ease:"Easy",poc:[7,14],deploy:[14,30],claim:"",
+  fit:"AI SOC analyst: its own AI agents investigate security alerts end to end and hunt threats across SIEM, EDR and cloud. It speeds up the security team; it does not secure the client's AI agents.",
+  guard:"None for AI agents; it investigates alerts.",
+  int:"Wiz Cloud investigation integration; runs across SIEM, EDR and cloud; ticketing not named publicly. EU data residency option.",
+  hostTxt:"SaaS, with an EU data residency option.",
+  watch:"Different category: does not discover AI agents, inspect prompts, stop data going into models or block agent actions.",
+  rev:{g:{r:4.8,n:4,url:"https://www.gartner.com/reviews/vendor/dropzone-ai",t:"Rating only; no review text shown."},tp:null}},
+ {id:"prophet",name:"Prophet AI",kind:"AI SOC",soc:true,short:false,startup:true,selfhost:0,conf:"med",
+  size:"startup",cost:2,
+  cap:{mcp:0,workforce:0,saas:0,homegrown:0,coding:0,models:0,injection:0,dlp:0,runtime:0,identity:0,redteam:0,governance:0,behaviour:1,wiz:1,ticketing:2,siem:3},
+  clouds:{aws:3,azure:3,gcp:3},ease:"Easy",poc:[7,10],deploy:[7,21],claim:"Vendor says setup takes 30 minutes or less; a reviewer reports production use within a week.",
+  fit:"AI SOC analyst from Prophet Security: investigates cloud, identity and endpoint alerts across AWS, Azure and GCP to reach a verdict in minutes. It does not secure the client's AI agents.",
+  guard:"None for AI agents; it investigates alerts.",
+  int:"Integrates with SIEMs, security data lakes and case-management tools (not named publicly); Wiz not mentioned.",
+  hostTxt:"SaaS.",
+  watch:"Different category: does not discover AI agents, inspect prompts, stop data going into models or block agent actions.",
+  rev:{g:{r:4.9,n:11,url:"https://www.gartner.com/reviews/product/prophet-ai",t:"Reviewers cite fast deployment, automated triage that cut manual review sharply, and a responsive vendor."},tp:null}}
+];
+
+/* opt: [value, label, description, weights, exclusive] */
+const Q=[
+ {sec:"Client priorities",id:"vprio",title:"What kind of vendor is the client most interested in?",hint:"Pick the one that matters most. It shapes the ranking.",
+  opts:[
+   ["large","Large, established vendor or service company","Proven at enterprise scale, broad suites, strong support and financial stability",{}],
+   ["mid","Mid-size specialist vendor","A focused AI security product with a growing enterprise customer base",{}],
+   ["startup","Start-up offering the solution at the lowest cost","Newer vendors, usually cheaper and quicker to deploy, with more vendor risk",{}],
+   ["capability","Cost doesn't matter; capability comes first","Whichever platform best achieves what the client is looking for",{}],
+   ["budget","Cost matters; must fit within budget","Favour existing licences and lower-cost options",{}]]},
+ {sec:"What to monitor",id:"monitor",multi:true,title:"What does the client need to monitor?",hint:"Select all that apply.",
+  opts:[
+   ["workforce","Employees using AI tools","ChatGPT, Copilot, Gemini, and unapproved shadow AI",{workforce:3,dlp:1}],
+   ["saas","Agents built in SaaS or low-code tools","Copilot Studio, Salesforce Agentforce, ChatGPT Enterprise",{saas:3}],
+   ["homegrown","Agents and LLM apps built in-house","Custom code, Bedrock, Foundry, Vertex, LangChain, MCP",{homegrown:3,injection:1}],
+   ["coding","Coding agents on developer laptops","Claude Code, Cursor, Codex, GitHub Copilot",{coding:3,mcp:1}],
+   ["models","AI models the client hosts or fine-tunes","Open-weight or custom models in their own cloud",{models:3}]]},
+ {sec:"What to monitor",id:"threats",multi:true,max:3,title:"Which risks matter most?",hint:"Select up to three.",
+  opts:[
+   ["injection","Prompt attacks and jailbreaks","Hidden instructions in documents, emails, web pages or tool results",{injection:3}],
+   ["dlp","Sensitive data going into AI models","Staff or agents pasting personal, client or confidential data",{dlp:3}],
+   ["actions","Agents taking harmful or unapproved actions","Sending, deleting, changing records, running code",{runtime:3,identity:2}],
+   ["breach","A breach through what agents can access","Over-permissioned agents, leaked credentials",{identity:2,dlp:2,runtime:1}],
+   ["evidence","Proving compliance to auditors and regulators","Audit trail, policy mapping, reports",{governance:3}],
+   ["testing","Testing agents before they go live","Red teaming and retesting after changes",{redteam:3}]]},
+ {sec:"What to monitor",id:"data",multi:true,title:"What data could reach AI tools or agents?",hint:"Select all that apply.",
+  opts:[
+   ["personal","Personal data","Customer or employee records",{dlp:1,governance:1}],
+   ["special","Health or other special category data","",{dlp:2,governance:1}],
+   ["payment","Payment card data","",{dlp:2}],
+   ["ip","Source code or intellectual property","",{dlp:1,coding:1}],
+   ["client","Confidential client data","",{dlp:1}],
+   ["none","None of these","",{},true]]},
+ {sec:"Environment",id:"autonomy",multi:true,title:"Does the client run, or plan to run, autonomous agents that perform tasks?",hint:"Select all that apply.",
+  opts:[
+   ["none","No autonomous agents yet","Chat assistants and copilots only",{},true],
+   ["plan","Planning autonomous agents in the next 12 months","Pilots or business cases under way",{runtime:1,identity:1}],
+   ["draft","Agents that prepare work for a person to approve","A human clicks send, approve or merge",{runtime:1}],
+   ["act","Agents that act on their own in business apps","Send emails, update CRM, ERP or HR records without a person",{runtime:3,identity:2}],
+   ["code","Agents that run code or change infrastructure","IT and DevOps automation, coding agents with write access",{runtime:2,identity:2,coding:1}],
+   ["money","Agents that move money or approve transactions","Payments, refunds, procurement approvals",{runtime:3,identity:2,governance:1}],
+   ["multi","Multi-agent workflows","Agents calling other agents, internal or external",{runtime:1,identity:1,behaviour:1}]]},
+ {sec:"Environment",id:"clouds",multi:true,title:"Where do the client's AI workloads and agents run?",hint:"Select all that apply. This sets the hosting-fit score.",
+  opts:[
+   ["aws","Amazon Web Services (AWS)","Bedrock, SageMaker, EC2 or EKS",{}],
+   ["azure","Microsoft Azure","Azure AI Foundry, Azure OpenAI",{}],
+   ["gcp","Google Cloud","Vertex AI, Gemini Enterprise Agent Platform",{}],
+   ["onprem","On-premises or private cloud","Self-hosted models or agents in the client's data centre",{}],
+   ["saasonly","SaaS AI tools only","No AI workloads in the client's own cloud",{},true]]},
+ {sec:"Environment",id:"eco",multi:true,title:"Which workplace and native cloud platforms does the client use?",hint:"Select all that apply.",
+  opts:[
+   ["microsoft","Microsoft 365","Outlook, Teams, SharePoint, Copilot",{}],
+   ["google","Google Workspace","Gmail, Drive, Gemini for Workspace",{}],
+   ["aws","AWS native services","Amazon Q, Bedrock Agents, Amazon Connect",{}],
+   ["azure","Azure native services","Azure OpenAI, AI Foundry, Copilot Studio",{}],
+   ["gcp","Google Cloud native services","Vertex AI, Gemini Enterprise",{}],
+   ["salesforce","Salesforce","Agentforce, Einstein",{saas:2}],
+   ["mixed","Mixed or other","",{}]]},
+ {sec:"Environment",id:"stack",title:"Which security vendor do they already use?",hint:"A match lets the client extend a licence and console they already run.",
+  opts:[["paloalto","Palo Alto Networks","",{}],["zscaler","Zscaler","",{}],["sentinelone","SentinelOne","",{}],["checkpoint","Check Point","",{}],["none","None of these","",{}]]},
+ {sec:"Integrations and response",id:"integrations",multi:true,title:"Which tools must it connect to?",hint:"Select all that apply.",
+  opts:[
+   ["wiz","Wiz","Send AI findings and logs into Wiz, or pull Wiz cloud context in",{wiz:3}],
+   ["jira","Jira","Receive alerts and create tickets automatically",{ticketing:3}],
+   ["snow","ServiceNow","Incidents and tickets",{ticketing:2}],
+   ["siem","A SIEM or SOAR","Splunk, Microsoft Sentinel, Google SecOps, XSIAM",{siem:3}],
+   ["chat","Slack or Microsoft Teams","Alert notifications",{siem:1}],
+   ["other","Other tools","For example CrowdStrike, Okta, PagerDuty, Datadog or an in-house platform; name them below",{}],
+   ["none","None of these","",{},true]],other:"Which other tools must it connect to?"},
+ {sec:"Integrations and response",id:"detect",multi:true,title:"What should the tool detect and analyse?",hint:"Select all that apply.",
+  opts:[
+   ["agentbeh","Agent behaviour patterns","Which tools agents call, what data they touch, and drift from normal behaviour",{behaviour:3,runtime:1}],
+   ["userbeh","User behaviour patterns","Baseline each user and flag anomalies such as sudden bulk data access",{behaviour:3,workforce:1}],
+   ["engint","Integrations built by engineering","Custom connectors, APIs and plugins that agents use",{homegrown:2,identity:1}],
+   ["mcp","Connections to open-source or third-party MCP servers","Unvetted MCP servers, tool poisoning, over-broad permissions",{mcp:3}],
+   ["models","AI models in use","Which models and versions are used, and where they came from",{models:2,workforce:1}],
+   ["rules","Fixed rules and policies","Allow and deny lists, sensitive-data patterns",{dlp:1}]]},
+ {sec:"Integrations and response",id:"respond",multi:true,title:"What should the tool do when it finds something suspicious?",hint:"Select all that apply.",
+  opts:[
+   ["detect","Detection","Spot suspicious prompts, data flows and agent actions as they happen",{injection:1,behaviour:1}],
+   ["prevent","Prevention","Block or redact risky prompts, data and actions before they run",{runtime:2,dlp:1}],
+   ["alert","Alerting","Notify the security team and raise tickets automatically in Jira, ServiceNow or the SIEM",{siem:2,ticketing:2}],
+   ["contain","Containing","Stop the agent, revoke its access or quarantine it automatically",{runtime:2,identity:2}]]},
+ {sec:"Control and constraints",id:"hosting",multi:true,title:"How should the tool be deployed?",hint:"Select all that are acceptable.",
+  opts:[
+   ["inhouse","In-house, within our own infrastructure","On-premises or private data centre",{}],
+   ["selfvpc","Self-hosted in our own cloud account","The client's AWS, Azure or Google Cloud tenancy",{}],
+   ["saas","Vendor's cloud (SaaS)","Run and maintained by the vendor",{}],
+   ["anycloud","Any cloud is fine","",{}],
+   ["nomatter","Doesn't matter","",{},true]]},
+ {sec:"Control and constraints",id:"region",multi:true,title:"Where must the data be hosted?",hint:"Select all acceptable locations.",
+  opts:[["us","United States","",{}],["eu","European Union","",{}],["uk","United Kingdom","",{}],["apac","Asia-Pacific","",{}],["any","No preference","",{},true]]},
+ {sec:"Control and constraints",id:"timeline",title:"How quickly must the tool be live?",hint:"Sets how much ease and speed of deployment count in the ranking.",
+  opts:[["d30","Within 30 days","Ease of deployment counts heavily",{}],["d90","Within 90 days","",{}],["flex","No fixed deadline","Capability matters most",{}]]},
+ {sec:"Control and constraints",id:"regs",multi:true,title:"Which frameworks need evidence?",hint:"Select all that apply.",
+  opts:[["euai","EU AI Act","",{governance:1}],["iso","ISO 42001","",{governance:1}],["nist","NIST AI RMF","",{governance:1}],["dora","DORA or NIS2","",{governance:1}],["gdpr","UK GDPR","",{dlp:1}],["none","None yet","",{},true]]}
+];
+const SAMPLE={vprio:"capability",monitor:["workforce","homegrown"],threats:["injection","dlp","actions"],data:["personal","client"],autonomy:["act","multi"],clouds:["azure","aws"],eco:["microsoft","aws"],stack:"none",integrations:["wiz","jira","siem"],detect:["agentbeh","userbeh","mcp"],respond:["detect","prevent","alert"],hosting:["saas","anycloud"],region:["uk","eu"],timeline:"d90",regs:["euai","iso","gdpr"]};
+const TOTAL=Q.length; // index TOTAL = review
+const KEY="compsilon_evaluator_v1";
+
+let state=load()||{step:0};
+if(state.step==null||state.step>TOTAL)state.step=0;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function load(){try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):null}catch(e){return null}}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const has=(id,v)=>(state[id]||[]).includes(v);
+
+let dl=null;
+try{if(window.claude&&window.claude.use)window.claude.use("downloads").then(x=>{dl=x}).catch(()=>{})}catch(e){}
+
+function answered(q){return q.multi?(state[q.id]||[]).length>0:!!state[q.id]}
+function doneCount(){return Q.filter(answered).length}
+
+/* ---------- survey ---------- */
+function renderNav(){
+  const s=$("steps");s.innerHTML="";
+  for(let i=0;i<=TOTAL;i++){
+    const b=document.createElement("button");b.type="button";
+    const isReview=i===TOTAL;
+    b.className="step"+(!isReview&&answered(Q[i])?" done":"")+(state.step===i?" current":"");
+    b.textContent=isReview?"Review & submit":i+1;
+    b.setAttribute("aria-label",isReview?"Review and submit":`Question ${i+1}: ${Q[i].title}${answered(Q[i])?" (answered)":" (not answered)"}`);
+    if(state.step===i)b.setAttribute("aria-current","step");
+    b.onclick=()=>go(i);
+    s.appendChild(b);
+  }
+  const d=doneCount();
+  $("navDone").textContent=d;$("navLeft").textContent=TOTAL-d;
+  $("meter").style.width=(d/TOTAL*100)+"%";
+  $("navLabel").textContent=state.step===TOTAL?"Review your answers":`Question ${state.step+1} of ${TOTAL} · ${Q[state.step].sec}`;
+  const cur=s.querySelector(".current");if(cur&&cur.scrollIntoView)cur.scrollIntoView({block:"nearest",inline:"nearest"});
+}
+function renderStage(){
+  const st=$("stage");
+  if(state.step===TOTAL)return renderReview(st);
+  const q=Q[state.step];
+  const sel=q.multi?(state[q.id]||[]):[state[q.id]];
+  st.innerHTML=`<section class="qcard">
+    <div class="tag">${esc(q.sec)} · Question ${state.step+1}</div>
+    <h2 id="qt">${esc(q.title)}</h2>
+    ${q.hint?`<p class="hint">${esc(q.hint)}</p>`:""}
+    <div class="options" role="${q.multi?"group":"radiogroup"}" aria-labelledby="qt">
+      ${q.opts.map(([v,l,d])=>`<label class="opt"><input type="${q.multi?"checkbox":"radio"}" id="${q.id}-${v}" name="${q.id}" value="${v}" ${sel.includes(v)?"checked":""}><span><span class="lt">${esc(l)}</span>${d?`<span class="ld">${esc(d)}</span>`:""}</span></label>`).join("")}
+    </div>
+    ${q.other?`<div id="otherWrap" class="otherwrap" ${sel.includes("other")?"":"hidden"}><label for="otherTxt">${esc(q.other)}</label><input id="otherTxt" type="text" maxlength="200" placeholder="e.g. CrowdStrike Falcon, Okta, PagerDuty" value="${esc(state[q.id+"Other"]||"")}"></div>`:""}
+    <div class="msg" id="msg"></div>
+    <div class="qfoot">
+      <button class="btn" type="button" id="backBtn" ${state.step===0?"disabled":""}>Back</button>
+      <button class="btn primary" type="button" id="nextBtn">${state.step===TOTAL-1?"Review answers":"Next"}</button>
+    </div></section>`;
+  st.querySelectorAll("input[name]").forEach(inp=>inp.addEventListener("change",()=>onPick(q,inp)));
+  const ot=$("otherTxt");if(ot)ot.addEventListener("input",()=>{state[q.id+"Other"]=ot.value.trim();state.submitted=false;save()});
+  $("backBtn").onclick=()=>go(state.step-1);
+  $("nextBtn").onclick=()=>{if(!answered(q)){$("msg").textContent="Select an answer to continue, or jump to another question in the bar above.";return}go(state.step+1)};
+}
+function onPick(q,t){
+  if(q.multi){
+    const excl=q.opts.filter(o=>o[4]).map(o=>o[0]);
+    const all=[...$("stage").querySelectorAll(`input[name="${q.id}"]`)];
+    if(t.checked)all.forEach(i=>{if(i!==t&&(excl.includes(t.value)||excl.includes(i.value)))i.checked=false});
+    let arr=all.filter(i=>i.checked).map(i=>i.value);
+    if(q.max&&arr.length>q.max){t.checked=false;arr=arr.filter(v=>v!==t.value);$("msg").textContent=`Select up to ${q.max} for this question.`}
+    else $("msg").textContent="";
+    state[q.id]=arr;
+    const ow=$("otherWrap");if(ow){ow.hidden=!arr.includes("other");if(!ow.hidden)$("otherTxt").focus()}
+  } else {state[q.id]=t.value;$("msg").textContent=""}
+  state.submitted=false;save();renderNav();
+}
+function answerText(q){
+  if(!answered(q))return "Not answered";
+  const sel=q.multi?state[q.id]:[state[q.id]];
+  return q.opts.filter(o=>sel.includes(o[0])).map(o=>o[0]==="other"&&state[q.id+"Other"]?`Other (${state[q.id+"Other"]})`:o[1]).join(", ");
+}
+function renderReview(st){
+  const miss=TOTAL-doneCount();
+  st.innerHTML=`<section class="qcard">
+    <div class="tag">Review</div>
+    <h2>Check the answers, then submit</h2>
+    <div class="review-list">
+      ${Q.map((q,i)=>`<div class="rv ${answered(q)?"":"miss"}"><span class="n">Q${i+1}</span><div><div>${esc(q.title)}</div><div class="a">${esc(answerText(q))}</div></div><button class="btn link" type="button" data-go="${i}">Edit</button></div>`).join("")}
+    </div>
+    <div class="msg">${miss?`${miss} question${miss>1?"s":""} still to answer before you can submit.`:""}</div>
+    <div class="qfoot"><button class="btn" type="button" id="backBtn">Back</button><button class="btn primary" type="button" id="submitBtn" ${miss?"disabled":""}>Submit and see evaluation</button></div></section>`;
+  st.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(+b.dataset.go));
+  $("backBtn").onclick=()=>go(state.step-1);
+  $("submitBtn").onclick=()=>{state.submitted=true;save();show()};
+}
+function go(i){state.step=Math.max(0,Math.min(TOTAL,i));save();renderNav();renderStage();window.scrollTo({top:0})}
+
+/* ---------- scoring ---------- */
+function weights(){
+  const w={};Object.keys(DIMS).forEach(k=>w[k]=0);
+  Q.forEach(q=>{const sel=q.multi?(state[q.id]||[]):[state[q.id]];q.opts.forEach(o=>{if(sel.includes(o[0]))for(const k in o[3])w[k]+=o[3][k]})});
+  for(const k in w)w[k]=Math.min(w[k],5);
+  return w;
+}
+function selectedInts(){const m={wiz:"wiz",jira:"ticketing",snow:"ticketing",siem:"siem"};return [...new Set((state.integrations||[]).map(i=>m[i]).filter(Boolean))]}
+const INTNAME={wiz:"Wiz",ticketing:"Jira/ServiceNow",siem:"SIEM"};
+function intMatch(v){const sel=selectedInts();const hit=sel.filter(k=>v.cap[k]>=2);return {hit:hit.length,of:sel.length,names:sel.map(k=>INTNAME[k]+(v.cap[k]>=2?" ✓":" ✗")).join(" · ")}}
+const REGN={us:"the US",eu:"the EU",uk:"the UK",apac:"Asia-Pacific"};
+const COSTL=["","£","££","£££"];
+function clientClouds(){const c=new Set(state.clouds||[]);(state.eco||[]).forEach(e=>{if(e in CLOUDN)c.add(e)});if(c.size>1)c.delete("saasonly");return [...c]}
+function wantsSelf(){return has("hosting","inhouse")||has("hosting","selfvpc")}
+function selfOnly(){return wantsSelf()&&!has("hosting","saas")&&!has("hosting","anycloud")&&!has("hosting","nomatter")}
+function costFor(v){return v.eco==="microsoft"&&has("eco","microsoft")?1:v.cost}
+function hostFit(v){
+  const c=clientClouds();const parts=[];if(wantsSelf())parts.push(v.selfhost);
+  c.forEach(x=>{if(x in CLOUDN)parts.push(v.clouds[x]);else if(x==="onprem")parts.push(v.selfhost);else if(x==="saasonly")parts.push(v.toolkit?0:3)});
+  if(!parts.length)return 100;
+  return Math.round(parts.reduce((a,b)=>a+b,0)/parts.length/3*100);
+}
+function readiness(v){
+  let s={Easy:100,Moderate:70,Complex:40}[v.ease];
+  if(state.timeline==="d30"&&v.deploy[1]>30)s-=20;
+  if(state.timeline==="d90"&&v.deploy[1]>90)s-=10;
+  return Math.max(0,s);
+}
+function weightSet(){let dep={d30:.2,d90:.12,flex:.05}[state.timeline]||.12;let host=.15;if(state.vprio==="capability"){dep=Math.min(dep,.08);host=.12}return {cap:1-host-dep,host,dep}}
+function catScore(v,dims){return Math.round(dims.reduce((a,k)=>a+v.cap[k],0)/dims.length/3*100)}
+function prio(n){return n>=3?"High":n>=2?"Medium":"Low"}
+function score(){
+  const w=weights();const total=Object.values(w).reduce((a,b)=>a+b,0);
+  const needs=Object.keys(w).filter(k=>w[k]>0).sort((a,b)=>w[b]-w[a]);
+  const W=weightSet();
+  const list=VENDORS.map(v=>{
+    let raw=0;for(const k in w)raw+=w[k]*(v.cap[k]/3);
+    let fit=total?raw/total*100:0;const notes=[];let excluded=null;
+    if(v.eco==="microsoft"){
+      if(has("eco","microsoft")||has("eco","azure")){fit+=8;notes.push("Builds on the client's Microsoft 365 estate and existing licences.")}
+      else{fit-=20;notes.push("Covers Microsoft-hosted agents only, so a weak fit outside Microsoft 365.")}
+    }
+    if(v.stack){
+      if(state.stack===v.stack){fit+=10;notes.push("Extends the client's existing security vendor, console and contract.")}
+      else if(v.id==="zscaler"){fit-=6;notes.push("Inline controls need the client's traffic routed through Zscaler.")}
+    }
+    if(selfOnly()&&v.selfhost<2)excluded="No self-hosted or in-house option stated";
+    else if(wantsSelf()&&v.selfhost<2){fit-=3;notes.push("The client prefers self-hosting; this tool is run in the vendor's cloud.")}
+    if(v.toolkit)notes.push("Point toolkit for Amazon Bedrock models only. Guardian and Recon are sold today as part of Palo Alto Prisma AIRS.");
+    if(v.soc)notes.push("AI SOC analyst, not an AI agent security tool: it investigates alerts, so it cannot meet the monitoring and protection needs on its own.");
+    const regs=(state.region||[]).filter(r=>r!=="any");
+    if(regs.length){const rn=regs.map(r=>REGN[r]).join(", ");
+      if(v.regions){const miss=regs.filter(r=>!v.regions.includes(r));if(miss.length){fit-=4;notes.push(`Data hosting in ${miss.map(r=>REGN[r]).join(", ")} not confirmed publicly.`)}else notes.push(`Offers data hosting in ${rn}.`)}
+      else if(v.selfhost>=2)notes.push(`Can keep data in ${rn} by self-hosting; confirm SaaS hosting regions in writing.`);
+      else notes.push(`Confirm in writing that data and logs can be hosted in ${rn}.`)}
+    const vp=state.vprio,sz=v.size;
+    if(vp==="large"){if(sz==="large")fit+=6;else if(sz==="startup"){fit-=10;notes.push("Start-up: add change-of-control and exit terms to the contract.")}}
+    if(vp==="mid"){if(sz==="mid")fit+=6;else if(sz==="startup")fit-=3}
+    if(vp==="startup"){if(sz==="startup")fit+=6;else if(sz==="mid")fit+=2;else fit-=6;if(sz==="startup")notes.push("Start-up vendor: typically lower cost; add change-of-control and exit terms.")}
+    if(vp==="budget"){const c=costFor(v);fit+=c===1?6:c===3?-8:0;notes.push(`Indicative cost level ${COSTL[c]} (relative; most vendors do not publish prices).`)}
+    if(has("integrations","other"))notes.push(`Confirm a connector for ${state.integrationsOther||"the other tools the client named"}, or plan a webhook or API build.`);
+    selectedInts().forEach(k=>{if(v.cap[k]<=1)notes.push(`${INTNAME[k]} connector not confirmed publicly; get it in writing or plan a webhook or API build.`)});
+    if((has("detect","agentbeh")||has("detect","userbeh"))&&v.cap.behaviour<=1)notes.push("Behaviour-pattern detection is limited; mostly rule and policy driven.");
+    if(has("detect","mcp")&&v.cap.mcp<=1)notes.push("MCP server discovery and control are limited or not confirmed.");
+    if(has("respond","contain")&&v.cap.runtime<3)notes.push("Automatic containment is partial.");
+    if(has("respond","prevent")&&v.cap.runtime<2)notes.push("Little in-path prevention; mainly detects and alerts.");
+    if(has("respond","alert")&&v.cap.ticketing<2&&v.cap.siem<2)notes.push("Automatic alert and ticket routing not confirmed.");
+    clientClouds().forEach(c=>{if(c in CLOUDN&&v.clouds[c]<=1)notes.push(`Limited coverage for workloads on ${CLOUDN[c]}.`)});
+    if(clientClouds().includes("onprem")&&v.selfhost<2)notes.push("No self-hosted option for on-premises workloads.");
+    if((state.regs||[]).includes("dora"))notes.push("DORA/NIS2: record as an ICT third party and agree an exit plan.");
+    fit=Math.round(Math.max(0,Math.min(100,fit)));
+    const hf=hostFit(v),rd=readiness(v);
+    const overall=Math.round((W.cap*fit+W.host*hf+W.dep*rd)*10)/10;
+    const strengths=needs.filter(k=>v.cap[k]===3);
+    const gaps=needs.filter(k=>w[k]>=3&&v.cap[k]<=1);
+    const weak=needs.filter(k=>w[k]<3&&v.cap[k]<=1);
+    return {...v,fitScore:fit,hostFit:hf,ready:rd,overall,notes,excluded,strengths,gaps,weak};
+  }).sort((a,b)=>(a.excluded?1:0)-(b.excluded?1:0)||(a.soc?2:a.toolkit?1:0)-(b.soc?2:b.toolkit?1:0)||b.overall-a.overall);
+  return {w,needs,W,list};
+}
+
+/* 12-month risk outcomes */
+const RISKS=[
+ {dim:"injection",when:()=>has("threats","injection")||has("monitor","homegrown"),text:"Prompt-injection attacks that hijack an agent or pull data out through hidden instructions"},
+ {dim:"dlp",when:()=>has("threats","dlp")||((state.data||[]).length&&!has("data","none")),text:"Personal or confidential data pasted into AI tools or sent to models"},
+ {dim:"runtime",when:()=>has("threats","actions")||["act","code","money"].some(a=>has("autonomy",a)),text:"An agent sending, deleting or changing records without approval"},
+ {dim:"identity",when:()=>has("threats","breach")||["act","code","money","multi"].some(a=>has("autonomy",a)),text:"A breach through over-permissioned agents or leaked agent credentials"},
+ {dim:"workforce",when:()=>has("monitor","workforce"),text:"Shadow-AI tools used with company data without anyone knowing"},
+ {dim:"saas",when:()=>has("monitor","saas"),text:"Risky Copilot Studio or Agentforce agents built by business users going unreviewed"},
+ {dim:"coding",when:()=>has("monitor","coding"),text:"Coding agents running destructive commands on developer machines"},
+ {dim:"mcp",when:()=>has("detect","mcp")||has("monitor","coding"),text:"Agents connecting to malicious or unvetted MCP servers"},
+ {dim:"models",when:()=>has("monitor","models")||has("detect","models"),text:"A backdoored or unsafe model imported into production"},
+ {dim:"behaviour",when:()=>has("detect","agentbeh")||has("detect","userbeh"),text:"Unusual user or agent behaviour, such as sudden bulk data access, going unnoticed"},
+ {dim:"redteam",when:()=>has("threats","testing"),text:"Releasing an agent with weaknesses an attacker can exploit"},
+ {dim:"governance",when:()=>has("threats","evidence")||((state.regs||[]).length&&!has("regs","none")),text:"Failing an audit or regulator request for evidence of AI controls"}
+];
+const OUT=[["Not covered","s0"],["Partly detected","s1"],["Reduced","s2"],["Prevented or strongly reduced","s3"]];
+function risks(){return RISKS.filter(r=>r.when())}
+
+/* ---------- charts (inline SVG, theme tokens) ---------- */
+function svgText(x,y,t,o={}){return `<text x="${x}" y="${y}" font-size="${o.size||13}" ${o.anchor?`text-anchor="${o.anchor}"`:""} font-weight="${o.weight||400}" fill="${o.fill||"var(--ink)"}" font-family="${o.mono?"var(--font-data)":"var(--font-ui)"}">${esc(t)}</text>`}
+function chartOverall(top,W){
+  const L=260,BW=540,H=46,y0=20,w=900,h=y0+top.length*H+28;
+  let s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Overall score for the top five tools">`;
+  [0,25,50,75,100].forEach(t=>{const x=L+t/100*BW;s+=`<line x1="${x}" x2="${x}" y1="${y0-6}" y2="${y0+top.length*H-8}" stroke="var(--line)"/>`+svgText(x,h-8,String(t),{size:11,anchor:"middle",fill:"var(--muted)",mono:1})});
+  top.forEach((v,i)=>{
+    const y=y0+i*H;const a=W.cap*v.fitScore,b=W.host*v.hostFit,c=W.dep*v.ready;
+    const xa=a/100*BW,xb=b/100*BW,xc=c/100*BW;
+    s+=svgText(0,y+18,(i+1)+". "+v.name,{size:13,weight:i===0?700:500});
+    s+=`<rect x="${L}" y="${y+4}" width="${xa}" height="22" fill="var(--teal)"/><rect x="${L+xa}" y="${y+4}" width="${xb}" height="22" fill="var(--blue)"/><rect x="${L+xa+xb}" y="${y+4}" width="${xc}" height="22" fill="var(--amber)"/>`;
+    s+=svgText(L+xa+xb+xc+8,y+20,v.overall.toFixed(1),{size:14,weight:700,mono:1});
+  });
+  return s+"</svg>";
+}
+function chartHeat(top){
+  const L=260,CW=104,RH=42,y0=30,w=L+CATS.length*CW+10,h=y0+top.length*RH+6;
+  let s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Capability by category for the top five tools">`;
+  CATS.forEach(([n],j)=>{s+=svgText(L+j*CW+CW/2-2,18,n,{size:12,anchor:"middle",weight:600,fill:"var(--muted)"})});
+  top.forEach((v,i)=>{
+    const y=y0+i*RH;s+=svgText(0,y+22,v.name,{size:13,weight:i===0?700:500});
+    CATS.forEach(([n,d],j)=>{const val=catScore(v,d);const cls=val<25?0:val<50?1:val<75?2:3;
+      const fill=["var(--c0)","var(--c1)","var(--c2)","var(--c3)"][cls],tf=cls===3?"var(--c3ink)":cls===0?"var(--muted)":"var(--ink)";
+      s+=`<rect x="${L+j*CW}" y="${y}" width="${CW-4}" height="${RH-6}" rx="4" fill="${fill}"/>`+svgText(L+j*CW+CW/2-2,y+22,String(val),{size:13,anchor:"middle",weight:600,fill:tf,mono:1});
+    });
+  });
+  return s+"</svg>";
+}
+function chartTime(top){
+  const L=260,BW=500,RH=50,y0=24,w=900,max=Math.max(90,...top.map(v=>v.deploy[1])),h=y0+top.length*RH+28;
+  const X=d=>L+d/max*BW;
+  let s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Estimated proof of concept and deployment time in days">`;
+  for(let t=0;t<=max;t+=15){s+=`<line x1="${X(t)}" x2="${X(t)}" y1="${y0-8}" y2="${y0+top.length*RH-8}" stroke="var(--line)"/>`+svgText(X(t),h-8,t+"d",{size:11,anchor:"middle",fill:"var(--muted)",mono:1})}
+  top.forEach((v,i)=>{
+    const y=y0+i*RH;s+=svgText(0,y+18,v.name,{size:13,weight:i===0?700:500});
+    s+=`<rect x="${X(v.poc[0])}" y="${y+2}" width="${Math.max(4,X(v.poc[1])-X(v.poc[0]))}" height="13" rx="3" fill="var(--amber)"/>`;
+    s+=svgText(X(v.poc[1])+6,y+13,`PoC ${v.poc[0]}–${v.poc[1]}d`,{size:11,fill:"var(--muted)",mono:1});
+    s+=`<rect x="${X(v.deploy[0])}" y="${y+19}" width="${Math.max(4,X(v.deploy[1])-X(v.deploy[0]))}" height="13" rx="3" fill="var(--teal)"/>`;
+    s+=svgText(X(v.deploy[1])+6,y+30,`Live ${v.deploy[0]}–${v.deploy[1]}d`,{size:11,fill:"var(--muted)",mono:1});
+  });
+  return s+"</svg>";
+}
+function chartReviews(top){
+  const L=260,BW=440,RH=42,y0=14,w=900,h=y0+top.length*RH+28;
+  const X=r=>L+r/5*BW;
+  let s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Gartner Peer Insights rating for the top five tools">`;
+  [0,1,2,3,4,5].forEach(t=>{s+=`<line x1="${X(t)}" x2="${X(t)}" y1="${y0-6}" y2="${y0+top.length*RH-8}" stroke="var(--line)"/>`+svgText(X(t),h-8,t+"★",{size:11,anchor:"middle",fill:"var(--muted)",mono:1})});
+  top.forEach((v,i)=>{
+    const y=y0+i*RH;s+=svgText(0,y+18,v.name,{size:13,weight:i===0?700:500});
+    if(v.rev.g){s+=`<rect x="${L}" y="${y+4}" width="${X(v.rev.g.r)-L}" height="20" rx="3" fill="var(--amber)"/>`+svgText(X(v.rev.g.r)+8,y+19,`${v.rev.g.r.toFixed(1)} · ${v.rev.g.n} rating${v.rev.g.n>1?"s":""}`,{size:12,weight:600,mono:1})}
+    else s+=svgText(L+4,y+19,v.rev.gnote||"No rating found",{size:12,fill:"var(--muted)"});
+  });
+  return s+"</svg>";
+}
+
+/* ---------- results ---------- */
+let last=null;
+function covered(v,R){return R.needs.length?Math.round(R.needs.filter(k=>v.cap[k]>=2).length/R.needs.length*100):0}
+function stars(r){const f=Math.round(r);return "★".repeat(f)+"☆".repeat(5-f)}
+function listByCat(v,dims,min){return dims.filter(k=>v.cap[k]>=min).map(k=>DIMS[k]+(v.cap[k]===3?" (strong)":""))}
+function renderResults(){
+  const R=score();last=R;
+  const live=R.list.filter(v=>!v.excluded);
+  const plat=live.filter(v=>!v.soc&&!v.toolkit);
+  const top=plat[0],top5=plat.slice(0,5);
+  const RK=risks();
+  const complement=g=>{const c=plat.filter(v=>v.id!==top.id).sort((a,b)=>b.cap[g]-a.cap[g]||b.overall-a.overall)[0];return c&&c.cap[g]>=2?c.name:null};
+  const date=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+  const W=R.W;
+  const pct=n=>Math.round(n*100);
+  const vdetail=(v,rank)=>`
+   <article class="vdetail">
+    <div class="vh"><h3>${rank}. ${esc(v.name)}</h3><span class="chips"><span class="pill">${v.kind}</span>${v.short?'<span class="pill short">Client shortlist</span>':''}<span class="pill ${v.ease.toLowerCase()}">${v.ease} to deploy</span><span class="pill">Overall ${v.overall.toFixed(1)}</span></span></div>
+    <p style="margin:0">${esc(v.fit)}</p>
+    <div class="vgrid">
+      <div class="vbox"><h4>Monitors</h4>${ul(listByCat(v,["workforce","saas","homegrown","coding","models"],2),"Limited monitoring coverage")}</div>
+      <div class="vbox"><h4>Detects</h4>${ul(listByCat(v,["injection","behaviour","dlp"],2),"Limited detection")}</div>
+      <div class="vbox"><h4>Prevents</h4>${ul(listByCat(v,["runtime","dlp","identity"],2),"Alerts only; little prevention")}</div>
+      <div class="vbox"><h4>Guardrails</h4><p style="margin:0;font-size:.92rem">${esc(v.guard)}</p></div>
+    </div>
+    <div class="vgrid">
+      <div class="vbox"><h4>Hosting fit</h4>
+        <table class="t"><tbody>${["aws","azure","gcp"].map(c=>`<tr><td>${CLOUDN[c]}</td><td><span class="lvl ${"s"+v.clouds[c]}">${LEVEL[v.clouds[c]]}</span></td></tr>`).join("")}<tr><td>On-prem / self-hosted</td><td><span class="lvl s${v.selfhost}">${LEVEL[v.selfhost]}</span></td></tr></tbody></table>
+        <p class="note" style="margin:4px 0 0">${esc(v.hostTxt)}</p></div>
+      <div class="vbox"><h4>Deployment</h4>
+        <div><span class="pill ${v.ease.toLowerCase()}">${v.ease}</span></div>
+        <div style="font-size:.92rem">Proof of concept: <b class="score">${v.poc[0]}–${v.poc[1]} days</b></div>
+        <div style="font-size:.92rem">Production rollout: <b class="score">${v.deploy[0]}–${v.deploy[1]} days</b></div>
+        <div style="font-size:.92rem">Indicative cost: <b class="score">${COSTL[costFor(v)]}</b> <span class="muted">(${({large:"large vendor",mid:"mid-size vendor",startup:"start-up"})[v.size]})</span></div>
+        <p class="note" style="margin:2px 0 0">${v.claim?esc(v.claim)+" ":""}Timelines are estimates based on the deployment model.</p></div>
+      <div class="vbox"><h4>Reviews</h4>${reviewHTML(v)}</div>
+    </div>
+    <div class="vbox"><h4>What it can prevent or reduce in the next 12 months</h4>
+      ${RK.length?`<table class="t"><tbody>${RK.map(r=>{const c=v.cap[r.dim];return `<tr><td>${esc(r.text)}</td><td style="white-space:nowrap"><span class="lvl ${OUT[c][1]}">${OUT[c][0]}</span></td></tr>`}).join("")}</tbody></table>`:"<p class='muted' style='margin:0'>No risks selected.</p>"}
+    </div>
+    <div class="two">
+      <div><h4>Integrations and detection</h4><p style="margin:0;font-size:.92rem">${esc(v.int)}</p></div>
+      <div><h4>Fit for this client</h4><ul class="tight">${v.notes.map(n=>`<li>${esc(n)}</li>`).join("")}<li>${esc(v.watch)}</li>${v.gaps.length?`<li><b>High-priority gaps:</b> ${v.gaps.map(k=>DIMS[k]).join(", ")}</li>`:""}</ul></div>
+    </div>
+   </article>`;
+  function ul(a,empty){return a.length?`<ul class="tight">${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<p class="muted" style="margin:0;font-size:.9rem">${empty}</p>`}
+  function reviewHTML(v){
+    const g=v.rev.g,tp=v.rev.tp;
+    return `<div style="font-size:.92rem">${g?`<div><span class="stars">${stars(g.r)}</span> <b class="score">${g.r.toFixed(1)}</b> on <a href="${g.url}" target="_blank" rel="noopener">${GPI}</a> (${g.n} rating${g.n>1?"s":""})</div><p class="note" style="margin:4px 0 0">${esc(g.t)}</p>`:`<div class="muted">${GPI}: ${v.rev.gurl?`<a href="${v.rev.gurl}" target="_blank" rel="noopener">${esc(v.rev.gnote)}</a>`:esc(v.rev.gnote||"No rating found")}</div>`}
+      <div style="margin-top:6px">Trustpilot: ${tp?`<b class="score">${tp.s.toFixed(1)}</b>/5 from ${tp.n} reviews (<a href="${tp.url}" target="_blank" rel="noopener">profile</a>). <span class="muted">${esc(tp.note)}.</span>`:`<span class="muted">No Trustpilot profile found.</span>`}</div></div>`;
+  }
+
+  const x=top;
+  $("results").innerHTML=`
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div class="exportbar">
+      <span class="tag">Evaluation results · ${date}</span>
+      <span class="actions">
+        <button class="btn" type="button" id="editBtn">Edit answers</button>
+        <button class="btn primary" type="button" id="pdfBtn">Download PDF report</button>
+      </span>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="pdfstatus" id="pdfStatus" role="status" hidden></div>
+
+    <section class="card hero">
+      <div>
+        <div class="tag">Recommended best fit</div>
+        <div class="name">${esc(top.name)}</div>
+        <div class="chips" style="margin-bottom:10px"><span class="pill">${top.kind}</span>${top.short?'<span class="pill short">On client shortlist</span>':''}<span class="pill">${top.ease} to deploy</span>${top.conf==="low"?'<span class="pill">Limited public detail</span>':''}</div>
+        <p style="margin:0">${esc(top.fit)}</p>
+        <p class="note">${runTxt(plat,1)}</p>
+      </div>
+      <div class="scorebox" style="text-align:right"><div class="tag">Overall score</div><div class="big">${top.overall.toFixed(1)}<span style="font-size:1.1rem;color:var(--on-navy-muted)">/100</span></div></div>
+    </section>
+
+    <section class="kpis" aria-label="Key indicators for the recommended tool">
+      <div class="kpi"><span>Overall score</span><b>${x.overall.toFixed(1)}</b><em>Capability ${pct(W.cap)}% · hosting ${pct(W.host)}% · deployment ${pct(W.dep)}%</em></div>
+      <div class="kpi"><span>Capability fit</span><b>${x.fitScore}%</b><em>Against this client's needs</em></div>
+      <div class="kpi"><span>Needs covered</span><b>${covered(x,R)}%</b><em>${R.needs.filter(k=>x.cap[k]>=2).length} of ${R.needs.length} at good or strong</em></div>
+      <div class="kpi"><span>High-priority gaps</span><b style="color:${x.gaps.length?"var(--warn)":"var(--good)"}">${x.gaps.length}</b><em>${x.gaps.length?x.gaps.map(k=>DIMS[k]).join(", "):"None"}</em></div>
+      <div class="kpi"><span>Hosting fit</span><b>${x.hostFit}%</b><em>${clientClouds().map(c=>CLOUDN[c]||({onprem:"On-prem",saasonly:"SaaS only"})[c]).join(", ")}</em></div>
+      <div class="kpi"><span>Integrations</span><b>${intMatch(x).hit}/${intMatch(x).of||"–"}</b><em>${intMatch(x).of?intMatch(x).names:"None selected"}</em></div>
+      <div class="kpi"><span>Proof of concept</span><b>${x.poc[0]}–${x.poc[1]}d</b><em>Live in ${x.deploy[0]}–${x.deploy[1]} days (estimate)</em></div>
+      <div class="kpi"><span>Gartner rating</span><b>${x.rev.g?x.rev.g.r.toFixed(1)+"★":"–"}</b><em>${x.rev.g?x.rev.g.n+" ratings":esc(x.rev.gnote||"No rating found")}</em></div>
+    </section>
+
+    <section class="card">
+      <h2>Top 5 at a glance</h2>
+      <div class="charts" style="margin-top:12px">
+        <div class="chart"><h3>Overall score</h3>
+          <div class="legend"><span><i style="background:var(--teal)"></i>Capability fit (${pct(W.cap)}%)</span><span><i style="background:var(--blue)"></i>Hosting fit (${pct(W.host)}%)</span><span><i style="background:var(--amber)"></i>Ease of deployment (${pct(W.dep)}%)</span></div>
+          ${chartOverall(top5,W)}
+          <p class="cap">Each bar is the weighted score out of 100. Deployment weighs more when the client needs the tool live quickly.</p></div>
+        <div class="chart"><h3>Capability by category (0–100)</h3>
+          ${chartHeat(top5)}
+          <p class="cap">Monitor, detect, prevent, test, govern and integrate, scored from public product evidence regardless of this client's answers.</p></div>
+        <div class="chart"><h3>Time to proof of concept and go-live</h3>
+          <div class="legend"><span><i style="background:var(--amber)"></i>Proof of concept</span><span><i style="background:var(--teal)"></i>Production rollout</span></div>
+          ${chartTime(top5)}
+          <p class="cap">Estimated working days from kick-off, based on each tool's deployment model and vendor claims.</p></div>
+        <div class="chart"><h3>User ratings (${GPI})</h3>
+          ${chartReviews(top5)}
+          <p class="cap">Small samples for newer vendors; treat as a signal, not proof.</p></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Full ranking</h2>
+      <p class="note" style="margin:4px 0 12px">AI agent security platforms are ranked first by overall score. The Protect AI toolkit and the two AI SOC analysts follow because they cannot meet the client's needs on their own. *Cost is an indicative relative level (£ low to £££ high) based on packaging and licences; most vendors do not publish prices.</p>
+      <div class="scroll"><table class="t wide">
+        <thead><tr><th>#</th><th>Tool</th><th>Overall</th><th>Capability</th><th>Hosting</th><th>Deployment</th><th>PoC</th><th>Go-live</th><th>Cost*</th><th>Gartner</th><th>High-priority gaps</th></tr></thead>
+        <tbody>${R.list.map((v,i)=>`<tr class="${v.id===top.id?"topr":""}"><td class="num">${v.excluded?"–":i+1}</td><td><b>${esc(v.name)}</b> ${v.short?'<span class="pill short">Shortlist</span>':""}${v.soc?' <span class="pill">AI SOC</span>':""}${v.toolkit?' <span class="pill">Toolkit</span>':""}${v.excluded?` <span class="pill ex">Excluded</span>`:""}</td><td class="num"><b>${v.excluded?"–":v.overall.toFixed(1)}</b></td><td class="num">${v.fitScore}%</td><td class="num">${v.hostFit}%</td><td><span class="pill ${v.ease.toLowerCase()}">${v.ease}</span></td><td class="num">${v.poc[0]}–${v.poc[1]}d</td><td class="num">${v.deploy[0]}–${v.deploy[1]}d</td><td class="num">${COSTL[costFor(v)]}</td><td class="num">${v.rev.g?v.rev.g.r.toFixed(1)+" ("+v.rev.g.n+")":"–"}</td><td style="font-size:.82rem">${v.excluded?esc(v.excluded):v.gaps.map(k=>DIMS[k]).join(", ")||"None"}</td></tr>`).join("")}</tbody>
+      </table></div>
+    </section>
+
+    <section class="card">
+      <h2>What the top 5 can prevent or reduce in the next 12 months</h2>
+      <p class="note" style="margin:4px 0 12px">Based on the risks this client selected. Shows the expected effect once the tool is deployed and tuned, judged from its capabilities; it is not a guarantee.</p>
+      ${RK.length?`<div class="scroll"><table class="t wide"><thead><tr><th>Risk</th>${top5.map(v=>`<th>${esc(v.name)}</th>`).join("")}</tr></thead><tbody>${RK.map(r=>`<tr><td>${esc(r.text)}</td>${top5.map(v=>{const c=v.cap[r.dim];return `<td><span class="lvl ${OUT[c][1]}">${OUT[c][0]}</span></td>`}).join("")}</tr>`).join("")}</tbody></table></div>`:"<p class='muted'>No risks selected.</p>"}
+    </section>
+
+    <section class="card">
+      <h2>Client needs profile</h2>
+      <p class="note" style="margin:4px 0 10px">Built from the answers. Priority sets how much each capability counts in the capability-fit score.</p>
+      <div class="chips">${R.needs.map(k=>`<span class="chip">${DIMS[k]}<b>${prio(R.w[k])}</b></span>`).join("")}</div>
+    </section>
+
+    <section class="card">
+      <h2>Evaluation matrix</h2>
+      <p class="note" style="margin:4px 0 12px">Capability against each client need, 0 (none) to 3 (strong), tools in ranking order. A red outline marks a gap on a high-priority need.</p>
+      <div class="scroll"><table class="matrix">
+        <thead><tr><th class="rowh">Client need</th>${R.list.map(v=>`<th>${esc(v.name)}</th>`).join("")}</tr></thead>
+        <tbody>
+          <tr class="fitrow"><td class="rowh">Overall score</td>${R.list.map(v=>`<td>${v.excluded?"Excl.":v.overall.toFixed(1)}</td>`).join("")}</tr>
+          ${R.needs.map(k=>`<tr><td class="rowh">${DIMS[k]}<span class="prio">${prio(R.w[k])}</span></td>${R.list.map(v=>{const c=v.cap[k];return `<td class="s${c}${R.w[k]>=3&&c<=1?" gap":""}" title="${esc(v.name)}: ${LEVEL[c]}">${c}</td>`}).join("")}</tr>`).join("")}
+        </tbody></table></div>
+      <div class="legend"><span><i class="s0"></i>0 None</span><span><i class="s1"></i>1 Partial</span><span><i class="s2"></i>2 Good</span><span><i class="s3"></i>3 Strong</span></div>
+    </section>
+
+    <section class="card">
+      <h2>Top 5 in detail</h2>
+      <p class="note" style="margin:4px 0 14px">What each tool monitors, detects and prevents, its guardrails, hosting fit, deployment effort and timeline, 12-month risk reduction, integrations and user reviews.</p>
+      <div style="display:flex;flex-direction:column;gap:16px">${top5.map((v,i)=>vdetail(v,i+1)).join("")}</div>
+      ${top.gaps.length?`<h4>Second tool to cover ${esc(top.name)}'s gaps</h4><ul class="tight">${top.gaps.map(g=>{const c=complement(g);return `<li>${DIMS[g]}: ${c?`add <b>${esc(c)}</b>`:"no strong option in this list"}</li>`}).join("")}</ul>`:""}
+    </section>
+
+    <section class="card">
+      <h2>Client shortlist: Zenity, Geordie AI, Onyx Security</h2>
+      <div class="vgrid" style="margin-top:12px">${R.list.filter(v=>v.short).map(v=>`<div class="vbox">
+        <div class="vh" style="display:flex;justify-content:space-between;gap:8px"><b>${esc(v.name)}</b><span class="score" style="font-weight:700;color:var(--teal-ink)">${v.excluded?"Excluded":v.overall.toFixed(1)+"/100"}</span></div>
+        <div class="muted" style="font-size:.85rem">${v.excluded?esc(v.excluded):`Rank ${R.list.indexOf(v)+1} of ${R.list.length}`} · ${v.ease} to deploy · PoC ${v.poc[0]}–${v.poc[1]} days</div>
+        <div style="font-size:.88rem"><b>Strong on:</b> ${v.strengths.length?v.strengths.map(k=>DIMS[k]).join(", "):"none of the selected needs"}</div>
+        <div style="font-size:.88rem"><b>Gaps:</b> ${v.gaps.length?v.gaps.map(k=>DIMS[k]).join(", "):"none on high-priority needs"}</div>
+      </div>`).join("")}</div>
+    </section>
+
+    <section class="card">
+      <h2>Integration and detection fit</h2>
+      <p class="note" style="margin:4px 0 12px">Scores 0–3. "Not confirmed" means the vendor does not list the connector publicly, so ask for it in the demo.</p>
+      <div class="scroll"><table class="t wide">
+        <thead><tr><th>Tool</th><th>Wiz</th><th>Jira / tickets</th><th>SIEM / SOAR</th><th>Behaviour analytics</th><th>Evidence</th></tr></thead>
+        <tbody>${R.list.map(v=>`<tr><td><b>${esc(v.name)}</b></td>${["wiz","ticketing","siem","behaviour"].map(k=>`<td style="white-space:nowrap"><span class="lvl s${v.cap[k]}">${v.cap[k]}</span> ${v.cap[k]<=1?"<span class='muted'>not confirmed</span>":LEVEL[v.cap[k]]}</td>`).join("")}<td style="font-size:.82rem;color:var(--muted);min-width:260px">${esc(v.int)}</td></tr>`).join("")}</tbody>
+      </table></div>
+    </section>
+
+    <section class="card">
+      <h2>Other tools assessed</h2>
+      ${R.list.filter(v=>v.soc||v.toolkit).map(v=>`<details class="more"><summary><span class="l">${esc(v.name)} <span class="pill">${v.kind}</span></span><span class="score">${v.overall.toFixed(1)}/100</span></summary><div style="margin-top:12px">${vdetail(v,R.list.indexOf(v)+1)}</div></details>`).join("")}
+      ${plat.slice(5).map(v=>`<details class="more"><summary><span class="l">${esc(v.name)} ${v.short?'<span class="pill short">Shortlist</span>':""}</span><span class="score">${v.overall.toFixed(1)}/100</span></summary><div style="margin-top:12px">${vdetail(v,R.list.indexOf(v)+1)}</div></details>`).join("")}
+      ${R.list.filter(v=>v.excluded).map(v=>`<details class="more"><summary><span class="l">${esc(v.name)} <span class="pill ex">Excluded</span></span><span class="score">${esc(v.excluded)}</span></summary><div style="margin-top:12px">${vdetail(v,"–")}</div></details>`).join("")}
+    </section>
+
+    <section class="card">
+      <h2>Next steps</h2>
+      <ol class="steps-list" style="margin-top:10px">
+        <li>Run a proof of concept with <b>${esc(top.name)}</b> and <b>${esc((plat[1]||top).name)}</b> on the client's own environment (about ${top.poc[1]} and ${(plat[1]||top).poc[1]} days).</li>
+        <li>Test three things: a prompt injection hidden in a document or tool result, sensitive data pasted into an AI tool, and an agent attempting an unapproved action. Each should be blocked or flagged${selectedInts().length?`, with the alert reaching ${selectedInts().map(k=>INTNAME[k]).join(", ")}`:""}.</li>
+        <li>Ask each vendor for a sample evidence pack mapped to ${regsText()||"the client's internal AI policy"}.</li>
+        <li>Re-score with PoC results, then negotiate change-of-control, renewal price cap and integration commitments.</li>
+      </ol>
+      <p class="note">Method: capability scores (0–3) come from public vendor documentation and independent coverage as of October 2026. Timelines are estimates. Ratings come from ${GPI} and Trustpilot; most enterprise AI security vendors have no Trustpilot profile, and the profiles that exist are company-wide, not product-specific.</p>
+    </section>
+  </div>`;
+  $("editBtn").onclick=()=>{state.step=TOTAL;state.submitted=false;save();show()};
+  $("pdfBtn").onclick=exportPDF;
+}
+function runTxt(a,html){const r=[];if(a[1])r.push(`Runner-up: ${html?"<b>"+esc(a[1].name)+"</b>":a[1].name} (${a[1].overall.toFixed(1)})`);if(a[2])r.push(`Third: ${html?"<b>"+esc(a[2].name)+"</b>":a[2].name} (${a[2].overall.toFixed(1)})`);return r.join(" · ")||"No other platform meets the hosting requirement."}
+function regsText(){return (state.regs||[]).filter(r=>r!=="none").map(r=>({euai:"EU AI Act",iso:"ISO 42001",nist:"NIST AI RMF",dora:"DORA/NIS2",gdpr:"UK GDPR"})[r]).join(", ")}
+
+/* ---------- PDF report ---------- */
+function reportData(){
+  const R=last;const plat=R.list.filter(v=>!v.excluded&&!v.soc&&!v.toolkit);
+  return {R,plat,top:plat[0],top5:plat.slice(0,5),RK:risks(),date:new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}),iso:new Date().toISOString().slice(0,10)};
+}
+const PC={navy:[11,26,58],teal:[6,214,160],tealInk:[3,120,90],amber:[239,159,39],blue:[76,126,230],ink:[15,26,51],muted:[74,86,117],line:[213,219,234],soft:[243,245,251],light:[184,195,227],white:[255,255,255],lvl:[[238,241,247],[251,230,196],[184,238,220],[3,120,90]]};
+const T=s=>String(s==null?"":s).replace(/✓/g,"(yes)").replace(/✗/g,"(no)").replace(/★/g,"").replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF–—‘’“”•…€]/g,"");
+function buildPDF(){
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:"mm",format:"a4"});
+  const {R,top,top5,RK,date}=reportData();const W=R.W;
+  const PW=210,PH=297,M=16,CW=PW-2*M,BOT=PH-24;let y=0;
+  const fill=c=>doc.setFillColor(...c),stroke=c=>doc.setDrawColor(...c),col=c=>doc.setTextColor(...c);
+  const font=(st,sz)=>{doc.setFont("helvetica",st);doc.setFontSize(sz)};
+  const newPage=()=>{doc.addPage();y=26};
+  const need=h=>{if(y+h>BOT)newPage()};
+  function para(text,sz=9.5,color=PC.ink,st="normal",gap=2,indent=0){font(st,sz);col(color);const lines=doc.splitTextToSize(T(text),CW-indent);const lh=sz*0.42;
+    lines.forEach(l=>{need(lh);doc.text(l,M+indent,y+lh*0.8);y+=lh});y+=gap}
+  function h2(t){need(22);y+=3;font("bold",13.5);col(PC.navy);doc.text(T(t),M,y+5);stroke(PC.teal);doc.setLineWidth(0.8);doc.line(M,y+7.5,PW-M,y+7.5);y+=12}
+  function h3(t,sz=11){need(14);y+=1;font("bold",sz);col(PC.navy);doc.text(T(t),M,y+4);y+=7}
+  const base={margin:{left:M,right:M,top:26,bottom:24},styles:{font:"helvetica",fontSize:8.2,textColor:PC.ink,lineColor:PC.line,lineWidth:0.2,cellPadding:1.8,overflow:"linebreak",valign:"top"},headStyles:{fillColor:PC.navy,textColor:PC.white,fontStyle:"bold"},alternateRowStyles:{fillColor:[248,249,252]}};
+  function table(o){const clean=a=>a.map(r=>r.map(c=>T(c)));doc.autoTable({...base,...o,head:o.head?clean(o.head):undefined,body:clean(o.body),startY:y,styles:{...base.styles,...(o.styles||{})}});y=doc.lastAutoTable.finalY+5}
+  const lvlCell=data=>{if(data.section!=="body"||data.column.index===0)return;const i=OUT.findIndex(o=>o[0]===data.cell.raw);if(i>=0){data.cell.styles.fillColor=PC.lvl[i];data.cell.styles.textColor=i===3?PC.white:PC.ink;data.cell.styles.fontStyle="bold"}};
+  const pdfInt=v=>{const sel=selectedInts();return sel.length?sel.map(k=>INTNAME[k]+(v.cap[k]>=2?" yes":" not confirmed")).join(", "):"None selected"};
+
+  /* cover band */
+  fill(PC.navy);doc.rect(7,7,PW-14,40,"F");fill(PC.teal);doc.rect(7,47,PW-14,1.6,"F");
+  font("bold",8.5);col(PC.teal);doc.text("C O M P S I L O N",M,17);
+  font("bold",21);col(PC.white);doc.text("Independent Tool Evaluation Report",M,29);
+  font("normal",10);col(PC.light);doc.text(T("AI agent security and governance  ·  "+date),M,38);
+  y=57;
+
+  /* recommendation box */
+  font("normal",9.5);const dl=doc.splitTextToSize(T(top.fit),CW-12);const bh=26+dl.length*4.1;
+  fill(PC.soft);doc.rect(M,y,CW,bh,"F");fill(PC.teal);doc.rect(M,y,2,bh,"F");
+  font("bold",7.5);col(PC.muted);doc.text("RECOMMENDED BEST FIT",M+7,y+7);
+  font("bold",16);col(PC.navy);doc.text(T(top.name),M+7,y+15);
+  font("bold",18);col(PC.tealInk);doc.text(top.overall.toFixed(1),PW-M-18,y+15,{align:"right"});font("normal",9);col(PC.muted);doc.text("/100",PW-M-5,y+15,{align:"right"});
+  font("normal",9.5);col(PC.ink);doc.text(dl,M+7,y+21.5);
+  font("normal",8.5);col(PC.muted);doc.text(T(runTxt(top5)),M+7,y+bh-4);
+  y+=bh+6;
+
+  /* KPI tiles */
+  const k=[["Overall score",top.overall.toFixed(1)+"/100"],["Capability fit",top.fitScore+"%"],["Needs covered",covered(top,R)+"%"],["Hosting fit",top.hostFit+"%"],
+    ["Proof of concept",top.poc[0]+"-"+top.poc[1]+" days"],["High-priority gaps",String(top.gaps.length)],["Integrations",intMatch(top).of?intMatch(top).hit+"/"+intMatch(top).of:"-"],["Gartner rating",top.rev.g?top.rev.g.r.toFixed(1)+"/5 ("+top.rev.g.n+")":"No reviews"]];
+  const kw=(CW-9)/4,kh=17;
+  k.forEach((t,i)=>{const x=M+(i%4)*(kw+3),yy=y+Math.floor(i/4)*(kh+3);stroke(PC.line);doc.setLineWidth(0.3);doc.rect(x,yy,kw,kh);fill(PC.teal);doc.rect(x,yy,kw,1.2,"F");
+    font("bold",6.8);col(PC.muted);doc.text(t[0].toUpperCase(),x+3,yy+6);font("bold",12);col(PC.ink);doc.text(T(t[1]),x+3,yy+13.5)});
+  y+=2*kh+3+6;
+  para(`Score weights for this client: capability ${Math.round(W.cap*100)}%, hosting fit ${Math.round(W.host*100)}%, ease of deployment ${Math.round(W.dep*100)}%.`,8.5,PC.muted);
+  if(top.gaps.length){const comp=top.gaps.map(g=>{const c=reportData().plat.filter(v=>v.id!==top.id).sort((a,b)=>b.cap[g]-a.cap[g]||b.overall-a.overall)[0];return DIMS[g]+(c&&c.cap[g]>=2?": add "+c.name:": no strong option")});para("Gaps to cover with a second tool: "+comp.join("; ")+".",9,PC.ink)}
+
+  /* requirements */
+  h2("1. Client requirements");
+  table({head:[["#","Question","Answer"]],body:Q.map((q,i)=>[String(i+1),q.title,answerText(q)]),columnStyles:{0:{cellWidth:8},1:{cellWidth:70}}});
+  para("Needs profile: "+R.needs.map(k=>`${DIMS[k]} (${prio(R.w[k])})`).join("; "),8.5,PC.muted);
+
+  /* charts */
+  h2("2. Top 5 at a glance");
+  const LBL=58,AX=M+LBL,AW=CW-LBL-18;
+  const axis=(x0,w,ticks,fmt,yTop,yBot)=>{ticks.forEach(t=>{const x=x0+t.p*w;stroke(PC.line);doc.setLineWidth(0.2);doc.line(x,yTop,x,yBot);font("normal",7);col(PC.muted);doc.text(fmt(t.v),x,yBot+4,{align:"center"})})};
+  const legend=(items)=>{y+=2;let x=M;font("normal",8);items.forEach(([c,t])=>{fill(c);doc.rect(x,y-2.6,3,3,"F");col(PC.muted);doc.text(T(t),x+4.5,y);x+=doc.getTextWidth(T(t))+11});y+=5};
+  // overall
+  need(70);h3("Overall score (0-100)",10.5);
+  legend([[PC.teal,`Capability fit (${Math.round(W.cap*100)}%)`],[PC.blue,`Hosting fit (${Math.round(W.host*100)}%)`],[PC.amber,`Ease of deployment (${Math.round(W.dep*100)}%)`]]);
+  {const rh=9,y0=y;axis(AX,AW,[0,25,50,75,100].map(v=>({v,p:v/100})),v=>String(v),y0,y0+top5.length*rh);
+   top5.forEach((v,i)=>{const yy=y0+i*rh;font(i?"normal":"bold",8.5);col(PC.ink);doc.text(T((i+1)+". "+v.name),M,yy+5.3);
+     const a=W.cap*v.fitScore/100*AW,b=W.host*v.hostFit/100*AW,c=W.dep*v.ready/100*AW;
+     fill(PC.teal);doc.rect(AX,yy+1.5,a,5,"F");fill(PC.blue);doc.rect(AX+a,yy+1.5,b,5,"F");fill(PC.amber);doc.rect(AX+a+b,yy+1.5,c,5,"F");
+     font("bold",8.5);col(PC.ink);doc.text(v.overall.toFixed(1),AX+a+b+c+2,yy+5.3)});
+   y=y0+top5.length*rh+9}
+  // heatmap
+  need(70);h3("Capability by category (0-100)",10.5);
+  {const cw=(CW-LBL)/CATS.length,rh=8;font("bold",7.5);col(PC.muted);CATS.forEach(([n],j)=>doc.text(n,AX+j*cw+cw/2,y+3,{align:"center"}));y+=5;
+   top5.forEach((v,i)=>{const yy=y+i*rh;font(i?"normal":"bold",8.5);col(PC.ink);doc.text(T(v.name),M,yy+5);
+     CATS.forEach(([n,d],j)=>{const val=catScore(v,d),l=val<25?0:val<50?1:val<75?2:3;fill(PC.lvl[l]);doc.rect(AX+j*cw+0.6,yy+0.6,cw-1.2,rh-1.2,"F");font("bold",8.5);col(l===3?PC.white:PC.ink);doc.text(String(val),AX+j*cw+cw/2,yy+5.2,{align:"center"})})});
+   y+=top5.length*rh+4;para("Scored from public product evidence, regardless of this client's answers.",8,PC.muted)}
+  // timeline
+  need(80);h3("Time to proof of concept and go-live (days, estimate)",10.5);
+  legend([[PC.amber,"Proof of concept"],[PC.teal,"Production rollout"]]);
+  {const rh=11,y0=y,max=Math.max(90,...top5.map(v=>v.deploy[1])),tw=AW-10,X=d=>AX+d/max*tw;
+   const ticks=[];for(let t=0;t<=max;t+=15)ticks.push({v:t,p:t/max});axis(AX,tw,ticks,v=>v+"d",y0,y0+top5.length*rh);
+   top5.forEach((v,i)=>{const yy=y0+i*rh;font(i?"normal":"bold",8.5);col(PC.ink);doc.text(T(v.name),M,yy+6);
+     fill(PC.amber);doc.rect(X(v.poc[0]),yy+1.2,Math.max(1,X(v.poc[1])-X(v.poc[0])),3.6,"F");font("normal",7);col(PC.muted);doc.text(`PoC ${v.poc[0]}-${v.poc[1]}d`,X(v.poc[1])+1.5,yy+4.3);
+     fill(PC.teal);doc.rect(X(v.deploy[0]),yy+5.8,Math.max(1,X(v.deploy[1])-X(v.deploy[0])),3.6,"F");doc.text(`Live ${v.deploy[0]}-${v.deploy[1]}d`,X(v.deploy[1])+1.5,yy+8.9)});
+   y=y0+top5.length*rh+9}
+  // ratings
+  need(65);h3("User ratings (Gartner Peer Insights, out of 5)",10.5);
+  {const rh=8,y0=y,aw=AW-20,X=r=>AX+r/5*aw;axis(AX,aw,[0,1,2,3,4,5].map(v=>({v,p:v/5})),v=>String(v),y0,y0+top5.length*rh);
+   top5.forEach((v,i)=>{const yy=y0+i*rh;font(i?"normal":"bold",8.5);col(PC.ink);doc.text(T(v.name),M,yy+5);
+     if(v.rev.g){fill(PC.amber);doc.rect(AX,yy+1.5,X(v.rev.g.r)-AX,4.6,"F");font("bold",8);col(PC.ink);doc.text(`${v.rev.g.r.toFixed(1)}  (${v.rev.g.n} rating${v.rev.g.n>1?"s":""})`,X(v.rev.g.r)+2,yy+5)}
+     else{font("italic",8);col(PC.muted);doc.text(T(v.rev.gnote||"No rating found"),AX+1,yy+5)}});
+   y=y0+top5.length*rh+9;para("Small samples for newer vendors; treat as a signal, not proof.",8,PC.muted)}
+
+  /* ranking */
+  h2("3. Full ranking");
+  table({head:[["#","Tool","Type","Overall","Capability","Hosting","Deployment","PoC","Go-live","Cost*","Gartner"]],
+    body:R.list.map((v,i)=>[v.excluded?"-":String(i+1),v.name+(v.short?" (shortlist)":""),v.kind,v.excluded?"Excluded":v.overall.toFixed(1),v.fitScore+"%",v.hostFit+"%",v.ease,`${v.poc[0]}-${v.poc[1]}d`,`${v.deploy[0]}-${v.deploy[1]}d`,COSTL[costFor(v)],v.rev.g?v.rev.g.r.toFixed(1)+" ("+v.rev.g.n+")":"-"]),
+    styles:{fontSize:7.6},columnStyles:{1:{cellWidth:40,fontStyle:"bold"}},
+    didParseCell:d=>{if(d.section==="body"&&d.row.index===0){d.cell.styles.fillColor=[220,247,238]}}});
+  para("AI SOC analysts (Dropzone AI, Prophet AI) and the Protect AI AWS Toolkit are listed after the platforms because they cannot meet the client's needs on their own. *Indicative relative cost level (£ low to £££ high); most vendors do not publish prices. PoC and go-live times are estimates.",8,PC.muted);
+
+  /* 12-month */
+  if(RK.length){h2("4. What the top 5 can prevent or reduce in the next 12 months");
+    table({head:[["Risk",...top5.map(v=>v.name)]],body:RK.map(r=>[r.text,...top5.map(v=>OUT[v.cap[r.dim]][0])]),styles:{fontSize:7.6},columnStyles:{0:{cellWidth:52}},didParseCell:lvlCell});
+    para("Expected effect once the tool is deployed and tuned, judged from its capabilities; not a guarantee.",8,PC.muted)}
+
+  /* detail */
+  h2((RK.length?"5":"4")+". Top 5 in detail");
+  top5.forEach((v,i)=>{
+    need(40);h3(`${i+1}. ${v.name}  ·  ${v.overall.toFixed(1)}/100`,11.5);
+    para(`${v.kind}${v.short?" · client shortlist":""} · ${v.ease} to deploy`,8.5,PC.muted,"italic",1);
+    para(v.fit,9,PC.ink);
+    const rows=[["Monitors",listByCat(v,["workforce","saas","homegrown","coding","models","mcp"],2).join("; ")||"Limited"],["Detects",listByCat(v,["injection","behaviour","dlp"],2).join("; ")||"Limited"],["Prevents",listByCat(v,["runtime","dlp","identity"],2).join("; ")||"Alerts only"],["Guardrails",v.guard],
+      ["Hosting fit",`AWS ${LEVEL[v.clouds.aws]}, Azure ${LEVEL[v.clouds.azure]}, Google Cloud ${LEVEL[v.clouds.gcp]}, self-hosted ${LEVEL[v.selfhost]}. ${v.hostTxt}`],
+      ["Deployment",`${v.ease}. Proof of concept ${v.poc[0]}-${v.poc[1]} days; production ${v.deploy[0]}-${v.deploy[1]} days (estimate). ${v.claim}`],
+      ["Indicative cost",`${COSTL[costFor(v)]} (${({large:"large vendor",mid:"mid-size vendor",startup:"start-up"})[v.size]})`],
+      ["Integrations",`${pdfInt(v)}. ${v.int}`],
+      ["Reviews",(v.rev.g?`Gartner Peer Insights ${v.rev.g.r.toFixed(1)}/5 from ${v.rev.g.n} rating${v.rev.g.n>1?"s":""}. ${v.rev.g.t}`:`Gartner Peer Insights: ${v.rev.gnote||"no rating found"}.`)+" "+(v.rev.tp?`Trustpilot ${v.rev.tp.s.toFixed(1)}/5 from ${v.rev.tp.n} reviews (${v.rev.tp.note}).`:"No Trustpilot profile found.")],
+      ["Fit for this client",[...v.notes,v.watch].join(" ")]];
+    if(v.gaps.length)rows.push(["High-priority gaps",v.gaps.map(k=>DIMS[k]).join(", ")]);
+    table({body:rows,columnStyles:{0:{cellWidth:34,fontStyle:"bold",textColor:PC.navy}},alternateRowStyles:{}});
+    if(RK.length)table({head:[["Risk over the next 12 months","Expected effect"]],body:RK.map(r=>[r.text,OUT[v.cap[r.dim]][0]]),styles:{fontSize:7.8},columnStyles:{1:{cellWidth:48}},didParseCell:lvlCell});
+    y+=2;
+  });
+
+  /* integrations */
+  h2((RK.length?"6":"5")+". Integration and detection fit");
+  table({head:[["Tool","Wiz","Jira / tickets","SIEM / SOAR","Behaviour analytics","MCP security"]],body:R.list.map(v=>[v.name,...["wiz","ticketing","siem","behaviour","mcp"].map(k=>v.cap[k]<=1?v.cap[k]+" - not confirmed":v.cap[k]+" - "+LEVEL[v.cap[k]])]),styles:{fontSize:7.6},columnStyles:{0:{cellWidth:44,fontStyle:"bold"}}});
+
+  /* next steps + method */
+  h2((RK.length?"7":"6")+". Next steps");
+  const second=(top5[1]||top5[0]);
+  [`Run a proof of concept with ${top.name} and ${second.name} on the client's own environment (about ${top.poc[1]} and ${second.poc[1]} days).`,
+   `Test a prompt injection hidden in a document or tool result, sensitive data pasted into an AI tool, and an agent attempting an unapproved action. Each should be blocked or flagged${selectedInts().length?", with the alert reaching "+selectedInts().map(k=>INTNAME[k]).join(", "):""}.`,
+   `Ask each vendor for a sample evidence pack mapped to ${regsText()||"the client's internal AI policy"}, and written confirmation of data hosting locations.`,
+   "Re-score with PoC results, then negotiate change-of-control, renewal price cap and integration commitments."].forEach((t,i)=>para(`${i+1}.  ${t}`,9.5,PC.ink,"normal",1.5));
+  h2("Method and sources");
+  para("Capability scores (0 none to 3 strong) come from public vendor documentation and independent coverage as of October 2026. Deployment timelines and cost levels are estimates. Ratings come from Gartner Peer Insights and Trustpilot; most enterprise AI security vendors have no Trustpilot profile, and existing profiles are company-wide.",8.5,PC.muted);
+  const src=[];R.list.forEach(v=>{if(v.rev.g)src.push([`Gartner Peer Insights: ${v.name}`,v.rev.g.url]);if(v.rev.tp)src.push([`Trustpilot: ${v.name}`,v.rev.tp.url])});
+  src.push(["OWASP Top 10 for Agentic Applications","https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026"],["Pillar Security: agentic AI security platforms compared","https://www.pillar.security/blog/best-agentic-ai-security-platforms-enterprise-2026"]);
+  font("normal",7.8);src.forEach(([t,u])=>{need(4.2);col(PC.ink);doc.text(T(t)+": ",M,y+3);const w=doc.getTextWidth(T(t)+": ");col(PC.tealInk);doc.textWithLink(u,M+w,y+3,{url:u});y+=4.2});
+
+  /* frame, running header and footer on every page */
+  const n=doc.getNumberOfPages();
+  for(let i=1;i<=n;i++){doc.setPage(i);
+    stroke(PC.navy);doc.setLineWidth(0.8);doc.rect(7,7,PW-14,PH-14);
+    if(i>1){font("bold",8);col(PC.navy);doc.text("Independent Tool Evaluation Report",M,15);font("normal",8);col(PC.muted);doc.text(T(date),PW-M,15,{align:"right"});stroke(PC.teal);doc.setLineWidth(0.6);doc.line(M,18,PW-M,18)}
+    stroke(PC.teal);doc.setLineWidth(0.6);doc.line(M,PH-17,PW-M,PH-17);
+    font("bold",8);col(PC.navy);doc.text("COMPSILON",M,PH-12);font("normal",8);col(PC.muted);doc.text("  ·  www.compsilon.com",M+doc.getTextWidth("COMPSILON")+1,PH-12);
+    doc.text(`Page ${i} of ${n}`,PW-M,PH-12,{align:"right"});
+  }
+  doc.setProperties({title:"Independent Tool Evaluation Report",subject:"AI agent security and governance tool evaluation",author:"Compsilon",creator:"Agentic Security Fit Finder"});
+  return doc;
+}
+async function getCap(name){try{if(window.claude&&window.claude.use)return await window.claude.use(name)}catch(e){}return null}
+async function exportPDF(){
+  const btn=$("pdfBtn"),box=$("pdfStatus");box.hidden=true;box.innerHTML="";
+  if(!window.jspdf||!window.jspdf.jsPDF||!window.jspdf.jsPDF.API.autoTable){showStatus("The PDF engine didn't load (the network may have blocked cdn.jsdelivr.net). Reload the page and try again.",true);return}
+  btn.disabled=true;btn.textContent="Preparing PDF…";
+  let blob,filename;
+  try{const {iso}=reportData();blob=buildPDF().output("blob");filename=`Independent-Tool-Evaluation-Report-${iso}.pdf`}
+  catch(e){showStatus("The PDF couldn't be built: "+esc(e&&e.message||e),true);resetBtn();return}
+  if(!(window.claude&&window.claude.use)){try{const d2=buildPDF();d2.save(filename);showStatus(`Downloaded <b>${esc(filename)}</b>. Check your Downloads folder.`)}catch(e){showStatus("The PDF couldn't be saved: "+esc(e&&e.message||e),true)}resetBtn();return}
+  let reason="";
+  const d=await getCap("downloads");
+  if(d){try{await d.save({filename,data:blob});showStatus(`Saved <b>${esc(filename)}</b>. Check your Downloads folder.`);resetBtn();return}
+    catch(e){const c=e&&e.code;if(c==="declined"){showStatus("Download cancelled. Click the button again and choose Save in the prompt.");resetBtn();return}
+      if(c==="rate_limited"){showStatus("A save prompt is already open. Finish it, then try again.");resetBtn();return}
+      reason=c||"save failed"}}
+  else reason="downloads not available in this view";
+  const a=await getCap("assets");
+  if(a){try{const r=await a.upload(blob,{type:"application/pdf"});
+      showStatus(`Your PDF is ready. <a href="${esc(r.url)}" target="_blank" rel="noopener"><b>Open the PDF report</b></a> in a new tab, then save it from your browser's PDF viewer (download icon, or Ctrl+S / Cmd+S).`);resetBtn();return}
+    catch(e){reason+=" / upload: "+(e&&e.code||"failed")}}
+  /* last resort: no platform capability in this view, so hand the PDF to the browser directly */
+  const url=URL.createObjectURL(blob);let w=null;
+  try{w=window.open(url,"_blank")}catch(e){}
+  if(w){showStatus("The PDF opened in a new tab. Save it from there with the download icon, or Ctrl+S / Cmd+S.");resetBtn();return}
+  showStatus(`This view can't save files directly (${esc(reason)}). Use the PDF preview below: its download icon saves the report. If no preview appears, open the Fit Finder in its own browser tab at <b>claude.ai/artifact/L3FvxxwNoStvRPM4N3Vyct</b> and click Download again.
+    <iframe src="${url}" title="PDF report preview" style="display:block;width:100%;height:80vh;margin-top:10px;border:1px solid var(--line);border-radius:6px;background:#fff"></iframe>
+    <div style="margin-top:8px"><a href="${url}" target="_blank" rel="noopener"><b>Open the PDF in a new tab</b></a></div>`,true);
+  resetBtn();
+  function resetBtn(){btn.disabled=false;btn.textContent="Download PDF report"}
+}
+function showStatus(html,err){const box=$("pdfStatus");box.innerHTML=html;box.hidden=false;box.classList.toggle("err",!!err)}
+function toast(m){const el=$("toast");if(!el)return;el.textContent=m;clearTimeout(toast.t);toast.t=setTimeout(()=>{el.textContent=""},4000)}
+
+function show(){
+  const res=state.submitted&&doneCount()===TOTAL;
+  $("survey").hidden=res;$("results").hidden=!res;$("wrap").classList.toggle("wide",res);
+  if(res)renderResults();else{renderNav();renderStage()}
+  window.scrollTo({top:0});
+}
+$("resetBtn").onclick=()=>{state={step:0};save();show()};
+$("sampleBtn").onclick=()=>{state={...JSON.parse(JSON.stringify(SAMPLE)),step:TOTAL,submitted:false};save();show()};
+window.__fit={buildPDF:()=>buildPDF()};
+show();
+})();
+</script>
+
+</body></html>
