@@ -618,7 +618,7 @@ function adminAppHTML() {
     <button class="tab on" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="subscribers">Subscribers</button>
     <button class="tab" data-tab="newsletters">Newsletters</button>
-    <button class="tab" data-tab="evaluator" title="AI Security &amp; Governance Platform Evaluator">Platform Evaluator</button>
+    <button class="tab" data-tab="evaluator" title="AI Agentic Platform Evaluator: security and governance">AI Agentic Platform Evaluator</button>
   </nav>
   <a class="logout" href="/admin/logout">Logout</a>
 </header>
@@ -783,7 +783,7 @@ function adminAppHTML() {
 </section>
 
 <section id="evaluator" class="panel">
-  <iframe id="evaluator-frame" title="AI Security &amp; Governance Platform Evaluator" style="width:100%;height:calc(100vh - 150px);min-height:640px;border:1px solid #2c2c5c;border-radius:12px;background:#06060e;display:block"></iframe>
+  <iframe id="evaluator-frame" title="AI Agentic Platform Evaluator" style="width:100%;height:calc(100vh - 150px);min-height:640px;border:1px solid #2c2c5c;border-radius:12px;background:#06060e;display:block"></iframe>
 </section>
 </main>
 
