@@ -610,6 +610,13 @@ function adminAppHTML() {
   .filter-btn{background:#12122a;border:1px solid #2c2c5c;color:#8c90c4;padding:7px 14px;border-radius:100px;font:600 12px inherit;cursor:pointer}
   .filter-btn.on{background:#06d6a020;border-color:#06d6a0;color:#06d6a0}
   .filter-btn .n{opacity:0.7;margin-left:6px}
+  .an-delta{font-size:12px;color:#8c90c4;margin-top:6px}
+  .an-up{color:#06d6a0}.an-dn{color:#ef4444}
+  .an-row{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13px}
+  .an-row .nm{width:150px;color:#eeeef6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .an-row .bar{flex:1;height:6px;background:#06060e;border-radius:4px;overflow:hidden}
+  .an-row .bar i{display:block;height:100%;background:linear-gradient(90deg,#06d6a0,#EF9F27);border-radius:4px}
+  .an-row .vl{width:48px;text-align:right;color:#8c90c4}
 </style></head>
 <body>
 <header>
@@ -618,6 +625,7 @@ function adminAppHTML() {
     <button class="tab on" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="subscribers">Subscribers</button>
     <button class="tab" data-tab="newsletters">Newsletters</button>
+    <button class="tab" data-tab="analytics">Analytics</button>
     <button class="tab" data-tab="evaluator" title="AI Agentic Platform Evaluator: security and governance">AI Agentic Platform Evaluator</button>
   </nav>
   <a class="logout" href="/admin/logout">Logout</a>
@@ -782,6 +790,32 @@ function adminAppHTML() {
   <div class="card"><h2>All newsletter publications</h2><div id="issues-table"><div class="empty">Loading&hellip;</div></div></div>
 </section>
 
+<section id="analytics" class="panel">
+  <h1>Analytics</h1>
+  <p class="sub">First-party site analytics. Cookieless, no IP addresses stored. Counts start from the day tracking went live.</p>
+  <div class="filters" id="an-range">
+    <button class="filter-btn" data-d="1" onclick="setAnRange(1)">Today</button>
+    <button class="filter-btn" data-d="7" onclick="setAnRange(7)">7 days</button>
+    <button class="filter-btn on" data-d="30" onclick="setAnRange(30)">30 days</button>
+    <button class="filter-btn" data-d="90" onclick="setAnRange(90)">90 days</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num green" id="an-visitors">&ndash;</div><div class="stat-label">Visitors (daily uniques)</div><div class="an-delta" id="an-d-visitors"></div></div>
+    <div class="stat"><div class="stat-num" id="an-views">&ndash;</div><div class="stat-label">Page views</div><div class="an-delta" id="an-d-views"></div></div>
+    <div class="stat"><div class="stat-num" id="an-time">&ndash;</div><div class="stat-label">Avg time on site</div><div class="an-delta" id="an-d-time"></div></div>
+    <div class="stat"><div class="stat-num" id="an-sub">&ndash;</div><div class="stat-label">New subscribers per visitor</div><div class="an-delta" id="an-d-sub"></div></div>
+  </div>
+  <div class="card"><h2>Visitors per day</h2><div id="an-chart"></div></div>
+  <div class="two-col">
+    <div class="card"><h2>Top pages &middot; time spent</h2><div id="an-pages"></div></div>
+    <div class="card"><h2>Top referrers</h2><div id="an-refs"></div><h2 style="margin-top:22px">Campaigns (UTM)</h2><div id="an-camps"></div></div>
+  </div>
+  <div class="two-col">
+    <div class="card"><h2>Countries</h2><div id="an-ctry"></div></div>
+    <div class="card"><h2>Devices</h2><div id="an-dev"></div></div>
+  </div>
+  <p class="sub" style="margin-top:-6px">Visitors are anonymous (country, device, source). Time on page counts only while the tab is visible. Your own admin visits are not counted.</p>
+</section>
 <section id="evaluator" class="panel">
   <iframe id="evaluator-frame" title="AI Agentic Platform Evaluator" style="width:100%;height:calc(100vh - 150px);min-height:640px;border:1px solid #2c2c5c;border-radius:12px;background:#06060e;display:block"></iframe>
 </section>
@@ -808,6 +842,7 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
   document.querySelectorAll('.panel').forEach(x => x.classList.remove('on'));
   t.classList.add('on');
   document.getElementById(t.dataset.tab).classList.add('on');
+  if (t.dataset.tab === 'analytics') loadAnalytics();
   if (t.dataset.tab === 'evaluator') {
     const f = document.getElementById('evaluator-frame');
     if (!f.getAttribute('src')) f.setAttribute('src', '/admin/evaluator');
@@ -1304,6 +1339,73 @@ async function deleteIssue(slug) {
     toast('Removed.');
     loadIssues(); loadStats();
   } catch (err) { toast('Remove failed: ' + err.message, true); }
+}
+
+// ---- analytics ----
+var anDays = 30;
+function setAnRange(d) {
+  anDays = d;
+  document.querySelectorAll('#an-range .filter-btn').forEach(function (b) { b.classList.toggle('on', Number(b.dataset.d) === d); });
+  loadAnalytics();
+}
+function anDur(s) { s = Math.round(s || 0); return Math.floor(s / 60) + 'm ' + (s % 60) + 's'; }
+function anDelta(id, cur, prev, suffix) {
+  var el = document.getElementById(id);
+  if (!prev) { el.textContent = 'no earlier data to compare'; el.className = 'an-delta'; return; }
+  var p = Math.round((cur - prev) / prev * 100);
+  el.className = 'an-delta ' + (p >= 0 ? 'an-up' : 'an-dn');
+  el.textContent = (p >= 0 ? '\u25B2 ' : '\u25BC ') + Math.abs(p) + '% vs previous period';
+}
+function anBars(id, rows, fmtVal) {
+  var el = document.getElementById(id);
+  if (!rows || !rows.length) { el.innerHTML = '<div class="empty" style="padding:18px">No data yet</div>'; return; }
+  var max = Math.max.apply(null, rows.map(function (r) { return r.n; })) || 1;
+  el.innerHTML = rows.map(function (r) {
+    return '<div class="an-row"><span class="nm">' + escape(r.name) + '</span><span class="bar"><i style="width:' + Math.round(r.n / max * 100) + '%"></i></span><span class="vl">' + (fmtVal ? fmtVal(r.n) : r.n) + '</span></div>';
+  }).join('');
+}
+function anChart(daily, days) {
+  var el = document.getElementById('an-chart');
+  var map = {}; daily.forEach(function (r) { map[r.d] = r.visitors; });
+  var pts = [], n = Math.min(days, 90);
+  for (var i = n - 1; i >= 0; i--) {
+    var dt = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+    pts.push({ d: dt, v: map[dt] || 0 });
+  }
+  if (pts.length < 2) { el.innerHTML = '<div class="empty" style="padding:18px">Pick 7 days or more to see a trend</div>'; return; }
+  var W = 900, H = 200, mx = Math.max.apply(null, pts.map(function (p) { return p.v; })) || 1;
+  var xy = pts.map(function (p, i) { return [i * (W / (pts.length - 1)), H - 24 - (p.v / mx) * (H - 48)]; });
+  var d = 'M' + xy.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' L');
+  var grid = [0, 1, 2, 3].map(function (i) { var y = 24 + i * ((H - 48) / 3); return '<line x1="0" x2="' + W + '" y1="' + y + '" y2="' + y + '" stroke="#2c2c5c" stroke-width="1"/>'; }).join('');
+  el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%"><defs><linearGradient id="anG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#06d6a0" stop-opacity=".35"/><stop offset="1" stop-color="#06d6a0" stop-opacity="0"/></linearGradient></defs>' + grid +
+    '<path d="' + d + ' L' + W + ',' + H + ' L0,' + H + ' Z" fill="url(#anG)"/><path d="' + d + '" fill="none" stroke="#06d6a0" stroke-width="2.5"/>' +
+    '<text x="4" y="14" fill="#8c90c4" font-size="11">peak ' + mx + '</text></svg>';
+}
+async function loadAnalytics() {
+  try {
+    var a = await api('/admin/api/analytics?days=' + anDays);
+    var t = a.totals, p = a.previous;
+    document.getElementById('an-visitors').textContent = t.visitors;
+    document.getElementById('an-views').textContent = t.views;
+    document.getElementById('an-time').textContent = anDur(t.avgTime);
+    document.getElementById('an-sub').textContent = t.subRate.toFixed(1) + '%';
+    anDelta('an-d-visitors', t.visitors, p.visitors);
+    anDelta('an-d-views', t.views, p.views);
+    anDelta('an-d-time', t.avgTime, p.avgTime);
+    anDelta('an-d-sub', t.subRate, p.subRate);
+    anChart(a.daily, a.days);
+    var pg = document.getElementById('an-pages');
+    if (!a.pages.length) { pg.innerHTML = '<div class="empty">No visits recorded yet. Tracking starts from the first page view after deploy.</div>'; }
+    else {
+      var mv = Math.max.apply(null, a.pages.map(function (r) { return r.views; })) || 1;
+      pg.innerHTML = '<table class="compact"><thead><tr><th>Page</th><th>Views</th><th>Avg time</th><th style="width:90px"></th></tr></thead><tbody>' +
+        a.pages.map(function (r) {
+          return '<tr><td>' + escape(r.path) + '</td><td>' + r.views + '</td><td>' + (r.avg_s ? anDur(r.avg_s) : '&ndash;') + '</td><td><div class="an-row" style="margin:0"><span class="bar"><i style="width:' + Math.round(r.views / mv * 100) + '%"></i></span></div></td></tr>';
+        }).join('') + '</tbody></table>';
+    }
+    anBars('an-refs', a.referrers); anBars('an-camps', a.campaigns);
+    anBars('an-ctry', a.countries); anBars('an-dev', a.devices);
+  } catch (err) { toast('Analytics failed: ' + err.message, true); }
 }
 
 // initial load
@@ -1831,6 +1933,7 @@ ${issue.body_html || "<p><em>No full content yet — this issue has only the ema
 </div>
 </div>
 <footer>&copy; 2026 Compsilon &middot; <a href="/">compsilon.com</a> &middot; <a href="/privacy-policy.html">Privacy</a> &middot; <a href="/terms-of-use.html">Terms</a></footer>
+<script defer src="/analytics.js"></script>
 </body></html>`;
 }
 
@@ -1970,6 +2073,132 @@ async function apiSendIssue(request, env) {
   return json({ ok: true, sent: totalSent });
 }
 
+// ========== analytics (first-party, cookieless) ==========
+let analyticsReady = false;
+async function ensureAnalyticsSchema(env) {
+  if (analyticsReady) return;
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS page_views (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      vid TEXT NOT NULL UNIQUE,
+      visitor TEXT NOT NULL,
+      path TEXT NOT NULL,
+      referrer TEXT,
+      country TEXT,
+      city TEXT,
+      device TEXT,
+      utm_campaign TEXT,
+      duration_s INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`
+  ).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_pv_created ON page_views(created_at)").run();
+  analyticsReady = true;
+}
+
+function referrerLabel(host, utm, selfHost) {
+  const u = String(utm || "").toLowerCase().trim();
+  if (u) {
+    if (u.includes("linkedin")) return "LinkedIn";
+    if (u.includes("newsletter") || u.includes("email")) return "Newsletter email";
+    if (u === "x" || u.includes("twitter")) return "X / Twitter";
+    return u.slice(0, 40);
+  }
+  let h = String(host || "").toLowerCase().replace(/^www\./, "");
+  if (!h) return "Direct";
+  if (h === selfHost.replace(/^www\./, "")) return "internal";
+  if (h.includes("linkedin.com") || h === "lnkd.in") return "LinkedIn";
+  if (h.startsWith("google.") || h.includes(".google.")) return h.startsWith("mail.") ? h : "Google";
+  if (h.includes("bing.com")) return "Bing";
+  if (h.includes("duckduckgo.com")) return "DuckDuckGo";
+  if (h === "t.co" || h.includes("twitter.com") || h === "x.com") return "X / Twitter";
+  if (h.includes("facebook.com") || h === "fb.me") return "Facebook";
+  return h.slice(0, 60);
+}
+
+async function handleTrack(request, env, url) {
+  const quiet = new Response(null, { status: 204 });
+  if (request.method !== "POST") return new Response(null, { status: 405 });
+  try {
+    const origin = request.headers.get("Origin");
+    if (origin && new URL(origin).host !== url.host) return quiet;
+    const ua = request.headers.get("User-Agent") || "";
+    if (!ua || /bot|crawl|spider|slurp|headless|preview|monitor|curl|wget|python|node-fetch|lighthouse/i.test(ua)) return quiet;
+    if (await isAuthed(request, env)) return quiet; // never count the site owner
+    const body = JSON.parse(await request.text());
+    const vid = String(body.vid || "");
+    if (!/^[a-z0-9]{8,40}$/i.test(vid)) return quiet;
+    await ensureAnalyticsSchema(env);
+
+    if (body.k === "d") {
+      const sec = Math.max(0, Math.min(1800, parseInt(body.sec, 10) || 0));
+      if (sec > 0) await env.DB.prepare("UPDATE page_views SET duration_s = MAX(duration_s, ?) WHERE vid = ?").bind(sec, vid).run();
+      return quiet;
+    }
+    if (body.k !== "v") return quiet;
+
+    let path = String(body.p || "/").split("?")[0].split("#")[0];
+    if (!path.startsWith("/") || path.length > 200 || path.startsWith("/admin") || path.startsWith("/api")) return quiet;
+    path = path.replace(/index\.html$/, "") || "/";
+    if (path.length > 1) path = path.replace(/\/+$/, "") || "/";
+
+    let refHost = "";
+    try { refHost = body.r ? new URL(String(body.r)).host : ""; } catch (e) {}
+    const referrer = referrerLabel(refHost, body.us, url.host);
+
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    const day = new Date().toISOString().slice(0, 10);
+    // Daily-rotating hash: the IP itself is never stored, and a visitor cannot be followed across days.
+    const visitor = (await sha256Hex(ip + "|" + ua + "|" + day + "|" + (env.ADMIN_PASSWORD || "compsilon"))).slice(0, 16);
+    const device = /ipad|tablet/i.test(ua) ? "Tablet" : /mobi|android|iphone/i.test(ua) ? "Mobile" : "Desktop";
+    const cf = request.cf || {};
+
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO page_views (vid, visitor, path, referrer, country, city, device, utm_campaign) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(vid, visitor, path, referrer, cf.country || null, cf.city || null, device, String(body.uc || "").slice(0, 60) || null).run();
+
+    if (Math.random() < 0.01) {
+      await env.DB.prepare("DELETE FROM page_views WHERE created_at < datetime('now', '-400 days')").run();
+    }
+  } catch (e) { /* analytics must never break the site */ }
+  return quiet;
+}
+
+async function apiAnalytics(env, url) {
+  await ensureAnalyticsSchema(env);
+  const days = Math.max(1, Math.min(365, parseInt(url.searchParams.get("days"), 10) || 30));
+  const cur = "-" + days + " days";
+  const prev = "-" + days * 2 + " days";
+  const visitKey = "date(created_at) || visitor";
+  const one = (sql, ...b) => env.DB.prepare(sql).bind(...b).first();
+  const many = async (sql, ...b) => (await env.DB.prepare(sql).bind(...b).all()).results || [];
+
+  const [k, kp, subs, subsp, daily, pages, refs, ctry, dev, camps] = await Promise.all([
+    one(`SELECT COUNT(*) AS views, COUNT(DISTINCT ${visitKey}) AS visitors, COALESCE(SUM(duration_s),0) AS dur FROM page_views WHERE created_at >= datetime('now', ?)`, cur),
+    one(`SELECT COUNT(*) AS views, COUNT(DISTINCT ${visitKey}) AS visitors, COALESCE(SUM(duration_s),0) AS dur FROM page_views WHERE created_at >= datetime('now', ?) AND created_at < datetime('now', ?)`, prev, cur),
+    one("SELECT COUNT(*) AS n FROM subscribers WHERE subscribed_at >= datetime('now', ?)", cur),
+    one("SELECT COUNT(*) AS n FROM subscribers WHERE subscribed_at >= datetime('now', ?) AND subscribed_at < datetime('now', ?)", prev, cur),
+    many("SELECT date(created_at) AS d, COUNT(DISTINCT visitor) AS visitors, COUNT(*) AS views FROM page_views WHERE created_at >= datetime('now', ?) GROUP BY d ORDER BY d", cur),
+    many("SELECT path, COUNT(*) AS views, ROUND(AVG(NULLIF(duration_s,0))) AS avg_s FROM page_views WHERE created_at >= datetime('now', ?) GROUP BY path ORDER BY views DESC LIMIT 15", cur),
+    many("SELECT referrer AS name, COUNT(*) AS n FROM page_views WHERE created_at >= datetime('now', ?) AND referrer <> 'internal' GROUP BY referrer ORDER BY n DESC LIMIT 10", cur),
+    many(`SELECT COALESCE(country,'Unknown') AS name, COUNT(DISTINCT ${visitKey}) AS n FROM page_views WHERE created_at >= datetime('now', ?) GROUP BY name ORDER BY n DESC LIMIT 10`, cur),
+    many(`SELECT COALESCE(device,'Unknown') AS name, COUNT(DISTINCT ${visitKey}) AS n FROM page_views WHERE created_at >= datetime('now', ?) GROUP BY name ORDER BY n DESC`, cur),
+    many("SELECT utm_campaign AS name, COUNT(*) AS n FROM page_views WHERE created_at >= datetime('now', ?) AND utm_campaign IS NOT NULL GROUP BY utm_campaign ORDER BY n DESC LIMIT 8", cur),
+  ]);
+  return json({
+    days,
+    totals: {
+      views: k.views, visitors: k.visitors, avgTime: k.visitors ? Math.round(k.dur / k.visitors) : 0,
+      newSubs: subs.n, subRate: k.visitors ? (subs.n / k.visitors) * 100 : 0,
+    },
+    previous: {
+      views: kp.views, visitors: kp.visitors, avgTime: kp.visitors ? Math.round(kp.dur / kp.visitors) : 0,
+      newSubs: subsp.n, subRate: kp.visitors ? (subsp.n / kp.visitors) * 100 : 0,
+    },
+    daily, pages, referrers: refs, countries: ctry, devices: dev, campaigns: camps,
+  });
+}
+
 // ========== router ==========
 
 export default {
@@ -1992,6 +2221,7 @@ export default {
           hasDB: Boolean(env.DB),
         });
       }
+      if (path === "/api/track") return await handleTrack(request, env, url);
       if (path === "/api/subscribe" && method === "POST") return await handleSubscribe(request, env, ctx);
       if (path === "/api/unsubscribe" && method === "GET") return await handleUnsubscribe(request, env, url);
 
@@ -2022,6 +2252,7 @@ export default {
         if (path === "/admin/api/subscribers/add-one" && method === "POST") return await apiAddOneSubscriber(request, env);
         if (path === "/admin/api/subscribers/delete" && method === "POST") return await apiDeleteSubscribers(request, env);
         if (path === "/admin/api/subscribers/activity" && method === "GET") return await apiSubscriberActivity(env, url);
+        if (path === "/admin/api/analytics" && method === "GET") return await apiAnalytics(env, url);
         if (path === "/admin/api/issues" && method === "GET") return await apiListIssues(env);
         if (path === "/admin/api/issues/next-slug" && method === "GET") return await apiNextIssueSlug(env);
         if (path === "/admin/api/issues/save" && method === "POST") return await apiSaveIssue(request, env);
