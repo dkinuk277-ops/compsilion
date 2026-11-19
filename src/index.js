@@ -348,48 +348,187 @@ async function sendAdminNotification(env, subscriber) {
 }
 // ========== public routes ==========
 
-async function handleSubscribe(request, env, ctx) {
+let signupReady = false;
+async function ensureSignupSchema(env) {
+  if (signupReady) return;
   await ensureSchema(env);
+  for (const col of ["confirm_token TEXT", "confirm_sent_at TEXT"]) {
+    try { await env.DB.prepare("ALTER TABLE subscribers ADD COLUMN " + col).run(); } catch (e) { /* column already exists */ }
+  }
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS signup_attempts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ip_hash TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`
+  ).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_signup_attempts ON signup_attempts(created_at)").run();
+  signupReady = true;
+}
+
+function confirmEmailHTML(subscriber) {
+  const confirmUrl = "https://compsilon.com/api/confirm?token=" + encodeURIComponent(subscriber.confirm_token || "");
+  const name = subscriber.first_name ? escapeHtml(subscriber.first_name) : "there";
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#06060e;font-family:Arial,Helvetica,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#06060e;">
+<tr><td align="center" style="padding:32px 16px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#12122a;border:2px solid #06d6a0;border-radius:16px;overflow:hidden;">
+<tr><td style="padding:22px 28px 16px;">
+<img src="https://compsilon.com/compsilon-ping.png?v=1" alt="" width="34" height="34" style="display:inline-block;vertical-align:middle;margin-right:8px;border:0;"><img src="https://compsilon.com/compsilon-logo.png?v=6" alt="Compsilon" width="167" height="31" style="display:inline-block;vertical-align:middle;border:0;">
+</td></tr>
+<tr><td style="padding:0 28px;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
+<tr><td style="padding:22px 28px 8px;">
+<h1 style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:800;color:#eeeef6;line-height:1.25;margin:0 0 14px;letter-spacing:-0.4px;">Confirm your subscription</h1>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#b9bce0;margin:0 0 12px;">Hi ${name},</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#b9bce0;margin:0 0 12px;">Someone, hopefully you, asked to receive the Compsilon weekly AI GRC newsletter at this address. Please confirm to start receiving it.</p>
+<div style="text-align:center;padding:20px 0 14px;">
+<a href="${confirmUrl}" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:#06060e;background-color:#06d6a0;padding:13px 32px;border-radius:100px;text-decoration:none;">Confirm subscription &rarr;</a>
+</div>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8c90c4;margin:0 0 12px;">If you didn't request this, ignore this email. You won't be subscribed and we won't email you again.</p>
+</td></tr>
+<tr><td style="padding:12px 28px 0;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
+<tr><td style="padding:16px 28px 22px;">
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.7;color:#8c90c4;margin:0;">Compsilon &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a></p>
+</td></tr>
+</table></td></tr></table>
+</body></html>`;
+}
+
+async function sendConfirmationEmail(env, subscriber) {
+  if (!env.RESEND_API_KEY) return;
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Compsilon <newsletter@compsilon.com>",
+        to: [subscriber.email],
+        subject: "Confirm your Compsilon subscription",
+        html: confirmEmailHTML(subscriber),
+      }),
+    });
+  } catch (err) { /* non-fatal */ }
+}
+
+function simplePageHTML(title, heading, body, button) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex"><title>${escapeHtml(title)} — Compsilon</title></head>
+<body style="margin:0;background:#06060e;color:#dcdef2;font-family:Arial,Helvetica,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;">
+<div style="max-width:440px"><h1 style="color:#eeeef6;font-size:24px;margin-bottom:12px;">${heading}</h1><p style="color:#8c90c4;line-height:1.6;margin-bottom:20px;">${body}</p>${button || ""}<p style="margin-top:22px"><a href="https://compsilon.com" style="color:#06d6a0;">Return to compsilon.com</a></p></div>
+</body></html>`;
+}
+
+async function verifyTurnstile(env, token, ip) {
+  if (!env.TURNSTILE_SECRET) return true; // not configured yet: skip
+  if (!token) return false;
+  try {
+    const form = new URLSearchParams();
+    form.set("secret", env.TURNSTILE_SECRET);
+    form.set("response", token);
+    if (ip) form.set("remoteip", ip);
+    const r = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form });
+    const j = await r.json();
+    return Boolean(j.success);
+  } catch (e) { return false; }
+}
+
+async function handleSubscribe(request, env, ctx) {
+  await ensureSignupSchema(env);
+  const OK_MSG = "Almost there. Check your inbox for a confirmation email and click the link to complete your subscription.";
+  const reply = (ok, message, status = 200) => json({ ok, message }, status);
+
   const ct = request.headers.get("content-type") || "";
   let data;
-  if (ct.includes("application/json")) data = await request.json();
-  else { const form = await request.formData(); data = Object.fromEntries(form.entries()); }
+  try {
+    if (ct.includes("application/json")) data = await request.json();
+    else { const form = await request.formData(); data = Object.fromEntries(form.entries()); }
+  } catch (e) { return reply(false, "Invalid request.", 400); }
 
-  // Honeypot: real users never see or fill this field. Bots that auto-fill every
-  // input do. Pretend success without actually subscribing them.
-  if (String(data.website || "").trim() !== "") {
-    return new Response(
-      "<!DOCTYPE html><html><body style='font-family:sans-serif;background:#06060e;color:#dcdef2;padding:24px;'>Thanks for subscribing.</body></html>",
-      { headers: { "Content-Type": "text/html" } }
-    );
-  }
+  // Honeypot: real users never see or fill this field. Pretend success so bots learn nothing.
+  if (String(data.website || "").trim() !== "") return reply(true, OK_MSG);
 
   const email = String(data.EMAIL || data.email || "").trim().toLowerCase();
-  const firstName = String(data.FNAME || data.firstName || "").trim();
-  const lastName = String(data.LNAME || data.lastName || "").trim();
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return new Response("Invalid email", { status: 400 });
+  const firstName = String(data.FNAME || data.firstName || "").trim().slice(0, 60);
+  const lastName = String(data.LNAME || data.lastName || "").trim().slice(0, 60);
+  if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return reply(false, "Please enter a valid email address.", 400);
   }
 
-  const existing = await env.DB.prepare("SELECT id, status FROM subscribers WHERE email = ?").bind(email).first();
+  const ip = request.headers.get("CF-Connecting-IP") || "";
+  if (!(await verifyTurnstile(env, data["cf-turnstile-response"], ip))) {
+    return reply(false, "Verification failed. Please refresh the page and try again.", 400);
+  }
+
+  // Known bot signature: silently drop.
+  if (firstName.toLowerCase() === "test" && lastName.toLowerCase() === "user") return reply(true, OK_MSG);
+
+  // Rate limits: per IP (hashed) and overall, per hour.
+  const ipHash = (await sha256Hex(ip + "|" + (env.ADMIN_PASSWORD || "compsilon"))).slice(0, 16);
+  const perIp = await env.DB.prepare("SELECT COUNT(*) AS n FROM signup_attempts WHERE ip_hash = ? AND created_at >= datetime('now', '-1 hour')").bind(ipHash).first();
+  const overall = await env.DB.prepare("SELECT COUNT(*) AS n FROM signup_attempts WHERE created_at >= datetime('now', '-1 hour')").first();
+  if ((perIp && perIp.n >= 5) || (overall && overall.n >= 200)) {
+    return reply(false, "Too many attempts. Please try again later.", 429);
+  }
+  await env.DB.prepare("INSERT INTO signup_attempts (ip_hash) VALUES (?)").bind(ipHash).run();
+  if (Math.random() < 0.02) {
+    await env.DB.prepare("DELETE FROM signup_attempts WHERE created_at < datetime('now', '-2 days')").run();
+    await env.DB.prepare("DELETE FROM subscribers WHERE status = 'pending' AND subscribed_at < datetime('now', '-7 days')").run();
+  }
+
+  const existing = await env.DB.prepare("SELECT id, status, confirm_token, confirm_sent_at FROM subscribers WHERE email = ?").bind(email).first();
+  if (existing && existing.status === "active") return reply(true, OK_MSG); // never email active subscribers again
+
+  const sendConfirm = (token) => ctx.waitUntil(sendConfirmationEmail(env, { email, first_name: firstName, confirm_token: token }));
+
   if (existing) {
-    if (existing.status !== "active") {
-      await env.DB.prepare("UPDATE subscribers SET status = 'active', unsubscribed_at = NULL WHERE id = ?").bind(existing.id).run();
+    // pending or previously unsubscribed: needs a fresh confirmation, but not more than once per 10 minutes
+    const recent = existing.status === "pending" && existing.confirm_sent_at &&
+      (await env.DB.prepare("SELECT ? >= datetime('now', '-10 minutes') AS r").bind(existing.confirm_sent_at).first()).r === 1;
+    if (!recent) {
+      const token = crypto.randomUUID();
+      await env.DB.prepare(
+        "UPDATE subscribers SET status = 'pending', confirm_token = ?, confirm_sent_at = datetime('now'), first_name = COALESCE(NULLIF(?, ''), first_name), last_name = COALESCE(NULLIF(?, ''), last_name) WHERE id = ?"
+      ).bind(token, firstName, lastName, existing.id).run();
+      sendConfirm(token);
     }
-  } else {
-    const token = crypto.randomUUID();
-    const insertResult = await env.DB.prepare(
-      `INSERT INTO subscribers (email, first_name, last_name, status, unsubscribe_token) VALUES (?, ?, ?, 'active', ?)`
-    ).bind(email, firstName, lastName, token).run();
-    const newId = insertResult.meta ? insertResult.meta.last_row_id : null;
-    ctx.waitUntil(sendWelcomeEmail(env, { id: newId, email, first_name: firstName, unsubscribe_token: token }));
-    ctx.waitUntil(sendAdminNotification(env, { email, first_name: firstName, last_name: lastName }));
+    return reply(true, OK_MSG);
   }
 
-  return new Response(
-    "<!DOCTYPE html><html><body style='font-family:sans-serif;background:#06060e;color:#dcdef2;padding:24px;'>Thanks for subscribing.</body></html>",
-    { headers: { "Content-Type": "text/html" } }
-  );
+  const unsubToken = crypto.randomUUID();
+  const confirmToken = crypto.randomUUID();
+  await env.DB.prepare(
+    `INSERT INTO subscribers (email, first_name, last_name, status, unsubscribe_token, confirm_token, confirm_sent_at) VALUES (?, ?, ?, 'pending', ?, ?, datetime('now'))`
+  ).bind(email, firstName, lastName, unsubToken, confirmToken).run();
+  sendConfirm(confirmToken);
+  return reply(true, OK_MSG);
+}
+
+async function handleConfirm(request, env, url, ctx) {
+  await ensureSignupSchema(env);
+  const headers = { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex" };
+  let token = url.searchParams.get("token") || "";
+  if (request.method === "POST") {
+    try { const f = await request.formData(); token = String(f.get("token") || token); } catch (e) { /* use query token */ }
+  }
+  token = token.slice(0, 80);
+  const sub = token ? await env.DB.prepare("SELECT * FROM subscribers WHERE confirm_token = ?").bind(token).first() : null;
+  if (!sub) {
+    return new Response(simplePageHTML("Link expired", "This link has expired or was already used", "If you are already subscribed there is nothing more to do. Otherwise please subscribe again from the website.", ""), { status: 404, headers });
+  }
+  // GET only shows a button. Email scanners follow links but do not press buttons, so they cannot confirm for someone.
+  if (request.method !== "POST") {
+    const btn = `<form method="post" action="/api/confirm"><input type="hidden" name="token" value="${escapeHtml(token)}"><button type="submit" style="background:#06d6a0;color:#06060e;border:none;border-radius:100px;padding:13px 32px;font-weight:700;font-size:14px;cursor:pointer;">Confirm subscription</button></form>`;
+    return new Response(simplePageHTML("Confirm subscription", "Confirm your subscription", "Press the button to start receiving the Compsilon weekly newsletter.", btn), { headers });
+  }
+  if (sub.status === "pending") {
+    await env.DB.prepare("UPDATE subscribers SET status = 'active', subscribed_at = datetime('now'), unsubscribed_at = NULL, confirm_token = NULL WHERE id = ?").bind(sub.id).run();
+    ctx.waitUntil(sendWelcomeEmail(env, { id: sub.id, email: sub.email, first_name: sub.first_name, unsubscribe_token: sub.unsubscribe_token }));
+    ctx.waitUntil(sendAdminNotification(env, { email: sub.email, first_name: sub.first_name, last_name: sub.last_name }));
+  } else {
+    await env.DB.prepare("UPDATE subscribers SET confirm_token = NULL WHERE id = ?").bind(sub.id).run();
+  }
+  return new Response(simplePageHTML("Subscribed", "You're subscribed", "Thanks for confirming. A welcome email is on its way.", ""), { headers });
 }
 
 async function handleUnsubscribe(request, env, url) {
@@ -580,6 +719,7 @@ function adminAppHTML() {
   .badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase}
   .badge.active{background:#0d3b2c;color:#06d6a0}
   .badge.unsub{background:#3a1a1a;color:#f4a1a1}
+  .badge.pending{background:#3d2f0d;color:#EF9F27}
   .badge.draft{background:#2c2c5c;color:#b9bce0}
   .badge.sent{background:#0d3b2c;color:#06d6a0}
   .toast{position:fixed;bottom:24px;right:24px;background:#12122a;border:1px solid #06d6a0;color:#eeeef6;padding:14px 20px;border-radius:8px;font-size:13px;z-index:100;display:none}
@@ -671,6 +811,7 @@ function adminAppHTML() {
   <div class="filters" id="sub-filters">
     <button class="filter-btn on" data-f="all">All <span class="n" id="f-n-all">0</span></button>
     <button class="filter-btn" data-f="active">Active <span class="n" id="f-n-active">0</span></button>
+    <button class="filter-btn" data-f="pending">Pending <span class="n" id="f-n-pending">0</span></button>
     <button class="filter-btn" data-f="unsubscribed">Unsubscribed <span class="n" id="f-n-unsub">0</span></button>
   </div>
   <div class="search" style="display:flex;gap:10px;align-items:center;">
@@ -958,6 +1099,7 @@ async function loadSubs() {
     allSubs = await api('/admin/api/subscribers');
     document.getElementById('f-n-all').textContent = allSubs.length;
     document.getElementById('f-n-active').textContent = allSubs.filter(s => s.status === 'active').length;
+    document.getElementById('f-n-pending').textContent = allSubs.filter(s => s.status === 'pending').length;
     document.getElementById('f-n-unsub').textContent = allSubs.filter(s => s.status === 'unsubscribed').length;
     const validIds = new Set(allSubs.map(s => s.id));
     selectedIds.forEach(id => { if (!validIds.has(id)) selectedIds.delete(id); });
@@ -1078,7 +1220,7 @@ function renderSubs(list, total, start) {
       '<td>' + escape(s.email) + '</td>' +
       '<td>' + escape(s.first_name || '—') + '</td>' +
       '<td>' + escape(s.last_name || '—') + '</td>' +
-      '<td><span class="badge ' + (s.status === 'active' ? 'active' : 'unsub') + '">' + s.status + '</span></td>' +
+      '<td><span class="badge ' + (s.status === 'active' ? 'active' : s.status === 'pending' ? 'pending' : 'unsub') + '">' + s.status + '</span></td>' +
       '<td>' + fmt(s.subscribed_at) + '</td>' +
       '<td>' + fmt(s.unsubscribed_at) + '</td>' +
     '</tr>';
@@ -2218,11 +2360,14 @@ export default {
           hasResendKey: Boolean(env.RESEND_API_KEY),
           hasResendWebhookSecret: Boolean(env.RESEND_WEBHOOK_SECRET),
           hasAnthropicKey: Boolean(env.ANTHROPIC_API_KEY),
+          hasTurnstile: Boolean(env.TURNSTILE_SECRET && env.TURNSTILE_SITEKEY),
           hasDB: Boolean(env.DB),
         });
       }
       if (path === "/api/track") return await handleTrack(request, env, url);
+      if (path === "/api/subscribe-config") return json({ turnstileSiteKey: env.TURNSTILE_SITEKEY || "" });
       if (path === "/api/subscribe" && method === "POST") return await handleSubscribe(request, env, ctx);
+      if (path === "/api/confirm" && (method === "GET" || method === "POST")) return await handleConfirm(request, env, url, ctx);
       if (path === "/api/unsubscribe" && method === "GET") return await handleUnsubscribe(request, env, url);
 
       // auth

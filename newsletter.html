@@ -203,7 +203,7 @@ footer a{color:var(--purple)}
 <h2>Never Miss an Issue</h2>
 <p>Get your weekly newsletter for free.</p>
 <div class="sub-form">
-  <form action="/api/subscribe" method="post" target="mc_hidden" class="sub-fields" id="mcForm">
+  <form action="/api/subscribe" method="post" class="sub-fields" id="mcForm">
     <div class="sub-names">
       <input type="text" name="FNAME" placeholder="First name" required>
       <input type="text" name="LNAME" placeholder="Last name">
@@ -214,26 +214,13 @@ footer a{color:var(--purple)}
     </div>
     <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
   </form>
-  <p class="sub-msg" id="mcMsg">Welcome, and thank you for showing interest in this newsletter.</p>
-  <iframe name="mc_hidden" title="subscribe" style="display:none"></iframe>
+  <p class="sub-msg" id="mcMsg">Almost there. Check your inbox for a confirmation email and click the link to complete your subscription.</p>
 </div>
 </div>
 
 </div>
 <footer><svg viewBox="0 0 40 40" width="14" height="14" style="vertical-align:-2px;margin-right:4px;"><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2.5" style="transform-origin:20px 20px;animation:logoPingF2 2.4s ease-out infinite;"/><circle cx="20" cy="20" r="10" fill="none" stroke="#06d6a0" stroke-width="2.5" style="transform-origin:20px 20px;animation:logoPingF2 2.4s ease-out infinite;animation-delay:1.2s;"/><circle cx="20" cy="20" r="4" fill="#EF9F27"/></svg>© 2026 Compsilon · <a href="index.html">compsilon.com</a> · <a href="privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a> · <a href="terms-of-use.html" target="_blank" rel="noopener">Terms of Use</a></footer>
-<script>
-(function(){
-  var f=document.getElementById('mcForm');
-  if(!f) return;
-  f.addEventListener('submit',function(){
-    if(!f.checkValidity()) return;
-    setTimeout(function(){
-      f.style.display='none';
-      document.getElementById('mcMsg').style.display='block';
-    },600);
-  });
-})();
-</script>
+<script defer src="/subscribe.js"></script>
 <script>
 (function(){try{var t=localStorage.getItem('csn-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();
 function toggleTheme(){
