@@ -199,6 +199,7 @@ ${bodyHtml}
 <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8c90c4;margin:0;">
 <img src="https://compsilon.com/compsilon-ping.png?v=1" width="16" height="16" alt="" style="vertical-align:-3px;margin-right:5px;border:0;"><img src="https://compsilon.com/compsilon-logo.png?v=6" alt="Compsilon" width="81" height="15" style="vertical-align:-3px;margin-right:6px;border:0;"> &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a><br>
 You're receiving this because you subscribed at compsilon.com.<br>
+<strong style="color:#EF9F27;">Beware of fraudulent and phishing emails.</strong> Compsilon will never ask for passwords, payment details or personal information by email.<br>
 <a href="${unsubUrl}" style="color:#8c90c4;text-decoration:underline;">Unsubscribe</a> &middot; <a href="${webUrl}" style="color:#8c90c4;text-decoration:underline;">Read on the web</a>
 </p>
 </td></tr>
@@ -265,6 +266,7 @@ function welcomeEmailHTML(subscriber) {
 <p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.7;color:#8c90c4;margin:0;">
 <img src="https://compsilon.com/compsilon-ping.png?v=1" width="16" height="16" alt="" style="vertical-align:-3px;margin-right:5px;border:0;"><img src="https://compsilon.com/compsilon-logo.png?v=6" alt="Compsilon" width="81" height="15" style="vertical-align:-3px;margin-right:6px;border:0;"> &middot; Contact: <a href="mailto:hellocompsilon@gmail.com" style="color:#8c90c4;text-decoration:underline;">hellocompsilon@gmail.com</a><br>
 You're receiving this because you subscribed at compsilon.com.<br>
+<strong style="color:#EF9F27;">Beware of fraudulent and phishing emails.</strong> Compsilon will never ask for passwords, payment details or personal information by email.<br>
 <a href="${unsubUrl}" style="color:#8c90c4;text-decoration:underline;">Unsubscribe</a>
 </p>
 </td></tr>
@@ -380,13 +382,15 @@ function confirmEmailHTML(subscriber) {
 </td></tr>
 <tr><td style="padding:0 28px;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
 <tr><td style="padding:22px 28px 8px;">
-<h1 style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:800;color:#eeeef6;line-height:1.25;margin:0 0 14px;letter-spacing:-0.4px;">Confirm your subscription</h1>
+<h1 style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:800;color:#eeeef6;line-height:1.25;margin:0 0 14px;letter-spacing:-0.4px;">Verify your email to activate your subscription</h1>
 <p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#b9bce0;margin:0 0 12px;">Hi ${name},</p>
-<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#b9bce0;margin:0 0 12px;">Someone, hopefully you, asked to receive the Compsilon weekly AI GRC newsletter at this address. Please confirm to start receiving it.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#b9bce0;margin:0 0 12px;">Thank you for showing interest in subscribing to the Compsilon newsletter.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#b9bce0;margin:0 0 12px;">To activate your subscription, please verify your email address below. Once verified, you will receive a welcome email from Compsilon.</p>
 <div style="text-align:center;padding:20px 0 14px;">
-<a href="${confirmUrl}" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:#06060e;background-color:#06d6a0;padding:13px 32px;border-radius:100px;text-decoration:none;">Confirm subscription &rarr;</a>
+<a href="${confirmUrl}" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:#06060e;background-color:#06d6a0;padding:13px 32px;border-radius:100px;text-decoration:none;">Verify my email &rarr;</a>
 </div>
 <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8c90c4;margin:0 0 12px;">If you didn't request this, ignore this email. You won't be subscribed and we won't email you again.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.7;color:#EF9F27;margin:10px 0 0;"><strong>Beware of fraudulent and phishing emails.</strong> Compsilon will never ask for passwords, payment details or personal information by email. If in doubt, do not click, and contact us at hellocompsilon@gmail.com.</p>
 </td></tr>
 <tr><td style="padding:12px 28px 0;"><hr style="border:none;border-top:1px solid #2c2c5c;margin:0;"></td></tr>
 <tr><td style="padding:16px 28px 22px;">
@@ -405,7 +409,7 @@ async function sendConfirmationEmail(env, subscriber) {
       body: JSON.stringify({
         from: "Compsilon <newsletter@compsilon.com>",
         to: [subscriber.email],
-        subject: "Confirm your Compsilon subscription",
+        subject: "Verify your email to activate your Compsilon subscription",
         html: confirmEmailHTML(subscriber),
       }),
     });
@@ -518,17 +522,19 @@ async function handleConfirm(request, env, url, ctx) {
   }
   // GET only shows a button. Email scanners follow links but do not press buttons, so they cannot confirm for someone.
   if (request.method !== "POST") {
-    const btn = `<form method="post" action="/api/confirm"><input type="hidden" name="token" value="${escapeHtml(token)}"><button type="submit" style="background:#06d6a0;color:#06060e;border:none;border-radius:100px;padding:13px 32px;font-weight:700;font-size:14px;cursor:pointer;">Confirm subscription</button></form>`;
-    return new Response(simplePageHTML("Confirm subscription", "Confirm your subscription", "Press the button to start receiving the Compsilon weekly newsletter.", btn), { headers });
+    const btn = `<form method="post" action="/api/confirm"><input type="hidden" name="token" value="${escapeHtml(token)}"><button type="submit" style="background:#06d6a0;color:#06060e;border:none;border-radius:100px;padding:13px 32px;font-weight:700;font-size:14px;cursor:pointer;">Verify my email</button></form>`;
+    return new Response(simplePageHTML("Verify your email", "Verify your email", "Press the button to verify your email address and activate your Compsilon newsletter subscription.", btn), { headers });
   }
   if (sub.status === "pending") {
     await env.DB.prepare("UPDATE subscribers SET status = 'active', subscribed_at = datetime('now'), unsubscribed_at = NULL, confirm_token = NULL WHERE id = ?").bind(sub.id).run();
-    ctx.waitUntil(sendWelcomeEmail(env, { id: sub.id, email: sub.email, first_name: sub.first_name, unsubscribe_token: sub.unsubscribe_token }));
+    // Welcome email first and awaited (outcome is logged in welcome_sends), then the admin notification.
+    // Sent one after the other so the two requests cannot trip the email API rate limit together.
+    await sendWelcomeEmail(env, { id: sub.id, email: sub.email, first_name: sub.first_name, unsubscribe_token: sub.unsubscribe_token });
     ctx.waitUntil(sendAdminNotification(env, { email: sub.email, first_name: sub.first_name, last_name: sub.last_name }));
   } else {
     await env.DB.prepare("UPDATE subscribers SET confirm_token = NULL WHERE id = ?").bind(sub.id).run();
   }
-  return new Response(simplePageHTML("Subscribed", "You're subscribed", "Thanks for confirming. A welcome email is on its way.", ""), { headers });
+  return new Response(simplePageHTML("Subscribed", "You're subscribed", "Thanks for verifying. Your subscription is active and a welcome email is on its way. Please be aware of fraudulent and phishing emails: Compsilon will never ask for passwords or payment details by email.", ""), { headers });
 }
 
 async function handleUnsubscribe(request, env, url) {
